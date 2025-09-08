@@ -6,18 +6,21 @@ import { useLogoutMutation } from "@/redux/api/userApi";
 
 export function LogoutButton() {
   const navigate = useNavigate();
-  const [logout] = useLogoutMutation();
+  const [logout, { isSuccess }] = useLogoutMutation();
   const { toast } = useToast();
 
   const handleLogout = async () => {
     try {
       await logout().unwrap();
       localStorage.removeItem("tna_user");
-      toast({
-        title: "Logged out",
-        description: "You have been successfully logged out.",
-      });
-      navigate("/login");
+      if (isSuccess) {
+         toast({
+          title: "Logged out",
+          description: "You have been successfully logged out.",
+        });
+       
+      }
+       navigate("/login");
     } catch (error) {
       toast({
         title: "Logout failed",
