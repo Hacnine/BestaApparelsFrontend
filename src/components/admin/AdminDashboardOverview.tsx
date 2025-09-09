@@ -109,7 +109,7 @@ const departmentProgress = [
   }
 ];
 
-export function DashboardOverview() {
+export function AdminDashboardOverview() {
   return (
     <div className="space-y-6">
       {/* Header */}

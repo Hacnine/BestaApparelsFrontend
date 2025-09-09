@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux"; // Add useDispatch and useSelector
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,14 +9,17 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Building2 } from "lucide-react";
 import { useLoginMutation } from "@/redux/api/userApi";
+import { setCredentials } from "@/redux/slices/userSlice"; // Import setCredentials action
+import { selectIsAuthenticated } from "@/redux/slices/userSlice"; // Import selector
+import { APP_ROUTES } from "@/routes/APP_ROUTES";
 
 const roleRoutes = {
-  Admin: "/",
-  Management: "/management-dashboard",
-  Merchandiser: "/merchandiser-dashboard",
-  CAD: "/cad-dashboard",
-  "Sample Fabric": "/sample-fabric-dashboard",
-  "Sample Room": "/sample-room-dashboard",
+  Admin: `${APP_ROUTES.admin_dashboard}`,
+  Management: `${APP_ROUTES.management_dashboard}`,
+  Merchandiser: `${APP_ROUTES.merchandiser_dashboard}`,
+  CAD: `${APP_ROUTES.cad_dashboard}`,
+  "Sample Fabric": `${APP_ROUTES.sample_fabric_dashboard}`,
+  "Sample Room": `${APP_ROUTES.sample_room_dashboard}`,
 };
 
 export function LoginPage() {
@@ -24,7 +28,14 @@ export function LoginPage() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [login, { isLoading }] = useLoginMutation(); // Use RTK Query mutation hook
+  const [login, { isLoading }] = useLoginMutation();
+  const dispatch = useDispatch(); 
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+
+
+  if (isAuthenticated) {
+    navigate("/"); 
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,13 +43,12 @@ export function LoginPage() {
 
     try {
       const response = await login({ body: { email, password } }).unwrap();
-      
-      // Store user data in localStorage
-      localStorage.setItem(
-        "tna_user",
-        JSON.stringify({
-          token: response.token,
+
+      // Store user data in Redux store instead of localStorage
+      dispatch(
+        setCredentials({
           user: response.user,
+          token: response.token, // Include token if needed in userSlice
         })
       );
 

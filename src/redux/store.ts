@@ -1,39 +1,51 @@
 import { configureStore, Middleware } from '@reduxjs/toolkit';
+import { persistReducer, persistStore } from 'redux-persist';
+import storage from 'redux-persist/lib/storage';
 import { userApi } from './api/userApi';
 import { auditApi } from './api/auditApi';
 import { dashboardApi } from './api/dashboardApi';
 import { tnaApi } from './api/tnaApi';
+import userReducer from './slices/userSlice';
 
-import userReducer from "./slices/userSlice";
-import storage from 'redux-persist/lib/storage';
-import { persistReducer, persistStore } from 'redux-persist';
-import { combineReducers } from 'redux';
+// No-op storage for server-side rendering
+const createNoopStorage = () => ({
+  getItem: () => Promise.resolve(null),
+  setItem: () => Promise.resolve(),
+  removeItem: () => Promise.resolve(),
+});
 
-// Persist configuration
-const persistConfig = {
-  key: 'root',
-  storage,
-  whitelist: ["user"], // Add reducer keys here if you want to persist specific slices
-};
+const storageEngine = typeof window !== 'undefined' ? storage : createNoopStorage();
 
-// Combine all API reducers
-const rootReducer = combineReducers({
-   userSlice: userReducer,
+// Factory function for persist config
+const createPersistConfig = (key: string, options = {}) => ({
+  key,
+  storage: storageEngine,
+  ...options,
+});
+
+// Persist config for userSlice
+const userPersistConfig = createPersistConfig('userSlice', {
+  whitelist: ['user'],
+});
+
+// Wrap userReducer with persistReducer
+const reducers = {
+  userSlice: persistReducer(userPersistConfig, userReducer),
   [userApi.reducerPath]: userApi.reducer,
   [auditApi.reducerPath]: auditApi.reducer,
   [dashboardApi.reducerPath]: dashboardApi.reducer,
   [tnaApi.reducerPath]: tnaApi.reducer,
-});
+};
 
-// Wrap with persistReducer
-const persistedReducer = persistReducer(persistConfig, rootReducer);
-
-// Configure store with explicit middleware typing
+// Configure store
 export const store = configureStore({
-  
-  reducer: persistedReducer,
+  reducer: reducers,
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({ serializableCheck: false }).concat([
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'], // Ignore redux-persist actions
+      },
+    }).concat([
       userApi.middleware,
       auditApi.middleware,
       dashboardApi.middleware,

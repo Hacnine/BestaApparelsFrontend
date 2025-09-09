@@ -10,42 +10,49 @@ import {
   Bell,
   Building2,
   ChevronLeft,
-  TrendingUp
+  TrendingUp,
+  IdCardIcon
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { LogoutButton } from "@/components/auth/LogoutButton";
 import { useState } from "react";
+import { APP_ROUTES } from "@/routes/APP_ROUTES";
 
 const navigationItems = [
   {
     title: "Dashboard",
-    href: "/",
+    href: `${APP_ROUTES.admin_dashboard}`,
     icon: LayoutDashboard
+  },
+    {
+    title: "Employee Management",
+    href: `${APP_ROUTES.admin_employee}`,
+    icon: IdCardIcon
   },
   {
     title: "User Management",
-    href: "/users",
+    href: `${APP_ROUTES.admin_user}`,
     icon: Users
   },
   {
     title: "TNA Progress",
-    href: "/progress",
+    href: `${APP_ROUTES.admin_tna}`,
     icon: TrendingUp
   },
   {
     title: "Audit Logs",
-    href: "/audit",
+    href: `${APP_ROUTES.admin_audit}`,
     icon: Activity
   },
   {
     title: "Reports",
-    href: "/reports",
+    href: `${APP_ROUTES.admin_reports}`,
     icon: FileText
   },
   {
     title: "System Settings",
-    href: "/settings",
+    href: `${APP_ROUTES.admin_settings}`,
     icon: Settings
   }
 ];
@@ -53,22 +60,22 @@ const navigationItems = [
 const settingsItems = [
   {
     title: "Company Info",
-    href: "/settings/company",
+    href: `${APP_ROUTES.admin_info}`,
     icon: Building2
   },
   {
     title: "Notifications",
-    href: "/settings/notifications",
+    href: `${APP_ROUTES.admin_notifications}`,
     icon: Bell
   },
   {
     title: "Approval Flow",
-    href: "/settings/approval",
+    href: `${APP_ROUTES.admin_approval}`,
     icon: ClipboardList
   },
   {
     title: "Security",
-    href: "/settings/security",
+    href: `${APP_ROUTES.admin_security}`,
     icon: Shield
   }
 ];

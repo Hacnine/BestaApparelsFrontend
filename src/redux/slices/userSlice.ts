@@ -1,11 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { useSelector } from "react-redux";
+import { TypedUseSelectorHook, useSelector } from "react-redux";
 import { userApi } from "../api/userApi";
+import { RootState } from "../store";
 
 // Initial State
 const initialState = {
   user: null,
-  isAuthenticated: null, //  Tracks login status: true / false / null (initial)
+  isAuthenticated: null, 
   loading: false,
   error: null,
 };
@@ -68,3 +69,8 @@ export const selectCurrentUser = (state) => state.userSlice.user;
 export const selectAuthLoading = (state) => state.userSlice.loading;
 export const selectAuthError = (state) => state.userSlice.error;
 export const selectIsAuthenticated = (state) => state.userSlice.isAuthenticated;
+
+
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
+
+export const useUser = () => useAppSelector((state) => state.userSlice);

@@ -14,7 +14,7 @@ export const userApi = createApi({
       query: ({ body }) => ({ url: `login/`, method: "POST", body }),
       invalidatesTags: ["User"],
     }),
-    logout: builder.mutation({
+    logout: builder.mutation<void, void>({
       query: () => ({ url: `logout/`, method: "POST" }),
       invalidatesTags: ["User"],
     }),
