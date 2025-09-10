@@ -1,8 +1,6 @@
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "react-hot-toast";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { RouterProvider } from "react-router-dom"; 
-import { Toaster } from "sonner";
+import { RouterProvider } from "react-router-dom";
 import { router } from "./routes/Routes";
 
 const queryClient = new QueryClient();
@@ -10,11 +8,8 @@ const queryClient = new QueryClient();
 const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <RouterProvider router={router} />
-      </TooltipProvider>
+      <RouterProvider router={router} />
+      <Toaster position="top-right" reverseOrder={false} />
     </QueryClientProvider>
   );
 };
