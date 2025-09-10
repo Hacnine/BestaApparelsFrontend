@@ -6,6 +6,7 @@ import { auditApi } from './api/auditApi';
 import { dashboardApi } from './api/dashboardApi';
 import { tnaApi } from './api/tnaApi';
 import userReducer from './slices/userSlice';
+import { employeeApi } from './api/employeeApi';
 
 // No-op storage for server-side rendering
 const createNoopStorage = () => ({
@@ -32,6 +33,7 @@ const userPersistConfig = createPersistConfig('userSlice', {
 const reducers = {
   userSlice: persistReducer(userPersistConfig, userReducer),
   [userApi.reducerPath]: userApi.reducer,
+  [employeeApi.reducerPath]: employeeApi.reducer,
   [auditApi.reducerPath]: auditApi.reducer,
   [dashboardApi.reducerPath]: dashboardApi.reducer,
   [tnaApi.reducerPath]: tnaApi.reducer,
@@ -47,6 +49,7 @@ export const store = configureStore({
       },
     }).concat([
       userApi.middleware,
+      employeeApi.middleware,
       auditApi.middleware,
       dashboardApi.middleware,
       tnaApi.middleware,
