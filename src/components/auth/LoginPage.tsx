@@ -6,20 +6,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useToast } from "@/hooks/use-toast";
 import { Loader2, Building2 } from "lucide-react";
 import { useLoginMutation } from "@/redux/api/userApi";
 import { setCredentials } from "@/redux/slices/userSlice"; // Import setCredentials action
 import { selectIsAuthenticated } from "@/redux/slices/userSlice"; // Import selector
 import { APP_ROUTES } from "@/routes/APP_ROUTES";
+import toast from "react-hot-toast";
 
 const roleRoutes = {
-  Admin: `${APP_ROUTES.admin_dashboard}`,
-  Management: `${APP_ROUTES.management_dashboard}`,
-  Merchandiser: `${APP_ROUTES.merchandiser_dashboard}`,
+  ADMIN: `${APP_ROUTES.admin_dashboard}`,
+  MANAGEMENT: `${APP_ROUTES.management_dashboard}`,
+  MERCHANDISER: `${APP_ROUTES.merchandiser_dashboard}`,
   CAD: `${APP_ROUTES.cad_dashboard}`,
-  "Sample Fabric": `${APP_ROUTES.sample_fabric_dashboard}`,
-  "Sample Room": `${APP_ROUTES.sample_room_dashboard}`,
+  SAMPLE_FABRIC: `${APP_ROUTES.sample_fabric_dashboard}`,
+  SAMPLE_ROOM: `${APP_ROUTES.sample_room_dashboard}`,
 };
 
 export function LoginPage() {
@@ -27,15 +27,11 @@ export function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [login, { isLoading }] = useLoginMutation();
   const dispatch = useDispatch(); 
   const isAuthenticated = useSelector(selectIsAuthenticated);
 
 
-  if (isAuthenticated) {
-    navigate("/"); 
-  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,10 +48,7 @@ export function LoginPage() {
         })
       );
 
-      toast({
-        title: "Login successful",
-        description: `Welcome back, ${response.user.email}!`,
-      });
+      toast.success(`Welcome back, ${response.user.email}!`);
 
       // Redirect based on role
       navigate(roleRoutes[response.user.role as keyof typeof roleRoutes] || "/");
