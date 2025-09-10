@@ -3,29 +3,23 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useLogoutMutation } from "@/redux/api/userApi";
+import toast from "react-hot-toast";
 
 export function LogoutButton() {
   const navigate = useNavigate();
   const [logout, { isSuccess }] = useLogoutMutation();
-  const { toast } = useToast();
+  
 
   const handleLogout = async () => {
     try {
       await logout().unwrap();
       localStorage.removeItem("tna_user");
       if (isSuccess) {
-         toast({
-          title: "Logged out",
-          description: "You have been successfully logged out.",
-        });
-       
+         toast.success("You have been successfully logged out.");
       }
        navigate("/login");
     } catch (error) {
-      toast({
-        title: "Logout failed",
-        description: "An error occurred while logging out.",
-      });
+      toast.error("An error occurred while logging out.");
     }
   };
 
