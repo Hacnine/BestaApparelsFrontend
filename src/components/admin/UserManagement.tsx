@@ -1,16 +1,21 @@
 import { useState } from "react";
-import { useToast } from "../../hooks/use-toast";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../../components/ui/card";
 import { Badge } from "../../components/ui/badge";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "../../components/ui/table";
 import {
   Dialog,
@@ -33,11 +38,61 @@ import {
   AlertDialogTrigger,
 } from "../../components/ui/alert-dialog";
 import { Label } from "../../components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
-import { Search, Plus, Edit, Trash2, UserCheck, UserX, Users } from "lucide-react";
-import { useGetUsersQuery, useGetUserStatsQuery, useCreateUserMutation, useUpdateUserMutation, useDeleteUserMutation, useToggleUserStatusMutation } from "../../redux/api/userApi";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../components/ui/select";
+import {
+  Search,
+  Plus,
+  Edit,
+  Trash2,
+  UserCheck,
+  UserX,
+  Users,
+} from "lucide-react";
+import {
+  useGetUsersQuery,
+  useGetUserStatsQuery,
+  useCreateUserMutation,
+  useUpdateUserMutation,
+  useDeleteUserMutation,
+  useToggleUserStatusMutation,
+} from "../../redux/api/userApi";
+import { useGetEmployeesQuery } from "../../redux/api/employeeApi";
+import { Employee } from "@/types/employee";
+import toast from "react-hot-toast";
+import RoleStats from "./RoleStats";
 
-const userRoles = ["Admin", "Management", "Merchandiser", "CAD", "Sample Fabric", "Sample Room"];
+const userRoles = [
+  {
+    value: "ADMIN",
+    label: "Admin",
+  },
+  {
+    value: "MANAGEMENT",
+    label: "Management",
+  },
+  {
+    value: "MERCHANDISER",
+    label: "Merchandiser",
+  },
+  {
+    value: "CAD",
+    label: "CAD",
+  },
+  {
+    value: "SAMPLE_FABRIC",
+    label: "Sample Fabric",
+  },
+  {
+    value: "SAMPLE_ROOM",
+    label: "Sample Room",
+  },
+];
 
 export function UserManagement() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -46,93 +101,144 @@ export function UserManagement() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<any>(null);
   const [formData, setFormData] = useState({
-    name: "",
+    userName: "",
     email: "",
     role: "",
     status: "Active",
-    department: ""
   });
-  const { toast } = useToast();
+  // New states for employee selection in add dialog
+  const [employeeSearchTerm, setEmployeeSearchTerm] = useState<string>("");
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
+    null
+  );
+  const [userName, setUserName] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [selectedRole, setSelectedRole] = useState<string>("");
 
-  const { data: users = [], isLoading } = useGetUsersQuery({ search: searchTerm, role: roleFilter });
-  const { data: stats } = useGetUserStatsQuery({});
-  const [createUser] = useCreateUserMutation();
-  const [updateUser] = useUpdateUserMutation();
-  const [deleteUser] = useDeleteUserMutation();
+  const { data: users, isLoading } = useGetUsersQuery({
+    search: searchTerm,
+    role: roleFilter === "all" ? "" : roleFilter,
+  });
+
+  const [createUser, { isLoading: isCreating, isSuccess: isCreated }] =
+    useCreateUserMutation();
+  const [updateUser, { isLoading: isUpdating, isSuccess: isUpdated }] =
+    useUpdateUserMutation();
+  const [deleteUser, { isLoading: isDeleting, isSuccess: isDeleted }] =
+    useDeleteUserMutation();
   const [toggleUserStatus] = useToggleUserStatusMutation();
 
+  // Query for searching employees in add dialog
+  const { data: employeeData, isLoading: isEmployeeLoading } =
+    useGetEmployeesQuery(
+      {
+        search: employeeSearchTerm,
+        page: 1,
+      },
+      { skip: !employeeSearchTerm }
+    );
+  const employeeSearchResults = employeeData?.data || [];
+
   const handleAddUser = async () => {
+    if (!selectedEmployee || !userName || !password || !selectedRole) {
+      toast.error("Please select an employee and fill all required fields.");
+      return;
+    }
     try {
-      await createUser(formData).unwrap();
-      setFormData({ name: "", email: "", role: "", status: "Active", department: "" });
+      await createUser({
+        employeeEmail: selectedEmployee.email,
+        userName: userName,
+        password: password,
+        role: selectedRole,
+      }).unwrap();
+      // Reset states
+      setEmployeeSearchTerm("");
+      setSelectedEmployee(null);
+      setUserName("");
+      setPassword("");
+      setSelectedRole("");
       setIsAddDialogOpen(false);
-      toast({ title: "User added", description: `${formData.name} has been successfully added.` });
-    } catch (err) {
-      toast({ title: "Error", description: "Failed to add user." });
+      toast.success(`${userName} has been successfully added.`);
+    } catch (err: any) {
+      toast.error(err?.data?.message || "Failed to add user.");
     }
   };
 
+  const handleSelectEmployee = (employee: any) => {
+    setSelectedEmployee(employee);
+    setEmployeeSearchTerm(""); // Clear search after selection
+  };
+
   const handleEditUser = async () => {
+    console.log(editingUser.id);
     try {
       await updateUser({ id: editingUser.id, ...formData }).unwrap();
       setIsEditDialogOpen(false);
       setEditingUser(null);
-      setFormData({ name: "", email: "", role: "", status: "Active", department: "" });
-      toast({ title: "User updated", description: `User information has been successfully updated.` });
+      setFormData({
+        userName: "",
+        email: "",
+        role: "",
+        status: "Active",
+      });
+      toast.success(`User information has been successfully updated.`);
     } catch (err) {
-      toast({ title: "Error", description: "Failed to update user." });
+      toast.error(`Failed to update user.`);
     }
   };
 
   const handleDeleteUser = async (userId: string) => {
     try {
       await deleteUser(userId).unwrap();
-      toast({ title: "User deleted", description: "User has been successfully deleted." });
+      toast.success(`User has been successfully deleted.`);
     } catch (err) {
-      toast({ title: "Error", description: "Failed to delete user." });
+      toast.error(`Failed to delete user.`);
     }
   };
 
   const handleToggleStatus = async (userId: string) => {
     try {
       await toggleUserStatus(userId).unwrap();
-      toast({ title: "Status updated", description: `User status has been updated.` });
+      toast.success(`User status has been updated.`);
     } catch (err) {
-      toast({ title: "Error", description: "Failed to update status." });
+      toast.error(`Failed to update status.`);
     }
   };
 
   const openEditDialog = (user: any) => {
     setEditingUser(user);
     setFormData({
-      name: user.name,
+      userName: user.userName,
       email: user.email,
       role: user.role,
       status: user.status,
-      department: user.department
     });
     setIsEditDialogOpen(true);
   };
 
-  // User stats fallback
-  const roleStats = stats || {
-    total: users.length,
-    active: users.filter((u: any) => u.status === "Active").length,
-    admin: users.filter((u: any) => u.role === "Admin").length,
-    management: users.filter((u: any) => u.role === "Management").length,
-    merchandiser: users.filter((u: any) => u.role === "Merchandiser").length,
-    cad: users.filter((u: any) => u.role === "CAD").length,
-    sampleFabric: users.filter((u: any) => u.role === "Sample Fabric").length,
-    sampleRoom: users.filter((u: any) => u.role === "Sample Room").length,
+  // Handle search input change
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
   };
+
+  // Handle clear search
+  const handleClearSearch = () => {
+    setSearchTerm("");
+    setRoleFilter("all");
+  };
+
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">User Management</h1>
-          <p className="text-muted-foreground">Manage users, roles and permissions</p>
+          <h1 className="text-3xl font-bold text-foreground">
+            User Management
+          </h1>
+          <p className="text-muted-foreground">
+            Manage users, roles and permissions
+          </p>
         </div>
         <div className="flex space-x-3">
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
@@ -142,56 +248,118 @@ export function UserManagement() {
                 Add User
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Add New User</DialogTitle>
                 <DialogDescription>
-                  Create a new user account with role and permissions.
+                  Search and select an employee, then provide user details.
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
+                {/* Employee Search */}
+                <div className="space-y-2">
+                  <Label htmlFor="employeeSearch">
+                    Search Employee by Email or Custom ID
+                  </Label>
+                  <Input
+                    id="employeeSearch"
+                    placeholder="Enter email or custom ID..."
+                    value={employeeSearchTerm}
+                    onChange={(e) => setEmployeeSearchTerm(e.target.value)}
+                  />
+                  {isEmployeeLoading && (
+                    <p className="text-sm text-muted-foreground">
+                      Searching...
+                    </p>
+                  )}
+                  {employeeSearchResults.length > 0 && !selectedEmployee && (
+                    <div className="max-h-40 overflow-y-auto border rounded-md">
+                      {employeeSearchResults.map((employee: any) => (
+                        <div
+                          key={employee.id}
+                          className="p-2 hover:bg-accent cursor-pointer flex justify-between items-center"
+                          onClick={() => handleSelectEmployee(employee)}
+                        >
+                          <div>
+                            <div className="font-medium">{employee.name}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {employee.email} - {employee.customId}
+                            </div>
+                          </div>
+                          {selectedEmployee?.id === employee.id && (
+                            <span className="text-green-500">✓</span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {selectedEmployee && (
+                    <div className="p-3 bg-accent/50 rounded-md">
+                      <p className="text-sm">
+                        Selected: {selectedEmployee.name} (
+                        {selectedEmployee.email})
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Custom User Name */}
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Input 
-                    id="name" 
-                    placeholder="John Doe" 
+                  <Label htmlFor="userName" className="text-right">
+                    Custom Username
+                  </Label>
+                  <Input
+                    id="userName"
+                    placeholder="Enter custom username"
                     className="col-span-3"
-                    value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
                   />
                 </div>
+
+                {/* Password */}
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Input 
-                    id="email" 
-                    placeholder="Email" 
+                  <Label htmlFor="password" className="text-right">
+                    Password
+                  </Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="Enter password"
                     className="col-span-3"
-                    value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                   />
                 </div>
+
+                {/* Role Select */}
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Select value={formData.role} onValueChange={role => setFormData({...formData, role})}>
+                  <Label htmlFor="role" className="text-right">
+                    Role
+                  </Label>
+                  <Select value={selectedRole} onValueChange={setSelectedRole}>
                     <SelectTrigger className="col-span-3">
                       <SelectValue placeholder="Select Role" />
                     </SelectTrigger>
                     <SelectContent>
                       {userRoles.map((role) => (
-                        <SelectItem key={role} value={role}>{role}</SelectItem>
+                        <SelectItem key={role.value} value={role.value}>
+                          {role.label}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Input 
-                    id="department" 
-                    placeholder="Department" 
-                    className="col-span-3"
-                    value={formData.department}
-                    onChange={(e) => setFormData({...formData, department: e.target.value})}
-                  />
-                </div>
               </div>
               <DialogFooter>
-                <Button onClick={handleAddUser}>Add</Button>
+                <Button
+                  onClick={handleAddUser}
+                  disabled={
+                    !selectedEmployee || !userName || !password || !selectedRole
+                  }
+                >
+                  Add User
+                </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -204,43 +372,43 @@ export function UserManagement() {
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Input 
-                    id="name" 
-                    placeholder="John Doe" 
+                  <Input
+                    id="name"
+                    placeholder="John Doe"
                     className="col-span-3"
-                    value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    value={formData.userName}
+                    onChange={(e) =>
+                      setFormData({ ...formData, userName: e.target.value })
+                    }
                   />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Input 
-                    id="email" 
-                    placeholder="Email" 
+                  <Input
+                    id="email"
+                    placeholder="Email"
                     className="col-span-3"
                     value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
                   />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Select value={formData.role} onValueChange={role => setFormData({...formData, role})}>
+                  <Select
+                    value={formData.role}
+                    onValueChange={(role) => setFormData({ ...formData, role })}
+                  >
                     <SelectTrigger className="col-span-3">
                       <SelectValue placeholder="Select Role" />
                     </SelectTrigger>
                     <SelectContent>
                       {userRoles.map((role) => (
-                        <SelectItem key={role} value={role}>{role}</SelectItem>
+                        <SelectItem key={role.value} value={role.value}>
+                          {role.label}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Input 
-                    id="department" 
-                    placeholder="Department" 
-                    className="col-span-3"
-                    value={formData.department}
-                    onChange={(e) => setFormData({...formData, department: e.target.value})}
-                  />
                 </div>
               </div>
               <DialogFooter>
@@ -252,56 +420,7 @@ export function UserManagement() {
       </div>
 
       {/* User Statistics */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="bg-gradient-card border-0 shadow-md">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Users</p>
-                <p className="text-2xl font-bold text-foreground">{roleStats.total}</p>
-              </div>
-              <Users className="h-8 w-8 text-primary" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="bg-gradient-card border-0 shadow-md">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Active Users</p>
-                <p className="text-2xl font-bold text-foreground">{roleStats.active}</p>
-              </div>
-              <UserCheck className="h-8 w-8 text-green-500" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="bg-gradient-card border-0 shadow-md">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Admins</p>
-                <p className="text-2xl font-bold text-foreground">{roleStats.admin}</p>
-              </div>
-              <div className="w-8 h-8 bg-primary/20 rounded-lg flex items-center justify-center">
-                <span className="text-primary font-bold text-sm">A</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="bg-gradient-card border-0 shadow-md">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Merchandisers</p>
-                <p className="text-2xl font-bold text-foreground">{roleStats.merchandiser}</p>
-              </div>
-              <div className="w-8 h-8 bg-accent/20 rounded-lg flex items-center justify-center">
-                <span className="text-accent font-bold text-sm">M</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <RoleStats />
 
       {/* Filters and Search */}
       <Card className="bg-gradient-card border-0 shadow-md">
@@ -309,11 +428,11 @@ export function UserManagement() {
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input 
-                placeholder="Search users by name or email..." 
+              <Input
+                placeholder="Search users by name or email..."
                 className="pl-10"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={handleSearchChange}
               />
             </div>
             <Select value={roleFilter} onValueChange={setRoleFilter}>
@@ -321,12 +440,18 @@ export function UserManagement() {
                 <SelectValue placeholder="Filter by Role" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Roles</SelectItem>
                 {userRoles.map((role) => (
-                  <SelectItem key={role} value={role}>{role}</SelectItem>
+                  <SelectItem key={role.value} value={role.value}>
+                    {role.label}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+            {searchTerm && (
+              <Button variant="outline" onClick={handleClearSearch}>
+                Clear
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -336,68 +461,61 @@ export function UserManagement() {
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <Users className="w-5 h-5 text-accent" />
-            <span>Users ({users.length})</span>
+            <span>Users ({users?.data.length})</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
+          {isLoading && (
+            <div className="min-w-full text-center flex items-center justify-center">
+              Loading users...
+            </div>
+          )}
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>User</TableHead>
+                <TableHead>User Name</TableHead>
+                <TableHead>Email</TableHead>
                 <TableHead>Role</TableHead>
-                <TableHead>Department</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Last Login</TableHead>
+                <TableHead>Phone Number</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {users.map((user: any) => (
-                <TableRow key={user.id}>
+              {users?.data?.map((user: any) => (
+                <TableRow key={user?.id}>
                   <TableCell>
                     <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-gradient-primary rounded-full flex items-center justify-center">
-                        <span className="text-white text-sm font-medium">
-                          {user.name.split(' ').map((n: string) => n[0]).join('')}
+                      <div className="w-10 h-10  flex items-center justify-center">
+                        <span className="text-gray-500 text-sm font-medium capitalize">
+                          {user?.userName}
                         </span>
                       </div>
-                      <div>
-                        <div className="font-medium text-foreground">{user.name}</div>
-                        <div className="text-sm text-muted-foreground">{user.email}</div>
-                      </div>
+                      <div></div>
+                    </div>
+                  </TableCell>
+
+                  <TableCell className="text-muted-foreground">
+                    <div className="text-sm text-muted-foreground">
+                      {user?.email}
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline">
-                      {user.role}
-                    </Badge>
+                    <Badge variant="outline">{user?.role}</Badge>
                   </TableCell>
                   <TableCell className="text-muted-foreground">
-                    {user.department}
+                    {user?.phoneNumber}
                   </TableCell>
-                  <TableCell>
-                    <Badge 
-                      variant={user.status === "Active" ? "default" : "secondary"}
-                      className={user.status === "Active" ? "bg-green-500" : ""}
-                    >
-                      {user.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {user.lastLogin}
-                  </TableCell>
+
                   <TableCell className="text-right">
                     <div className="flex justify-end space-x-2">
-                      <Button variant="ghost" size="sm" onClick={() => openEditDialog(user)}>
-                        <Edit className="h-4 w-4" />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => openEditDialog(user)}
+                      >
+                        <Edit className="h-4 w-4 text-green-500" />
                       </Button>
-                      <Button variant="ghost" size="sm" onClick={() => handleToggleStatus(user.id)}>
-                        {user.status === "Active" ? (
-                          <UserX className="h-4 w-4 text-red-500" />
-                        ) : (
-                          <UserCheck className="h-4 w-4 text-green-500" />
-                        )}
-                      </Button>
+
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Button variant="ghost" size="sm">
@@ -408,13 +526,16 @@ export function UserManagement() {
                           <AlertDialogHeader>
                             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                             <AlertDialogDescription>
-                              This action cannot be undone. This will permanently delete the user
-                              account and remove all associated data.
+                              This action cannot be undone. This will
+                              permanently delete the user account and remove all
+                              associated data.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
                             <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleDeleteUser(user.id)}>
+                            <AlertDialogAction
+                              onClick={() => handleDeleteUser(user?.id)}
+                            >
                               Delete
                             </AlertDialogAction>
                           </AlertDialogFooter>
@@ -426,8 +547,16 @@ export function UserManagement() {
               ))}
             </TableBody>
           </Table>
+          {!isLoading && users?.data.length === 0 && (
+            <div>
+              No users found
+              {searchTerm ? ` for "${searchTerm}"` : ""}.
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
   );
 }
+
+export default UserManagement;
