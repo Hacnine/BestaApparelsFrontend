@@ -4,10 +4,10 @@ import url from "@/config/urls";
 export const userApi = createApi({
   reducerPath: "userApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: `${url.BASE_URL}/user`,
+    baseUrl: `${url.BASE_URL}/user/`,
     credentials: "include",
   }),
-  tagTypes: ["User", "TNA", "AuditLog", "Dashboard"],
+  tagTypes: ["User", "Get User", "AuditLog", "Dashboard"],
   endpoints: (builder) => ({
     // Users
     login: builder.mutation({
@@ -22,28 +22,28 @@ export const userApi = createApi({
       query: (body) => ({ url: `user-info/`, method: "GET", body }),
     }),
     getUsers: builder.query({
-      query: (params) => ({ url: "users", params }),
-      providesTags: ["User"],
+      query: (params) => ({ url: "users/", params }),
+      providesTags: ["Get User"],
     }),
     getUserStats: builder.query({
-      query: () => "users/stats",
-      providesTags: ["User"],
+      query: () => "/stats",
+      providesTags: ["Get User"],
     }),
     createUser: builder.mutation({
-      query: (body) => ({ url: "users", method: "POST", body }),
-      invalidatesTags: ["User"],
+      query: (body) => ({ url: "create-user", method: "POST", body }),
+      invalidatesTags: ["Get User"],
     }),
     updateUser: builder.mutation({
-      query: ({ id, ...body }) => ({ url: `users/${id}`, method: "PUT", body }),
-      invalidatesTags: ["User"],
+      query: ({ id, ...body }) => ({ url: `update/${id}`, method: "PUT", body }),
+      invalidatesTags: ["Get User"],
     }),
     deleteUser: builder.mutation({
-      query: (id) => ({ url: `users/${id}`, method: "DELETE" }),
-      invalidatesTags: ["User"],
+      query: (id) => ({ url: `delete/${id}`, method: "DELETE" }),
+      invalidatesTags: ["Get User"],
     }),
     toggleUserStatus: builder.mutation({
       query: (id) => ({ url: `users/${id}/toggle-status`, method: "PATCH" }),
-      invalidatesTags: ["User"],
+      invalidatesTags: ["Get User"],
     }),
   }),
 });
