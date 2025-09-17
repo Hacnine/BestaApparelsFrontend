@@ -18,15 +18,6 @@ import {
   TableRow,
 } from "../../components/ui/table";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../../components/ui/dialog";
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -47,17 +38,41 @@ const departments = [
   "Sample Room",
 ];
 
+interface Employee {
+  id: string;
+  customId: string;
+  phoneNumber: string;
+  name: string;
+  email: string;
+  designation: string;
+  level: string;
+  department: string;
+  status: string;
+}
+
+interface EmployeeFormData {
+  customId: string;
+  phoneNumber: string;
+  name: string;
+  email: string;
+  designation: string;
+  level: string;
+  department: string;
+  status: string;
+}
+
 export function EmployeeManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState("all");
   const [page, setPage] = useState(1);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<EmployeeFormData>({
     customId: "",
     phoneNumber: "",
     name: "",
     email: "",
     designation: "",
+    level: "",
     department: "",
     status: "ACTIVE",
   });
@@ -75,7 +90,7 @@ export function EmployeeManagement() {
     useUpdateEmployeeStatusMutation();
 
   // Extract data
-  const employees = data?.data || [];
+  const employees: Employee[] = data?.data || [];
   const pagination = data?.pagination || {};
 
   // Handle add employee
@@ -88,20 +103,14 @@ export function EmployeeManagement() {
         name: "",
         email: "",
         designation: "",
+        level: "",
         department: "",
         status: "ACTIVE",
       });
       setIsAddDialogOpen(false);
-      toast({
-        title: "Employee added",
-        description: `${formData.name} has been successfully added.`,
-      });
+      toast.success(`${formData.name} has been successfully added.`);
     } catch (err) {
-      toast({
-        title: "Error",
-        description: err?.data?.message || "Failed to add employee.",
-        variant: "destructive",
-      });
+      toast.error(err?.data?.message || "Failed to add employee.");
     }
   };
 
@@ -116,16 +125,9 @@ export function EmployeeManagement() {
         id: employeeId,
         status: newStatus,
       }).unwrap();
-      toast({
-        title: "Status updated",
-        description: `Employee status changed to ${newStatus.toLowerCase()}.`,
-      });
+      toast.success(`Employee status changed to ${newStatus.toLowerCase()}.`);
     } catch (err) {
-      toast({
-        title: "Error",
-        description: err?.data?.message || "Failed to update employee status.",
-        variant: "destructive",
-      });
+      toast.error(err?.data?.message || "Failed to update employee status.");
     }
   };
 
@@ -159,20 +161,16 @@ export function EmployeeManagement() {
             Manage employees, roles, and permissions
           </p>
         </div>
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={() => setIsAddDialogOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Employee
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add New Employee</DialogTitle>
-              <DialogDescription>
-                Create a new employee account with role and permissions.
-              </DialogDescription>
-            </DialogHeader>
+        <Button onClick={() => setIsAddDialogOpen((prev) => !prev)}>
+          <Plus className="h-4 w-4 mr-2" />
+          Add Employee
+        </Button>
+      </div>
+      {/* Add Employee Form (collapsible) */}
+      {isAddDialogOpen && (
+        <Card className="mb-4">
+          <CardContent className="py-6">
+            <h2 className="text-xl font-semibold mb-4">Add New Employee</h2>
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
                 <Input
@@ -230,6 +228,17 @@ export function EmployeeManagement() {
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
+                <Input
+                  id="level"
+                  placeholder="Level (e.g., Junior, Senior)"
+                  className="col-span-3"
+                  value={formData.level}
+                  onChange={(e) =>
+                    setFormData({ ...formData, level: e.target.value })
+                  }
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
                 <Select
                   value={formData.department}
                   onValueChange={(dept) =>
@@ -249,14 +258,14 @@ export function EmployeeManagement() {
                 </Select>
               </div>
             </div>
-            <DialogFooter>
+            <div className="flex justify-end">
               <Button onClick={handleAddEmployee} disabled={isCreating}>
                 {isCreating ? "Adding..." : "Add"}
               </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Filters and Search */}
       <Card className="bg-gradient-card border-0 shadow-md">
@@ -325,6 +334,7 @@ export function EmployeeManagement() {
                 <TableHead>Email</TableHead>
                 <TableHead>Phone Number</TableHead>
                 <TableHead>Designation</TableHead>
+                <TableHead>Level</TableHead>
                 <TableHead>Department</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right flex">Actions</TableHead>
@@ -332,13 +342,14 @@ export function EmployeeManagement() {
             </TableHeader>
             <TableBody>
               {isLoading && <div className=" min-w-full text-center flex items-center justify-center-safe">Loading employees...</div>}
-              {employees.map((employee) => (
+              {employees.map((employee: Employee) => (
                 <TableRow key={employee.id}>
                   <TableCell>{employee.customId}</TableCell>
                   <TableCell>{employee.name}</TableCell>
                   <TableCell>{employee.email}</TableCell>
                   <TableCell>{employee.phoneNumber}</TableCell>
                   <TableCell>{employee.designation}</TableCell>
+                  <TableCell>{employee.level}</TableCell>
                   <TableCell>{employee.department}</TableCell>
                   <TableCell>
                     <Badge

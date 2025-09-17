@@ -4,7 +4,7 @@ import ulr from "@/config/urls";
 export const tnaApi = createApi({
   reducerPath: "tnaApi",
   baseQuery: fetchBaseQuery({ baseUrl: ulr.BASE_URL }),
-  tagTypes: ["User", "TNA", "AuditLog", "Dashboard"],
+  tagTypes: [ "TNA", "AuditLog", "Dashboard"],
   endpoints: (builder) => ({
 
     // TNAs

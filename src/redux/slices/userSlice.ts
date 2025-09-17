@@ -6,7 +6,7 @@ import { RootState } from "../store";
 // Initial State
 const initialState = {
   user: null,
-  isAuthenticated: null, 
+  isAuthenticated: null,
   loading: false,
   error: null,
 };
@@ -46,7 +46,7 @@ const userSlice = createSlice({
       .addMatcher(userApi.endpoints.login.matchRejected, (state, action) => {
         state.user = null;
         state.loading = false;
-        state.isAuthenticated = false; // 👈 Marks login failure
+        state.isAuthenticated = false; 
       })
       .addMatcher(
         userApi.endpoints.userInfo.matchFulfilled,
@@ -56,7 +56,12 @@ const userSlice = createSlice({
           state.user = user;
           state.isAuthenticated = true;
         }
-      );
+      )
+      .addMatcher(userApi.endpoints.logout.matchFulfilled, (state, action) => {
+        state.loading = false;
+        state.user = null;
+        state.isAuthenticated = false; 
+      });
   },
 });
 
@@ -69,7 +74,6 @@ export const selectCurrentUser = (state) => state.userSlice.user;
 export const selectAuthLoading = (state) => state.userSlice.loading;
 export const selectAuthError = (state) => state.userSlice.error;
 export const selectIsAuthenticated = (state) => state.userSlice.isAuthenticated;
-
 
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 

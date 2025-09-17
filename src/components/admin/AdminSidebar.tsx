@@ -1,18 +1,41 @@
-import { NavLink } from "react-router-dom";
-import { 
-  LayoutDashboard, 
-  Users, 
-  Settings, 
-  Activity, 
-  FileText, 
+import {
+  LayoutDashboard,
+  Users,
+  Settings,
+  Activity,
+  FileText,
   ClipboardList,
   Shield,
   Bell,
   Building2,
   ChevronLeft,
   TrendingUp,
-  IdCardIcon
+  IdCardIcon,
+  Package,
+  ShoppingCart,
+  Calculator,
+  BarChart3,
+  ChevronDown,
 } from "lucide-react";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarHeader,
+  useSidebar,
+} from "@/components/ui/sidebar";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+
+import { NavLink, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { LogoutButton } from "@/components/auth/LogoutButton";
@@ -23,61 +46,61 @@ const navigationItems = [
   {
     title: "Dashboard",
     href: `${APP_ROUTES.admin_dashboard}`,
-    icon: LayoutDashboard
+    icon: LayoutDashboard,
   },
-    {
+  {
     title: "Employee Management",
     href: `${APP_ROUTES.admin_employee}`,
-    icon: IdCardIcon
+    icon: IdCardIcon,
   },
   {
     title: "User Management",
     href: `${APP_ROUTES.admin_user}`,
-    icon: Users
+    icon: Users,
   },
   {
     title: "TNA Progress",
     href: `${APP_ROUTES.admin_tna}`,
-    icon: TrendingUp
+    icon: TrendingUp,
   },
   {
     title: "Audit Logs",
     href: `${APP_ROUTES.admin_audit}`,
-    icon: Activity
+    icon: Activity,
   },
   {
     title: "Reports",
     href: `${APP_ROUTES.admin_reports}`,
-    icon: FileText
+    icon: FileText,
   },
   {
     title: "System Settings",
     href: `${APP_ROUTES.admin_settings}`,
-    icon: Settings
-  }
+    icon: Settings,
+  },
 ];
 
 const settingsItems = [
   {
     title: "Company Info",
     href: `${APP_ROUTES.admin_info}`,
-    icon: Building2
+    icon: Building2,
   },
   {
     title: "Notifications",
     href: `${APP_ROUTES.admin_notifications}`,
-    icon: Bell
+    icon: Bell,
   },
   {
     title: "Approval Flow",
     href: `${APP_ROUTES.admin_approval}`,
-    icon: ClipboardList
+    icon: ClipboardList,
   },
   {
     title: "Security",
     href: `${APP_ROUTES.admin_security}`,
-    icon: Shield
-  }
+    icon: Shield,
+  },
 ];
 
 interface AdminSidebarProps {
@@ -85,12 +108,31 @@ interface AdminSidebarProps {
   onToggle: () => void;
 }
 
+const mainItems = [
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Masters", url: "/masters", icon: Package },
+  { title: "Orders", url: "/orders", icon: ShoppingCart },
+  { title: "Reports", url: "/reports", icon: BarChart3 },
+];
+
+const masterItems = [
+  { title: "Buyers", url: "/masters/buyers" },
+  { title: "Styles", url: "/masters/styles" },
+  { title: "Products", url: "/masters/products" },
+  { title: "Materials", url: "/masters/materials" },
+  { title: "Trims", url: "/masters/trims" },
+  { title: "Processes", url: "/masters/processes" },
+  { title: "UOMs", url: "/masters/uoms" },
+];
+
 export function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps) {
   return (
-    <div className={cn(
-      "relative bg-sidebar text-sidebar-foreground border-r border-border transition-all duration-300",
-      collapsed ? "w-16" : "w-64"
-    )}>
+    <div
+      className={cn(
+        "relative bg-sidebar text-sidebar-foreground border-r border-border transition-all duration-300",
+        collapsed ? "w-16" : "w-64"
+      )}
+    >
       {/* Header */}
       <div className="h-16 flex items-center justify-between px-4 border-b border-sidebar-hover">
         {!collapsed && (
@@ -110,7 +152,12 @@ export function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps) {
           onClick={onToggle}
           className="text-sidebar-foreground hover:bg-sidebar-hover"
         >
-          <ChevronLeft className={cn("w-4 h-4 transition-transform", collapsed && "rotate-180")} />
+          <ChevronLeft
+            className={cn(
+              "w-4 h-4 transition-transform",
+              collapsed && "rotate-180"
+            )}
+          />
         </Button>
       </div>
 
@@ -126,8 +173,8 @@ export function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps) {
                 cn(
                   "flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
                   "hover:bg-sidebar-hover hover:text-white",
-                  isActive 
-                    ? "bg-sidebar-active text-white shadow-lg" 
+                  isActive
+                    ? "bg-sidebar-active text-white shadow-lg"
                     : "text-sidebar-foreground"
                 )
               }
@@ -155,8 +202,8 @@ export function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps) {
                     cn(
                       "flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
                       "hover:bg-sidebar-hover hover:text-white",
-                      isActive 
-                        ? "bg-sidebar-active text-white shadow-lg" 
+                      isActive
+                        ? "bg-sidebar-active text-white shadow-lg"
                         : "text-sidebar-foreground"
                     )
                   }
@@ -179,8 +226,12 @@ export function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps) {
                 <span className="text-white text-sm font-medium">A</span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-sidebar-foreground truncate">Admin User</p>
-                <p className="text-xs text-sidebar-foreground/70 truncate">admin@company.com</p>
+                <p className="text-sm font-medium text-sidebar-foreground truncate">
+                  Admin User
+                </p>
+                <p className="text-xs text-sidebar-foreground/70 truncate">
+                  admin@company.com
+                </p>
               </div>
             </div>
             <LogoutButton />

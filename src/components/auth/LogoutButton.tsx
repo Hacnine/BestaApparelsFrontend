@@ -8,16 +8,14 @@ import toast from "react-hot-toast";
 export function LogoutButton() {
   const navigate = useNavigate();
   const [logout, { isSuccess }] = useLogoutMutation();
-  
 
   const handleLogout = async () => {
     try {
       await logout().unwrap();
-      localStorage.removeItem("tna_user");
       if (isSuccess) {
-         toast.success("You have been successfully logged out.");
+        toast.success("You have been successfully logged out.");
       }
-       navigate("/login");
+      navigate("/login");
     } catch (error) {
       toast.error("An error occurred while logging out.");
     }

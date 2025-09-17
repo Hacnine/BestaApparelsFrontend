@@ -1,12 +1,13 @@
-import { configureStore, Middleware } from '@reduxjs/toolkit';
-import { persistReducer, persistStore } from 'redux-persist';
-import storage from 'redux-persist/lib/storage';
-import { userApi } from './api/userApi';
-import { auditApi } from './api/auditApi';
-import { dashboardApi } from './api/dashboardApi';
-import { tnaApi } from './api/tnaApi';
-import userReducer from './slices/userSlice';
-import { employeeApi } from './api/employeeApi';
+import { configureStore, Middleware } from "@reduxjs/toolkit";
+import { persistReducer, persistStore } from "redux-persist";
+import storage from "redux-persist/lib/storage";
+import { userApi } from "./api/userApi";
+import { auditApi } from "./api/auditApi";
+import { dashboardApi } from "./api/dashboardApi";
+import { tnaApi } from "./api/tnaApi";
+import userReducer from "./slices/userSlice";
+import { employeeApi } from "./api/employeeApi";
+import { merchandiserApi } from "./api/merchandiserApi";
 
 // No-op storage for server-side rendering
 const createNoopStorage = () => ({
@@ -15,7 +16,8 @@ const createNoopStorage = () => ({
   removeItem: () => Promise.resolve(),
 });
 
-const storageEngine = typeof window !== 'undefined' ? storage : createNoopStorage();
+const storageEngine =
+  typeof window !== "undefined" ? storage : createNoopStorage();
 
 // Factory function for persist config
 const createPersistConfig = (key: string, options = {}) => ({
@@ -25,8 +27,8 @@ const createPersistConfig = (key: string, options = {}) => ({
 });
 
 // Persist config for userSlice
-const userPersistConfig = createPersistConfig('userSlice', {
-  whitelist: ['user'],
+const userPersistConfig = createPersistConfig("userSlice", {
+  whitelist: ["user"],
 });
 
 // Wrap userReducer with persistReducer
@@ -37,6 +39,7 @@ const reducers = {
   [auditApi.reducerPath]: auditApi.reducer,
   [dashboardApi.reducerPath]: dashboardApi.reducer,
   [tnaApi.reducerPath]: tnaApi.reducer,
+  [merchandiserApi.reducerPath]: merchandiserApi.reducer,
 };
 
 // Configure store
@@ -45,7 +48,7 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'], // Ignore redux-persist actions
+        ignoredActions: ["persist/PERSIST", "persist/REHYDRATE"], // Ignore redux-persist actions
       },
     }).concat([
       userApi.middleware,
@@ -53,6 +56,7 @@ export const store = configureStore({
       auditApi.middleware,
       dashboardApi.middleware,
       tnaApi.middleware,
+      merchandiserApi.middleware,
     ] as Middleware[]),
 });
 

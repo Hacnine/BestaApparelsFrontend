@@ -12,6 +12,7 @@ import { TNAProgress } from "@/components/admin/TNAProgress";
 import { AuditLogs } from "@/components/admin/AuditLogs";
 import NotFound from "@/pages/NotFound";
 import EmployeeManagement from "@/components/admin/EmployeeManagement";
+import MerchandiserDashboard from "@/components/merchandiser/MerchandiserDashboard";
 
 // Create router with nested routes
 export const router = createBrowserRouter(
@@ -20,8 +21,19 @@ export const router = createBrowserRouter(
       {/* Public route */}
       <Route path={APP_ROUTES.login} element={<LoginPage />} />
       {/* Admin layout + nested routes */}
-      <Route path="admin" element={<AdminLayout />}>
+      <Route path="admin" element={<AdminLayout sidebarFor={"admin"} />}>
         <Route path="dashboard" element={<AdminDashboardOverview />} />
+        <Route path="employee" element={<EmployeeManagement />} />
+        <Route path="user" element={<UserManagement />} />
+
+        <Route path="tna" element={<TNAProgress />} />
+        <Route path="audit" element={<AuditLogs />} />
+        <Route path="*" element={<NotFound />} />
+      </Route>
+
+          {/* Admin layout + nested routes */}
+      <Route path="merchandiser" element={<AdminLayout sidebarFor={"merchandiser"} />}>
+        <Route path="dashboard" element={<MerchandiserDashboard />} />
         <Route path="employee" element={<EmployeeManagement />} />
         <Route path="user" element={<UserManagement />} />
 
