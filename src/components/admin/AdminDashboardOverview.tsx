@@ -131,17 +131,7 @@ export function AdminDashboardOverview() {
             Monitor and manage your Sample TNA
           </p>
         </div>
-        <Popover open={openBuyer} onOpenChange={setOpenBuyer}>
-          <PopoverTrigger asChild>
-            <Button onClick={() => setOpenBuyer(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Create Buyer
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-96">
-            <BuyerForm onSuccess={() => setOpenBuyer(false)} />
-          </PopoverContent>
-        </Popover>
+       
       </div>
 
       {/* Stats Cards */}

@@ -13,6 +13,7 @@ import { AuditLogs } from "@/components/admin/AuditLogs";
 import NotFound from "@/pages/NotFound";
 import EmployeeManagement from "@/components/admin/EmployeeManagement";
 import MerchandiserDashboard from "@/components/merchandiser/MerchandiserDashboard";
+import BuyerManagement from "@/components/admin/BuyerManagement";
 
 // Create router with nested routes
 export const router = createBrowserRouter(
@@ -25,7 +26,7 @@ export const router = createBrowserRouter(
         <Route path="dashboard" element={<AdminDashboardOverview />} />
         <Route path="employee" element={<EmployeeManagement />} />
         <Route path="user" element={<UserManagement />} />
-
+        <Route path="buyer" element={<BuyerManagement />} />
         <Route path="tna" element={<TNAProgress />} />
         <Route path="audit" element={<AuditLogs />} />
         <Route path="*" element={<NotFound />} />

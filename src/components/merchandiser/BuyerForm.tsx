@@ -18,7 +18,7 @@ interface Department {
   name: string;
 }
 
-export default function BuyerForm({ onSuccess }: BuyerFormProps) {
+export default function BuyerForm() {
   const [form, setForm] = useState<BuyerFormState>({ name: "", country: "", buyerDepartmentId: "" });
   const [createBuyer, { isLoading }] = useCreateBuyerMutation();
   const { data: departments } = useGetDepartmentsQuery();

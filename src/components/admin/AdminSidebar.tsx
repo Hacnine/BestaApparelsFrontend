@@ -13,95 +13,115 @@ import {
   IdCardIcon,
   Package,
   ShoppingCart,
-  Calculator,
   BarChart3,
-  ChevronDown,
+  Barcode,
 } from "lucide-react";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarHeader,
-  useSidebar,
-} from "@/components/ui/sidebar";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 
 import { NavLink, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { LogoutButton } from "@/components/auth/LogoutButton";
-import { useState } from "react";
 import { APP_ROUTES } from "@/routes/APP_ROUTES";
+import { useUser } from "@/redux/slices/userSlice";
 
-const navigationItems = [
-  {
-    title: "Dashboard",
-    href: `${APP_ROUTES.admin_dashboard}`,
-    icon: LayoutDashboard,
-  },
-  {
-    title: "Employee Management",
-    href: `${APP_ROUTES.admin_employee}`,
-    icon: IdCardIcon,
-  },
-  {
-    title: "User Management",
-    href: `${APP_ROUTES.admin_user}`,
-    icon: Users,
-  },
-  {
-    title: "TNA Progress",
-    href: `${APP_ROUTES.admin_tna}`,
-    icon: TrendingUp,
-  },
-  {
-    title: "Audit Logs",
-    href: `${APP_ROUTES.admin_audit}`,
-    icon: Activity,
-  },
-  {
-    title: "Reports",
-    href: `${APP_ROUTES.admin_reports}`,
-    icon: FileText,
-  },
-  {
-    title: "System Settings",
-    href: `${APP_ROUTES.admin_settings}`,
-    icon: Settings,
-  },
-];
+const navigationItemsMap: Record<string, any[]> = {
+  ADMIN: [
+    {
+      title: "Dashboard",
+      href: `${APP_ROUTES.admin_dashboard}`,
+      icon: LayoutDashboard,
+    },
+    {
+      title: "Employee Management",
+      href: `${APP_ROUTES.admin_employee}`,
+      icon: IdCardIcon,
+    },
+    {
+      title: "User Management",
+      href: `${APP_ROUTES.admin_user}`,
+      icon: Users,
+    },
+    {
+      title: "Buyer Management",
+      href: `${APP_ROUTES.admin_buyer}`,
+      icon: Barcode,
+    },
+    {
+      title: "TNA Progress",
+      href: `${APP_ROUTES.admin_tna}`,
+      icon: TrendingUp,
+    },
+    {
+      title: "Audit Logs",
+      href: `${APP_ROUTES.admin_audit}`,
+      icon: Activity,
+    },
+    {
+      title: "Reports",
+      href: `${APP_ROUTES.admin_reports}`,
+      icon: FileText,
+    },
+    {
+      title: "System Settings",
+      href: `${APP_ROUTES.admin_settings}`,
+      icon: Settings,
+    },
+  ],
+  MERCHANDISER: [
+    {
+      title: "Dashboard",
+      href: `${APP_ROUTES.merchandiser_dashboard}`,
+      icon: LayoutDashboard,
+    },
+    {
+      title: "Buyer Management",
+      href: `${APP_ROUTES.admin_buyer}`,
+      icon: Barcode,
+    },
+    {
+      title: "TNA Progress",
+      href: `${APP_ROUTES.admin_tna}`,
+      icon: TrendingUp,
+    },
+    {
+      title: "Reports",
+      href: `${APP_ROUTES.admin_reports}`,
+      icon: FileText,
+    },
+  ],
+};
 
-const settingsItems = [
-  {
-    title: "Company Info",
-    href: `${APP_ROUTES.admin_info}`,
-    icon: Building2,
-  },
-  {
-    title: "Notifications",
-    href: `${APP_ROUTES.admin_notifications}`,
-    icon: Bell,
-  },
-  {
-    title: "Approval Flow",
-    href: `${APP_ROUTES.admin_approval}`,
-    icon: ClipboardList,
-  },
-  {
-    title: "Security",
-    href: `${APP_ROUTES.admin_security}`,
-    icon: Shield,
-  },
-];
+const settingsItemsMap: Record<string, any[]> = {
+  ADMIN: [
+    {
+      title: "Company Info",
+      href: `${APP_ROUTES.admin_info}`,
+      icon: Building2,
+    },
+    {
+      title: "Notifications",
+      href: `${APP_ROUTES.admin_notifications}`,
+      icon: Bell,
+    },
+    {
+      title: "Approval Flow",
+      href: `${APP_ROUTES.admin_approval}`,
+      icon: ClipboardList,
+    },
+    {
+      title: "Security",
+      href: `${APP_ROUTES.admin_security}`,
+      icon: Shield,
+    },
+  ],
+  MERCHANDISER: [
+    {
+      title: "Notifications",
+      href: `${APP_ROUTES.admin_notifications}`,
+      icon: Bell,
+    },
+  ],
+};
 
 interface AdminSidebarProps {
   collapsed: boolean;
@@ -126,6 +146,11 @@ const masterItems = [
 ];
 
 export function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps) {
+  const { user } = useUser();
+  console.log("User in sidebar:", user);
+  const location = useLocation();
+  const navigationItems = navigationItemsMap[user?.role] || [];
+  const settingsItems = settingsItemsMap[user?.role] || [];
   return (
     <div
       className={cn(
@@ -186,7 +211,7 @@ export function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps) {
         </nav>
 
         {/* Settings Section */}
-        {!collapsed && (
+        {!collapsed && settingsItems.length > 0 && (
           <div className="mt-8">
             <div className="px-3 mb-2">
               <h3 className="text-xs font-semibold text-sidebar-foreground/70 uppercase tracking-wider">

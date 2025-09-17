@@ -4,6 +4,7 @@ export const APP_ROUTES = {
   admin_dashboard: "/admin/dashboard",
   admin_user: "/admin/user",
   admin_employee: "/admin/employee",
+  admin_buyer: "/admin/buyer",
   admin_tna: "/admin/tna",
   admin_audit: "/admin/audit",
   admin_reports:"/admin/reports",

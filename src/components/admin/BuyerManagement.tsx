@@ -4,9 +4,9 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Plus } from "lucide-react";
-import TnaForm from "./TnaForm";
+import BuyerForm from "../merchandiser/BuyerForm";
 
-export default function MerchandiserDashboard() {
+export default function BuyerManagement() {
   const navigate = useNavigate();
   const [openTna, setOpenTna] = useState(false);
 
@@ -18,14 +18,14 @@ export default function MerchandiserDashboard() {
         actions={
           <Button onClick={() => setOpenTna((prev) => !prev)}>
             <Plus className="h-4 w-4 mr-2" />
-            Create TNA
+            Create Buyer
           </Button>
         }
       />
 
       {openTna && (
         <Card className="p-4 ">
-          <TnaForm onSuccess={() => setOpenTna(false)} />
+            <BuyerForm />
         </Card>
       )}
     </div>

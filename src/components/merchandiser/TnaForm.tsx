@@ -70,7 +70,7 @@ export default function TnaForm({ onSuccess }: TnaFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
       <div>
         <label className="text-sm font-medium">Buyer</label>
         <Select value={form.buyerId} onValueChange={(v) => handleSelectChange("buyerId", v)} required>
@@ -126,7 +126,9 @@ export default function TnaForm({ onSuccess }: TnaFormProps) {
           </SelectContent>
         </Select>
       </div> */}
-      <Button type="submit" disabled={isLoading}>Create TNA</Button>
+      <div className="col-span-2 flex justify-center">
+        <Button className="w-[400px] self-end" type="submit" disabled={isLoading}>Create TNA</Button>
+      </div>
     </form>
   );
 }
