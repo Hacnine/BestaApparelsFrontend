@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
-import { AdminSidebar } from "./AdminSidebar";
+import { AdminSidebar } from "../common/Sidebar";
 
 import { ReactNode } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
