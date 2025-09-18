@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { useCreateSampleDevelopmentMutation } from '@/redux/api/cadApi';
+import toast from 'react-hot-toast';
 
 const SampleDevelopement = () => {
   const [openForm, setOpenForm] = useState(false);
@@ -12,23 +14,35 @@ const SampleDevelopement = () => {
     sampleCompleteDate: "",
     sampleQuantity: "",
   });
+  const [createSampleDevelopment, { isLoading }] = useCreateSampleDevelopmentMutation();
 
-  const handleChange = (e) => {
+  const handleChange = (e: { target: { name: any; value: any; }; }) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
-    // Submit logic here
-    setForm({
-      style: "",
-      samplemanName: "",
-      sampleReceiveDate: "",
-      sampleCompleteDate: "",
-      sampleQuantity: "",
-    });
-    setOpenForm(false);
+    try {
+      await createSampleDevelopment({
+        style: form.style,
+        samplemanName: form.samplemanName,
+        sampleReceiveDate: new Date(form.sampleReceiveDate).toISOString(),
+        sampleCompleteDate: new Date(form.sampleCompleteDate).toISOString(),
+        sampleQuantity: Number(form.sampleQuantity),
+      }).unwrap();
+      toast.success('Sample Development created successfully');
+      setForm({
+        style: "",
+        samplemanName: "",
+        sampleReceiveDate: "",
+        sampleCompleteDate: "",
+        sampleQuantity: "",
+      });
+      setOpenForm(false);
+    } catch (error) {
+      toast.error(error?.data?.error || 'Failed to create Sample Development');
+    }
   };
 
   return (
@@ -101,7 +115,7 @@ const SampleDevelopement = () => {
                 />
               </div>
               <div className="col-span-2 flex justify-center">
-                <Button type="submit">Submit</Button>
+                <Button type="submit" disabled={isLoading}>Submit</Button>
               </div>
             </form>
           </CardContent>

@@ -15,7 +15,7 @@ import EmployeeManagement from "@/components/admin/EmployeeManagement";
 import MerchandiserDashboard from "@/components/merchandiser/MerchandiserDashboard";
 import BuyerManagement from "@/components/admin/BuyerManagement";
 import CadDesignDashboard from "@/components/cadDesign/CadDesignDashboard";
-import SampleDevelopement from "@/components/SampleDevelopement/SampleDevelopement";
+import SampleDevelopement from "@/components/SampleDevelopment/SampleDevelopment";
 
 // Create router with nested routes
 export const router = createBrowserRouter(
