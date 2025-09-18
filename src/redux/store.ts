@@ -8,6 +8,7 @@ import { tnaApi } from "./api/tnaApi";
 import userReducer from "./slices/userSlice";
 import { employeeApi } from "./api/employeeApi";
 import { merchandiserApi } from "./api/merchandiserApi";
+import { cadApi } from "./api/cadApi";
 
 // No-op storage for server-side rendering
 const createNoopStorage = () => ({
@@ -40,6 +41,7 @@ const reducers = {
   [dashboardApi.reducerPath]: dashboardApi.reducer,
   [tnaApi.reducerPath]: tnaApi.reducer,
   [merchandiserApi.reducerPath]: merchandiserApi.reducer,
+  [cadApi.reducerPath]: cadApi.reducer,
 };
 
 // Configure store
@@ -57,6 +59,7 @@ export const store = configureStore({
       dashboardApi.middleware,
       tnaApi.middleware,
       merchandiserApi.middleware,
+      cadApi.middleware,
     ] as Middleware[]),
 });
 
