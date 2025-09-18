@@ -12,10 +12,12 @@ import { TNAProgress } from "@/components/admin/TNAProgress";
 import { AuditLogs } from "@/components/admin/AuditLogs";
 import NotFound from "@/pages/NotFound";
 import EmployeeManagement from "@/components/admin/EmployeeManagement";
-import MerchandiserDashboard from "@/components/merchandiser/MerchandiserDashboard";
 import BuyerManagement from "@/components/admin/BuyerManagement";
 import CadDesignDashboard from "@/components/cadDesign/CadDesignDashboard";
 import SampleDevelopement from "@/components/SampleDevelopment/SampleDevelopment";
+import FabricBooking from "@/components/fabricBooking/FabricBooking";
+import { MerchandiserDashboard } from "@/components/merchandiser/MerchandiserDashboard";
+import SampleTna from "@/components/merchandiser/SampleTna";
 
 // Create router with nested routes
 export const router = createBrowserRouter(
@@ -43,7 +45,7 @@ export const router = createBrowserRouter(
         <Route path="employee" element={<EmployeeManagement />} />
         <Route path="user" element={<UserManagement />} />
 
-        <Route path="tna" element={<TNAProgress />} />
+        <Route path="tna" element={<SampleTna />} />
         <Route path="audit" element={<AuditLogs />} />
         <Route path="*" element={<NotFound />} />
       </Route>
@@ -53,6 +55,7 @@ export const router = createBrowserRouter(
         element={<AdminLayout sidebarFor={"cad"} />}
       >
         <Route path="cad-designs" element={<CadDesignDashboard />} />
+        <Route path="fabric-booking" element={<FabricBooking />} />
         <Route path="sample-development" element={<SampleDevelopement />} />
       </Route>
 
