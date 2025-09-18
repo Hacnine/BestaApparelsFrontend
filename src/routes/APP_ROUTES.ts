@@ -1,4 +1,4 @@
-// src/appRoutes/APP_ROUTES.js
+
 export const APP_ROUTES = {
   login: "/login",
   admin_dashboard: "/admin/dashboard",
@@ -7,7 +7,7 @@ export const APP_ROUTES = {
   admin_buyer: "/admin/buyer",
   admin_tna: "/admin/tna",
   admin_audit: "/admin/audit",
-  admin_reports:"/admin/reports",
+  admin_reports: "/admin/reports",
   admin_info: "/settings/company",
   admin_settings: "/admin/settings",
   admin_notifications: "/settings/notifications",
@@ -19,4 +19,11 @@ export const APP_ROUTES = {
   cad_dashboard: "/cad/dashboard",
   sample_fabric_dashboard: "/sample-fabric/dashboard",
   sample_room_dashboard: "/sample-room/dashboard",
+
+  sample_tna: "/merchandiser/tna",
+  cad_designs: "/merchandiser/cad-designs",
+  fabric_booking: "/merchandiser/fabric-booking",
+  sample_development: "/merchandiser/sample-development",
+
+  not_found: "*",
 };

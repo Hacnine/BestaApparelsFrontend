@@ -14,6 +14,8 @@ import NotFound from "@/pages/NotFound";
 import EmployeeManagement from "@/components/admin/EmployeeManagement";
 import MerchandiserDashboard from "@/components/merchandiser/MerchandiserDashboard";
 import BuyerManagement from "@/components/admin/BuyerManagement";
+import CadDesignDashboard from "@/components/cadDesign/CadDesignDashboard";
+import SampleDevelopement from "@/components/SampleDevelopement/SampleDevelopement";
 
 // Create router with nested routes
 export const router = createBrowserRouter(
@@ -32,8 +34,11 @@ export const router = createBrowserRouter(
         <Route path="*" element={<NotFound />} />
       </Route>
 
-          {/* Admin layout + nested routes */}
-      <Route path="merchandiser" element={<AdminLayout sidebarFor={"merchandiser"} />}>
+      {/* Merchandiser layout + nested routes */}
+      <Route
+        path="merchandiser"
+        element={<AdminLayout sidebarFor={"merchandiser"} />}
+      >
         <Route path="dashboard" element={<MerchandiserDashboard />} />
         <Route path="employee" element={<EmployeeManagement />} />
         <Route path="user" element={<UserManagement />} />
@@ -42,6 +47,16 @@ export const router = createBrowserRouter(
         <Route path="audit" element={<AuditLogs />} />
         <Route path="*" element={<NotFound />} />
       </Route>
+
+      <Route
+        path="merchandiser"
+        element={<AdminLayout sidebarFor={"cad"} />}
+      >
+        <Route path="cad-designs" element={<CadDesignDashboard />} />
+        <Route path="sample-development" element={<SampleDevelopement />} />
+      </Route>
+
+      <Route path="*" element={<NotFound />} />
     </>
   )
 );

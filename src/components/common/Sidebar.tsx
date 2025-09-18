@@ -15,6 +15,9 @@ import {
   ShoppingCart,
   BarChart3,
   Barcode,
+  Airplay,
+  GitCommitHorizontal,
+  Rows4,
 } from "lucide-react";
 
 import { NavLink, useLocation } from "react-router-dom";
@@ -74,18 +77,23 @@ const navigationItemsMap: Record<string, any[]> = {
       icon: LayoutDashboard,
     },
     {
-      title: "Buyer Management",
-      href: `${APP_ROUTES.admin_buyer}`,
-      icon: Barcode,
+      title: "Sample TNA",
+      href: `${APP_ROUTES.sample_tna}`,
+      icon: Rows4,
     },
     {
-      title: "TNA Progress",
-      href: `${APP_ROUTES.admin_tna}`,
-      icon: TrendingUp,
+      title: "CAD Designs",
+      href: `${APP_ROUTES.cad_designs}`,
+      icon: Airplay,
     },
     {
-      title: "Reports",
-      href: `${APP_ROUTES.admin_reports}`,
+      title: "Fabric Booking",
+      href: `${APP_ROUTES.fabric_booking}`,
+      icon: GitCommitHorizontal,
+    },
+    {
+      title: "Sample Development",
+      href: `${APP_ROUTES.sample_development}`,
       icon: FileText,
     },
   ],
@@ -115,11 +123,12 @@ const settingsItemsMap: Record<string, any[]> = {
     },
   ],
   MERCHANDISER: [
-    {
-      title: "Notifications",
-      href: `${APP_ROUTES.admin_notifications}`,
-      icon: Bell,
-    },
+      {
+        title: "Notifications",
+        href: `${APP_ROUTES.admin_notifications}`,
+        icon: Bell,
+      },
+    
   ],
 };
 
@@ -128,26 +137,10 @@ interface AdminSidebarProps {
   onToggle: () => void;
 }
 
-const mainItems = [
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Masters", url: "/masters", icon: Package },
-  { title: "Orders", url: "/orders", icon: ShoppingCart },
-  { title: "Reports", url: "/reports", icon: BarChart3 },
-];
-
-const masterItems = [
-  { title: "Buyers", url: "/masters/buyers" },
-  { title: "Styles", url: "/masters/styles" },
-  { title: "Products", url: "/masters/products" },
-  { title: "Materials", url: "/masters/materials" },
-  { title: "Trims", url: "/masters/trims" },
-  { title: "Processes", url: "/masters/processes" },
-  { title: "UOMs", url: "/masters/uoms" },
-];
 
 export function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps) {
   const { user } = useUser();
-  console.log("User in sidebar:", user);
+
   const location = useLocation();
   const navigationItems = navigationItemsMap[user?.role] || [];
   const settingsItems = settingsItemsMap[user?.role] || [];
@@ -162,8 +155,8 @@ export function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps) {
       <div className="h-16 flex items-center justify-between px-4 border-b border-sidebar-hover">
         {!collapsed && (
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-accent rounded-lg flex items-center justify-center">
-              <Building2 className="w-5 h-5 text-white" />
+            <div className="  flex items-center justify-center">
+              <img className="size-10" src="/images/logo.webp" alt="" />
             </div>
             <div>
               <h2 className="font-semibold text-sm">Sample TNA</h2>
