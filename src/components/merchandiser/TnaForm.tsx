@@ -16,6 +16,7 @@ interface TnaFormState {
   orderDate: string;
   userId: string;
   status: string;
+  sampleType: string;
 }
 interface Buyer { id: string; name: string; }
 interface Merchandiser { id: string; userName: string; }
@@ -29,6 +30,7 @@ export default function TnaForm({ onSuccess }: TnaFormProps) {
     orderDate: "",
     userId: "",
     status: "ACTIVE",
+    sampleType: "",
   });
   const [createTna, { isLoading }] = useCreateTnaMutation();
   const { data: buyersResponse } = useGetBuyersQuery({});
@@ -62,6 +64,7 @@ export default function TnaForm({ onSuccess }: TnaFormProps) {
         orderDate: "",
         userId: "",
         status: "ACTIVE",
+        sampleType: "",
       });
       onSuccess();
     } catch (error: any) {
@@ -110,6 +113,22 @@ export default function TnaForm({ onSuccess }: TnaFormProps) {
             {merchandisers?.map((user: Merchandiser) => (
               <SelectItem key={user.id} value={user.id}>{user.userName}</SelectItem>
             ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div>
+        <label className="text-sm font-medium">Sample Type</label>
+        <Select value={form.sampleType} onValueChange={(v) => handleSelectChange("sampleType", v)} required>
+          <SelectTrigger>
+            <SelectValue placeholder="Select sample type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="DVP">DVP</SelectItem>
+            <SelectItem value="PP1">PP1</SelectItem>
+            <SelectItem value="PP2">PP2</SelectItem>
+            <SelectItem value="PP3">PP3</SelectItem>
+            <SelectItem value="PP4">PP4</SelectItem>
+            <SelectItem value="PP5">PP5</SelectItem>
           </SelectContent>
         </Select>
       </div>
