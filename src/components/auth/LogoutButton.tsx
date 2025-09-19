@@ -5,7 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useLogoutMutation } from "@/redux/api/userApi";
 import toast from "react-hot-toast";
 
-export function LogoutButton() {
+export function LogoutButton({collapsed}) {
   const navigate = useNavigate();
   const [logout, { isSuccess }] = useLogoutMutation();
 
@@ -24,7 +24,7 @@ export function LogoutButton() {
   return (
     <Button variant="ghost" size="sm" onClick={handleLogout}>
       <LogOut className="h-4 w-4 mr-2" />
-      Logout
+      {!collapsed ? "Logout" : ""}
     </Button>
   );
 }
