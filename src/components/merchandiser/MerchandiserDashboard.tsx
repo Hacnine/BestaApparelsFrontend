@@ -15,6 +15,8 @@ import {
   Download,
   Filter
 } from "lucide-react";
+import SampleDevelopement from "../SampleDevelopment/SampleDevelopment";
+import SampleTnaTable from "./SampleTnaTable";
 
 const tnaOverview = [
   {
@@ -167,7 +169,7 @@ export function MerchandiserDashboard() {
           </Card>
         ))}
       </div>
-
+      <SampleTnaTable/>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Department Progress */}
         <Card className="bg-gradient-card border-0 shadow-md">

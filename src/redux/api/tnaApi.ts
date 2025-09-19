@@ -28,6 +28,10 @@ export const tnaApi = createApi({
       query: () => "tnas/department-progress",
       providesTags: ["TNA"],
     }),
+    getTNASummary: builder.query({
+      query: () => "tnas/get-tna-summary",
+      providesTags: ["Dashboard"],
+    }),
    
   }),
 });
@@ -38,4 +42,5 @@ export const {
   useUpdateTNAMutation,
   useDeleteTNAMutation,
   useGetDepartmentProgressQuery,
+  useGetTNASummaryQuery,
 } = tnaApi;
