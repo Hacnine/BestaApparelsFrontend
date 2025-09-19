@@ -252,14 +252,14 @@ export function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps) {
                 </p>
               </div>
             </div>
-            <LogoutButton />
+            <LogoutButton collapsed={collapsed}/>
           </div>
         ) : (
           <div className="flex flex-col items-center space-y-3">
             <div className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center">
               <span className="text-white text-sm font-medium">A</span>
             </div>
-            <LogoutButton />
+            <LogoutButton collapsed={collapsed}/>
           </div>
         )}
       </div>
