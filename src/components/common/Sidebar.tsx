@@ -18,6 +18,7 @@ import {
   Airplay,
   GitCommitHorizontal,
   Rows4,
+  Webhook,
 } from "lucide-react";
 
 import { NavLink, useLocation } from "react-router-dom";
@@ -94,6 +95,11 @@ const navigationItemsMap: Record<string, any[]> = {
     {
       title: "Sample Development",
       href: `${APP_ROUTES.sample_development}`,
+      icon: Webhook,
+    },
+    {
+      title: "Reports",
+      href: `${APP_ROUTES.reports}`,
       icon: FileText,
     },
   ],

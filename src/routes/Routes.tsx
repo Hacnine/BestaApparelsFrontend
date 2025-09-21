@@ -18,6 +18,7 @@ import SampleDevelopement from "@/components/SampleDevelopment/SampleDevelopment
 import FabricBooking from "@/components/fabricBooking/FabricBooking";
 import { MerchandiserDashboard } from "@/components/merchandiser/MerchandiserDashboard";
 import SampleTna from "@/components/merchandiser/SampleTna";
+import Reports from "@/components/merchandiser/Reports";
 
 // Create router with nested routes
 export const router = createBrowserRouter(
@@ -57,6 +58,7 @@ export const router = createBrowserRouter(
         <Route path="cad-designs" element={<CadDesignDashboard />} />
         <Route path="fabric-booking" element={<FabricBooking />} />
         <Route path="sample-development" element={<SampleDevelopement />} />
+        <Route path="reports" element={<Reports />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />

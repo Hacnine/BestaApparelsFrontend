@@ -22,6 +22,7 @@ import {
   Users
 } from "lucide-react";
 import { VariancePill } from "@/components/ui/variance-pill";
+import SampleTnaTable from "./SampleTnaTable";
 
 const reports = [
   {
@@ -125,7 +126,7 @@ export default function Reports() {
           </div>
         }
       />
-
+      <SampleTnaTable/>
       {/* Filters */}
       <Card className="shadow-soft">
         <CardContent className="pt-6">

@@ -24,6 +24,7 @@ export const APP_ROUTES = {
   cad_designs: "/merchandiser/cad-designs",
   fabric_booking: "/merchandiser/fabric-booking",
   sample_development: "/merchandiser/sample-development",
+  reports: "/merchandiser/reports",
 
   not_found: "*",
 };
