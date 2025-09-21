@@ -2,7 +2,18 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useCreateCadApprovalMutation } from "@/redux/api/cadApi";
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from "@/components/ui/table";
+import {
+  useCreateCadApprovalMutation,
+  useGetCadApprovalQuery,
+} from "@/redux/api/cadApi";
 import toast from "react-hot-toast";
 
 const CadDesignDashboard = () => {
@@ -15,6 +26,14 @@ const CadDesignDashboard = () => {
   });
   const [createCadApproval, { isLoading }] = useCreateCadApprovalMutation();
 
+  // Pagination state
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
+
+  const { data: cadApprovals, isLoading: isTableLoading } = useGetCadApprovalQuery(
+    { page, pageSize }
+  );
+  console.log("CAD Approvals:", cadApprovals);
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -72,7 +91,7 @@ const CadDesignDashboard = () => {
                   required
                 />
               </div>
-              
+
               <div>
                 <label className="text-sm font-medium">Cad Master Name</label>
                 <Input
@@ -104,12 +123,89 @@ const CadDesignDashboard = () => {
                 />
               </div>
               <div className="col-span-2  flex justify-center">
-                <Button className='' type="submit" disabled={isLoading}>Submit</Button>
+                <Button className="" type="submit" disabled={isLoading}>
+                  Submit
+                </Button>
               </div>
             </form>
           </CardContent>
         </Card>
       )}
+
+      {/* CAD Approval Table */}
+      <Card className="mt-4">
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Style</TableHead>
+                <TableHead>CAD Master Name</TableHead>
+                <TableHead>File Receive Date</TableHead>
+                <TableHead>Complete Date</TableHead>
+                <TableHead>Created At</TableHead>
+                <TableHead>Updated At</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {(cadApprovals?.data || []).map((row: any) => (
+                <TableRow key={row.id}>
+                  <TableCell>{row.style}</TableCell>
+                  <TableCell>{row.CadMasterName}</TableCell>
+                  <TableCell>
+                    {row.fileReceiveDate
+                      ? new Date(row.fileReceiveDate).toLocaleDateString()
+                      : ""}
+                  </TableCell>
+                  <TableCell>
+                    {row.completeDate
+                      ? new Date(row.completeDate).toLocaleDateString()
+                      : ""}
+                  </TableCell>
+                  <TableCell>
+                    {row.createdAt
+                      ? new Date(row.createdAt).toLocaleDateString()
+                      : ""}
+                  </TableCell>
+                  <TableCell>
+                    {row.updatedAt
+                      ? new Date(row.updatedAt).toLocaleDateString()
+                      : ""}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+          {/* Pagination Controls */}
+          <div className="flex justify-between items-center mt-4">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page <= 1}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+            >
+              Previous
+            </Button>
+            <span>
+              Page {cadApprovals?.page || page} of{" "}
+              {cadApprovals?.totalPages || 1}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={cadApprovals?.page >= cadApprovals?.totalPages}
+              onClick={() =>
+                setPage((p) =>
+                  cadApprovals?.totalPages
+                    ? Math.min(cadApprovals.totalPages, p + 1)
+                    : p + 1
+                )
+              }
+            >
+              Next
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
