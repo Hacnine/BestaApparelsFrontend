@@ -14,18 +14,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "@/components/ui/popover";
 import { useGetTNASummaryQuery } from "@/redux/api/tnaApi";
 
 const SampleTnaTable = () => {
   const [isBuyerModalVisible, setBuyerModalVisible] = useState(false);
   const [buyerInfo, setBuyerInfo] = useState("");
-  const [leadTimePopover, setLeadTimePopover] = useState<string | null>(null);
-  const { data: tnaSummary } = useGetTNASummaryQuery();
+  const [leadTimeModal, setLeadTimeModal] = useState<{
+    open: boolean;
+    row: any | null;
+  }>({
+    open: false,
+    row: null,
+  });
+  const { data: tnaSummary } = useGetTNASummaryQuery({});
   console.log("TNA Summary:", tnaSummary);
   const showBuyerModal = (buyer: string) => {
     setBuyerInfo(buyer);
@@ -46,9 +47,9 @@ const SampleTnaTable = () => {
             <TableHead>Buyer</TableHead>
             <TableHead>Sending Date</TableHead>
             <TableHead>Lead Time</TableHead>
-            <TableHead>Fabric</TableHead>
             <TableHead>Sample Type</TableHead>
             <TableHead>CAD</TableHead>
+            <TableHead>Fabric</TableHead>
             <TableHead>Sample</TableHead>
             <TableHead>DHL Tracking</TableHead>
           </TableRow>
@@ -82,33 +83,25 @@ const SampleTnaTable = () => {
                 </TableCell>
                 <TableCell>
                   {leadTime !== null ? (
-                    <Popover
-                      open={leadTimePopover === row.id}
-                      onOpenChange={(open) =>
-                        setLeadTimePopover(open ? row.id : null)
-                      }
-                    >
-                      <PopoverTrigger asChild>
-                        <Button variant="link">{leadTime} days</Button>
-                      </PopoverTrigger>
-                      <PopoverContent>
-                        <div>
-                          Order Date:{" "}
-                          {new Date(row.orderDate).toLocaleDateString()}
-                        </div>
-                        <div>
-                          Sample Sending Date:{" "}
-                          {new Date(row.sampleSendingDate).toLocaleDateString()}
-                        </div>
-                      </PopoverContent>
-                    </Popover>
+                    <>
+                      <Button
+                        variant="link"
+                        onClick={() => setLeadTimeModal({ open: true, row })}
+                      >
+                        {leadTime} days
+                      </Button>
+                    </>
                   ) : (
                     ""
                   )}
                 </TableCell>
-                <TableCell>{/* Fabric empty */}</TableCell>
                 <TableCell>{row.sampleType || ""}</TableCell>
-                <TableCell>{/* CAD empty */}</TableCell>
+                <TableCell>
+                  {row.cadCompleteDate
+                    ? new Date(row.cadCompleteDate).toLocaleDateString()
+                    : ""}
+                </TableCell>
+                <TableCell>{/* Fabric empty */}</TableCell>
                 <TableCell>{/* Sample empty */}</TableCell>
                 <TableCell>{/* DHL Tracking empty */}</TableCell>
               </TableRow>
@@ -116,13 +109,60 @@ const SampleTnaTable = () => {
           })}
         </TableBody>
       </Table>
+      {/* Buyer Modal */}
       <Dialog open={isBuyerModalVisible} onOpenChange={setBuyerModalVisible}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Buyer Info</DialogTitle>
           </DialogHeader>
           <div>{buyerInfo}</div>
-          <Button onClick={handleBuyerModalClose}>OK</Button>
+          <Button onClick={() => setBuyerModalVisible(false)}>OK</Button>
+        </DialogContent>
+      </Dialog>
+      {/* Lead Time Modal */}
+      <Dialog
+        open={leadTimeModal.open}
+        onOpenChange={(open) =>
+          setLeadTimeModal({ open, row: open ? leadTimeModal.row : null })
+        }
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Lead Time Details</DialogTitle>
+          </DialogHeader>
+          {leadTimeModal.row && (
+            <div>
+              <div>
+                Order Date:{" "}
+                {leadTimeModal.row.orderDate
+                  ? new Date(leadTimeModal.row.orderDate).toLocaleDateString()
+                  : ""}
+              </div>
+              <div>
+                Sample Sending Date:{" "}
+                {leadTimeModal.row.sampleSendingDate
+                  ? new Date(leadTimeModal.row.sampleSendingDate).toLocaleDateString()
+                  : ""}
+              </div>
+              <div>
+                Lead Time:{" "}
+                {leadTimeModal.row.sampleSendingDate &&
+                leadTimeModal.row.orderDate
+                  ? Math.round(
+                      (new Date(leadTimeModal.row.sampleSendingDate).getTime() -
+                        new Date(leadTimeModal.row.orderDate).getTime()) /
+                        (1000 * 60 * 60 * 24)
+                    )
+                  : ""}{" "}
+                days
+              </div>
+            </div>
+          )}
+          <Button
+            onClick={() => setLeadTimeModal({ open: false, row: null })}
+          >
+            Close
+          </Button>
         </DialogContent>
       </Dialog>
     </div>
