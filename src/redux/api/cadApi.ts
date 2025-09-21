@@ -16,11 +16,18 @@ export const cadApi = createApi({
       query: (params) => ({ url: "cad-approval", method: "GET", params }),
       providesTags: ["Cad"],
     }),
+    updateCadDesign: builder.mutation({
+      query: ({ id, ...body }) => ({ url: `update-cad-design/${id}`, method: "PATCH", body }),
+      invalidatesTags: ["Cad"],
+    }),
     createSampleDevelopment: builder.mutation({
       query: (body) => ({ url: "sample-development", method: "POST", body }),
       invalidatesTags: ["SampleDevelopment"],
     }),
-
+    getSampleDevelopment: builder.query({
+      query: (params) => ({ url: "get-sample-development", method: "GET", params }),
+      providesTags: ["SampleDevelopment"],
+    }),
     createFabricBooking: builder.mutation({
       query: (body) => ({ url: "fabric-booking", method: "POST", body }),
       invalidatesTags: ["FabricBooking"],
@@ -35,7 +42,9 @@ export const cadApi = createApi({
 export const {
   useCreateCadApprovalMutation,
   useGetCadApprovalQuery,
+  useUpdateCadDesignMutation,
   useCreateSampleDevelopmentMutation,
+  useGetSampleDevelopmentQuery,
   useCreateFabricBookingMutation,
   useGetFabricBookingQuery,
 } = cadApi;

@@ -2,8 +2,16 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useCreateSampleDevelopmentMutation } from '@/redux/api/cadApi';
+import { useCreateSampleDevelopmentMutation, useGetSampleDevelopmentQuery } from '@/redux/api/cadApi';
 import toast from 'react-hot-toast';
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from "@/components/ui/table";
 
 const SampleDevelopement = () => {
   const [openForm, setOpenForm] = useState(false);
@@ -15,6 +23,13 @@ const SampleDevelopement = () => {
     sampleQuantity: "",
   });
   const [createSampleDevelopment, { isLoading }] = useCreateSampleDevelopmentMutation();
+
+  // Pagination state
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
+  const { data, isLoading: isTableLoading } = useGetSampleDevelopmentQuery
+    ? useGetSampleDevelopmentQuery({ page, pageSize })
+    : { data: null, isLoading: false };
 
   const handleChange = (e: { target: { name: any; value: any; }; }) => {
     const { name, value } = e.target;
@@ -121,6 +136,70 @@ const SampleDevelopement = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Sample Development Table */}
+      <Card className="mt-4">
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Style</TableHead>
+                <TableHead>Sampleman Name</TableHead>
+                <TableHead>Sample Receive Date</TableHead>
+                <TableHead>Sample Complete Date</TableHead>
+                <TableHead>Sample Quantity</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {(data?.data || []).map((row: any) => (
+                <TableRow key={row.id}>
+                  <TableCell>{row.style}</TableCell>
+                  <TableCell>{row.samplemanName}</TableCell>
+                  <TableCell>
+                    {row.sampleReceiveDate
+                      ? new Date(row.sampleReceiveDate).toLocaleDateString()
+                      : ""}
+                  </TableCell>
+                  <TableCell>
+                    {row.sampleCompleteDate
+                      ? new Date(row.sampleCompleteDate).toLocaleDateString()
+                      : ""}
+                  </TableCell>
+                  <TableCell>{row.sampleQuantity}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+          {/* Pagination Controls */}
+          <div className="flex justify-between items-center mt-4">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page <= 1}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+            >
+              Previous
+            </Button>
+            <span>
+              Page {data?.page || page} of {data?.totalPages || 1}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={data?.page >= data?.totalPages}
+              onClick={() =>
+                setPage((p) =>
+                  data?.totalPages
+                    ? Math.min(data.totalPages, p + 1)
+                    : p + 1
+                )
+              }
+            >
+              Next
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

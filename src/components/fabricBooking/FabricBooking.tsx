@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import toast from "react-hot-toast";
-import { useGetFabricBookingQuery } from "@/redux/api/cadApi";
+import { useGetFabricBookingQuery, useCreateFabricBookingMutation } from "@/redux/api/cadApi";
 import {
   Table,
   TableHeader,
@@ -18,13 +18,14 @@ const FabricBooking = () => {
   const [page, setPage] = useState(1);
   const pageSize = 10;
   const { data, error, isLoading } = useGetFabricBookingQuery({ page, pageSize });
+  const [createFabricBooking, { isLoading: isCreating }] = useCreateFabricBookingMutation();
   const [openForm, setOpenForm] = useState(false);
   const [form, setForm] = useState({
     fabricStyle: "",
     bookingDate: "",
     receiveDate: "",
   });
-
+console.log(data)
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -33,7 +34,11 @@ const FabricBooking = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      // Submit logic here
+      await createFabricBooking({
+        style: form.fabricStyle,
+        bookingDate: form.bookingDate,
+        receiveDate: form.receiveDate,
+      }).unwrap();
       setForm({
         fabricStyle: "",
         bookingDate: "",
@@ -95,7 +100,7 @@ const FabricBooking = () => {
                 />
               </div>
               <div className="col-span-2 flex justify-center">
-                <Button type="submit">Submit</Button>
+                <Button type="submit" disabled={isCreating}>Submit</Button>
               </div>
             </form>
           </CardContent>
@@ -108,7 +113,7 @@ const FabricBooking = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Fabric Style</TableHead>
+                <TableHead>Style</TableHead>
                 <TableHead>Booking Date</TableHead>
                 <TableHead>Receive Date</TableHead>
                 <TableHead>Created At</TableHead>
@@ -118,7 +123,7 @@ const FabricBooking = () => {
             <TableBody>
               {(data?.data || []).map((row: any) => (
                 <TableRow key={row.id}>
-                  <TableCell>{row.fabricStyle}</TableCell>
+                  <TableCell>{row.style}</TableCell>
                   <TableCell>
                     {row.bookingDate
                       ? new Date(row.bookingDate).toLocaleDateString()

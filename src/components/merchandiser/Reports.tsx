@@ -115,14 +115,14 @@ export default function Reports() {
         description="Business intelligence and analytics reports"
         actions={
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm">
+            {/* <Button variant="outline" size="sm">
               <Filter className="h-4 w-4 mr-2" />
               Filters
             </Button>
             <Button size="sm">
               <Download className="h-4 w-4 mr-2" />
               Export All
-            </Button>
+            </Button> */}
           </div>
         }
       />

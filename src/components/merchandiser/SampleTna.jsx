@@ -30,7 +30,7 @@ export default function SampleTna() {
   const { data, isLoading, error } = useGetTNAsQuery({ page, pageSize });
   const [openTna, setOpenTna] = useState(false);
   const [modal, setModal] = useState({ open: false, type: null, details: null });
-
+console.log("TNA Data:", data, isLoading, error);
   // Modal state for merchandiser and buyer
   const openDetailsModal = (type, details) => setModal({ open: true, type, details });
   const closeModal = () => setModal({ open: false, type: null, details: null });
