@@ -16,6 +16,8 @@ import {
 } from "@/components/ui/dialog";
 import { useGetTNASummaryQuery } from "@/redux/api/tnaApi";
 import { useUpdateCadDesignMutation } from "@/redux/api/cadApi";
+import { useUpdateFabricBookingMutation } from "@/redux/api/fabricBooking";
+import { useUpdateSampleDevelopmentMutation } from "@/redux/api/sampleDevelopementApi";
 import { cn } from "@/lib/utils"; // If you use a classnames util, otherwise use template strings
 
 // Show "+N" for days left, "-N" for overdue, "0" for due today
@@ -42,10 +44,30 @@ const getStatusBadge = (remaining: number | null) => {
   }
 };
 
+// Show blue badge for actual completion: "+N" if on/before, "-N" if exceeded
+const getActualCompleteBadge = (actual: Date, planned: Date) => {
+  const diff = Math.round((actual.getTime() - planned.getTime()) / (1000 * 60 * 60 * 24));
+  if (diff <= 0) {
+    return (
+      <span className="inline-block px-2 py-0.5 rounded bg-blue-100 text-blue-700 font-medium">
+        {Math.abs(diff)} days
+      </span>
+    );
+  } else {
+    return (
+      <span className="inline-block px-2 py-0.5 rounded bg-blue-100 text-blue-700 font-medium">
+        -{diff} days
+      </span>
+    );
+  }
+};
+
 const SampleTnaTable = () => {
   const [isBuyerModalVisible, setBuyerModalVisible] = useState(false);
   const [buyerInfo, setBuyerInfo] = useState("");
   const [updateCadDesign, { isLoading: isUpdating }] = useUpdateCadDesignMutation();
+  const [updateFabricBooking, { isLoading: isFabricUpdating }] = useUpdateFabricBookingMutation();
+  const [updateSampleDevelopment, { isLoading: isSampleUpdating }] = useUpdateSampleDevelopmentMutation();
 
   const [leadTimeModal, setLeadTimeModal] = useState<{
     open: boolean;
@@ -68,6 +90,10 @@ const SampleTnaTable = () => {
   });
   const [finalFileReceivedDate, setFinalFileReceivedDate] = useState("");
   const [finalCompleteDate, setFinalCompleteDate] = useState("");
+  const [actualBookingDate, setActualBookingDate] = useState("");
+  const [actualReceiveDate, setActualReceiveDate] = useState("");
+  const [actualSampleReceiveDate, setActualSampleReceiveDate] = useState("");
+  const [actualSampleCompleteDate, setActualSampleCompleteDate] = useState("");
   const { data: tnaSummary } = useGetTNASummaryQuery({});
   console.log("TNA Summary:", tnaSummary);
   const showBuyerModal = (buyer: string) => {
@@ -94,6 +120,36 @@ const SampleTnaTable = () => {
     );
   };
 
+  // When opening Fabric modal, set editable fields
+  const openFabricModal = (fabric: any) => {
+    setFabricModal({ open: true, fabric });
+    setActualBookingDate(
+      fabric?.actualBookingDate
+        ? new Date(fabric.actualBookingDate).toISOString().slice(0, 10)
+        : ""
+    );
+    setActualReceiveDate(
+      fabric?.actualReceiveDate
+        ? new Date(fabric.actualReceiveDate).toISOString().slice(0, 10)
+        : ""
+    );
+  };
+
+  // When opening Sample modal, set editable fields
+  const openSampleModal = (sample: any) => {
+    setSampleModal({ open: true, sample });
+    setActualSampleReceiveDate(
+      sample?.actualSampleReceiveDate
+        ? new Date(sample.actualSampleReceiveDate).toISOString().slice(0, 10)
+        : ""
+    );
+    setActualSampleCompleteDate(
+      sample?.actualSampleCompleteDate
+        ? new Date(sample.actualSampleCompleteDate).toISOString().slice(0, 10)
+        : ""
+    );
+  };
+
   // Update handler
   const handleUpdateCad = async () => {
     if (!cadModal.cad) return;
@@ -109,8 +165,38 @@ const SampleTnaTable = () => {
     }
   };
 
+  // Update handler for Fabric
+  const handleUpdateFabric = async () => {
+    if (!fabricModal.fabric) return;
+    try {
+      await updateFabricBooking({
+        id: fabricModal.fabric.id,
+        actualBookingDate: actualBookingDate ? new Date(actualBookingDate).toISOString() : null,
+        actualReceiveDate: actualReceiveDate ? new Date(actualReceiveDate).toISOString() : null,
+      }).unwrap();
+      setFabricModal({ open: false, fabric: null });
+    } catch (err) {
+      // handle error (toast, etc.)
+    }
+  };
+
+  // Update handler for Sample
+  const handleUpdateSample = async () => {
+    if (!sampleModal.sample) return;
+    try {
+      await updateSampleDevelopment({
+        id: sampleModal.sample.id,
+        actualSampleReceiveDate: actualSampleReceiveDate ? new Date(actualSampleReceiveDate).toISOString() : null,
+        actualSampleCompleteDate: actualSampleCompleteDate ? new Date(actualSampleCompleteDate).toISOString() : null,
+      }).unwrap();
+      setSampleModal({ open: false, sample: null });
+    } catch (err) {
+      // handle error (toast, etc.)
+    }
+  };
+
   return (
-    <div>
+    <div className=" 2xl:max-w-full xl:max-w-[900px] overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow>
@@ -128,6 +214,34 @@ const SampleTnaTable = () => {
         </TableHeader>
         <TableBody>
           {(tnaSummary || []).map((row: any) => {
+            // CAD
+            let cadRemaining = null;
+            let cadActualBadge = null;
+            if (row.cad && row.cad.completeDate) {
+              if (row.cad.finalCompleteDate) {
+                // Show actual complete badge (Actual Complete Date - Complete Date)
+                const planned = new Date(row.cad.completeDate);
+                const actual = new Date(row.cad.finalCompleteDate);
+                cadActualBadge = getActualCompleteBadge(actual, planned);
+              }
+              if (row.cad.finalFileReceivedDate) {
+                // Subtract Complete Date - Final File Received Date
+                const completeDate = new Date(row.cad.completeDate);
+                const finalFileReceivedDate = new Date(row.cad.finalFileReceivedDate);
+                cadRemaining = Math.round(
+                  (completeDate.getTime() - finalFileReceivedDate.getTime()) /
+                  (1000 * 60 * 60 * 24)
+                );
+              } else {
+                // Fallback to original logic (Complete Date - today)
+                const completeDate = new Date(row.cad.completeDate);
+                const today = new Date();
+                cadRemaining = Math.round(
+                  (completeDate.getTime() - today.setHours(0, 0, 0, 0)) /
+                  (1000 * 60 * 60 * 24)
+                );
+              }
+            }
             // Lead Time
             let leadTimeRemaining = null;
             if (row.sampleSendingDate) {
@@ -138,36 +252,60 @@ const SampleTnaTable = () => {
                   (1000 * 60 * 60 * 24)
               );
             }
-            // CAD
-            let cadRemaining = null;
-            if (row.cad && row.cad.completeDate) {
-              const cadCompleteDate = new Date(row.cad.completeDate);
-              const today = new Date();
-              cadRemaining = Math.round(
-                (cadCompleteDate.getTime() - today.setHours(0, 0, 0, 0)) /
-                  (1000 * 60 * 60 * 24)
-              );
-            }
             // Fabric
             let fabricRemaining = null;
+            let fabricActualBadge = null;
             if (row.fabricBooking && row.fabricBooking.receiveDate) {
-              const receiveDate = new Date(row.fabricBooking.receiveDate);
-              const today = new Date();
-              fabricRemaining = Math.round(
-                (receiveDate.getTime() - today.setHours(0, 0, 0, 0)) /
-                  (1000 * 60 * 60 * 24)
-              );
+              if (row.fabricBooking.actualReceiveDate) {
+                // Show actual complete badge (Actual Receive Date - Planned Receive Date)
+                const planned = new Date(row.fabricBooking.receiveDate);
+                const actual = new Date(row.fabricBooking.actualReceiveDate);
+                fabricActualBadge = getActualCompleteBadge(actual, planned);
+              }
+              if (row.fabricBooking.actualBookingDate) {
+                // Subtract Receive Date - Actual Booking Date
+                const receiveDate = new Date(row.fabricBooking.receiveDate);
+                const actualBookingDate = new Date(row.fabricBooking.actualBookingDate);
+                fabricRemaining = Math.round(
+                  (receiveDate.getTime() - actualBookingDate.getTime()) / (1000 * 60 * 60 * 24)
+                );
+              } else {
+                // Fallback to original logic (Receive Date - today)
+                const receiveDate = new Date(row.fabricBooking.receiveDate);
+                const today = new Date();
+                fabricRemaining = Math.round(
+                  (receiveDate.getTime() - today.setHours(0, 0, 0, 0)) / (1000 * 60 * 60 * 24)
+                );
+              }
             }
+
             // Sample
             let sampleRemaining = null;
+            let sampleActualBadge = null;
             if (row.sampleDevelopment && row.sampleDevelopment.sampleCompleteDate) {
-              const sampleCompleteDate = new Date(row.sampleDevelopment.sampleCompleteDate);
-              const today = new Date();
-              sampleRemaining = Math.round(
-                (sampleCompleteDate.getTime() - today.setHours(0, 0, 0, 0)) /
-                  (1000 * 60 * 60 * 24)
-              );
+              if (row.sampleDevelopment.actualSampleCompleteDate) {
+                // Show actual complete badge (Actual Complete Date - Planned Complete Date)
+                const planned = new Date(row.sampleDevelopment.sampleCompleteDate);
+                const actual = new Date(row.sampleDevelopment.actualSampleCompleteDate);
+                sampleActualBadge = getActualCompleteBadge(actual, planned);
+              }
+              if (row.sampleDevelopment.actualSampleReceiveDate) {
+                // Subtract Complete Date - Actual Receive Date
+                const completeDate = new Date(row.sampleDevelopment.sampleCompleteDate);
+                const actualReceiveDate = new Date(row.sampleDevelopment.actualSampleReceiveDate);
+                sampleRemaining = Math.round(
+                  (completeDate.getTime() - actualReceiveDate.getTime()) / (1000 * 60 * 60 * 24)
+                );
+              } else {
+                // Fallback to original logic (Complete Date - today)
+                const completeDate = new Date(row.sampleDevelopment.sampleCompleteDate);
+                const today = new Date();
+                sampleRemaining = Math.round(
+                  (completeDate.getTime() - today.setHours(0, 0, 0, 0)) / (1000 * 60 * 60 * 24)
+                );
+              }
             }
+
             return (
               <TableRow key={row.id}>
                 <TableCell>{row.merchandiser || ""}</TableCell>
@@ -204,7 +342,7 @@ const SampleTnaTable = () => {
                       variant="link"
                       onClick={() => openCadModal(row.cad)}
                     >
-                      {getStatusBadge(cadRemaining)}
+                      {cadActualBadge ? cadActualBadge : getStatusBadge(cadRemaining)}
                     </Button>
                   ) : (
                     ""
@@ -214,9 +352,9 @@ const SampleTnaTable = () => {
                   {row.fabricBooking ? (
                     <Button
                       variant="link"
-                      onClick={() => setFabricModal({ open: true, fabric: row.fabricBooking })}
+                      onClick={() => openFabricModal(row.fabricBooking)}
                     >
-                      {getStatusBadge(fabricRemaining)}
+                      {fabricActualBadge ? fabricActualBadge : getStatusBadge(fabricRemaining)}
                     </Button>
                   ) : (
                     ""
@@ -226,9 +364,9 @@ const SampleTnaTable = () => {
                   {row.sampleDevelopment ? (
                     <Button
                       variant="link"
-                      onClick={() => setSampleModal({ open: true, sample: row.sampleDevelopment })}
+                      onClick={() => openSampleModal(row.sampleDevelopment)}
                     >
-                      {getStatusBadge(sampleRemaining)}
+                      {sampleActualBadge ? sampleActualBadge : getStatusBadge(sampleRemaining)}
                     </Button>
                   ) : (
                     ""
@@ -398,9 +536,19 @@ const SampleTnaTable = () => {
             <DialogTitle>Fabric Booking Details</DialogTitle>
           </DialogHeader>
           {fabricModal.fabric && (
-            <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-4">
               <div>
                 <strong>Style:</strong> {fabricModal.fabric.style}
+              </div>
+              <div>
+                <strong>Days Between:</strong>{" "}
+                {fabricModal.fabric.bookingDate && fabricModal.fabric.receiveDate
+                  ? Math.round(
+                      (new Date(fabricModal.fabric.receiveDate).getTime() -
+                        new Date(fabricModal.fabric.bookingDate).getTime()) /
+                        (1000 * 60 * 60 * 24)
+                    )
+                  : ""}
               </div>
               <div>
                 <strong>Booking Date:</strong>{" "}
@@ -414,38 +562,45 @@ const SampleTnaTable = () => {
                   ? new Date(fabricModal.fabric.receiveDate).toLocaleDateString()
                   : ""}
               </div>
+              
               <div>
-                <strong>Days Between:</strong>{" "}
-                {fabricModal.fabric.bookingDate && fabricModal.fabric.receiveDate
-                  ? Math.round(
-                      (new Date(fabricModal.fabric.receiveDate).getTime() -
-                        new Date(fabricModal.fabric.bookingDate).getTime()) /
-                        (1000 * 60 * 60 * 24)
-                    )
-                  : ""}
+                <label className="block text-sm font-medium">Actual Booking Date</label>
+                <input
+                  type="date"
+                  className="border rounded px-2 py-1 w-full"
+                  value={actualBookingDate}
+                  onChange={e => setActualBookingDate(e.target.value)}
+                />
+                {fabricModal.fabric.actualBookingDate && (
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Current: {new Date(fabricModal.fabric.actualBookingDate).toLocaleDateString()}
+                  </div>
+                )}
               </div>
               <div>
-                <strong>
-                  {fabricModal.fabric.receiveDate
-                    ? (() => {
-                        const today = new Date();
-                        const receiveDate = new Date(fabricModal.fabric.receiveDate);
-                        const remaining = Math.round(
-                          (receiveDate.getTime() - today.setHours(0,0,0,0)) /
-                          (1000 * 60 * 60 * 24)
-                        );
-                        return remaining >= 0
-                          ? `${remaining} days remaining`
-                          : `${Math.abs(remaining)} days overdue`;
-                      })()
-                    : ""}
-                </strong>
+                <label className="block text-sm font-medium">Actual Receive Date</label>
+                <input
+                  type="date"
+                  className="border rounded px-2 py-1 w-full"
+                  value={actualReceiveDate}
+                  onChange={e => setActualReceiveDate(e.target.value)}
+                />
+                {fabricModal.fabric.actualReceiveDate && (
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Current: {new Date(fabricModal.fabric.actualReceiveDate).toLocaleDateString()}
+                  </div>
+                )}
+              </div>
+              <div className="col-span-2 flex justify-end">
+                <Button
+                  onClick={handleUpdateFabric}
+                  disabled={isFabricUpdating}
+                >
+                  {isFabricUpdating ? "Updating..." : "Update"}
+                </Button>
               </div>
             </div>
           )}
-          <Button onClick={() => setFabricModal({ open: false, fabric: null })}>
-            Close
-          </Button>
         </DialogContent>
       </Dialog>
       {/* Sample Development Modal */}
@@ -460,7 +615,7 @@ const SampleTnaTable = () => {
             <DialogTitle>Sample Development Details</DialogTitle>
           </DialogHeader>
           {sampleModal.sample && (
-            <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-4">
               <div>
                 <strong>Style:</strong> {sampleModal.sample.style}
               </div>
@@ -493,27 +648,43 @@ const SampleTnaTable = () => {
                   : ""}
               </div>
               <div>
-                <strong>
-                  {sampleModal.sample.sampleCompleteDate
-                    ? (() => {
-                        const today = new Date();
-                        const completeDate = new Date(sampleModal.sample.sampleCompleteDate);
-                        const remaining = Math.round(
-                          (completeDate.getTime() - today.setHours(0,0,0,0)) /
-                          (1000 * 60 * 60 * 24)
-                        );
-                        return remaining >= 0
-                          ? `${remaining} days remaining`
-                          : `${Math.abs(remaining)} days overdue`;
-                    })()
-                    : ""}
-                </strong>
+                <label className="block text-sm font-medium">Actual Sample Receive Date</label>
+                <input
+                  type="date"
+                  className="border rounded px-2 py-1 w-full"
+                  value={actualSampleReceiveDate}
+                  onChange={e => setActualSampleReceiveDate(e.target.value)}
+                />
+                {sampleModal.sample.actualSampleReceiveDate && (
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Current: {new Date(sampleModal.sample.actualSampleReceiveDate).toLocaleDateString()}
+                  </div>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium">Actual Sample Complete Date</label>
+                <input
+                  type="date"
+                  className="border rounded px-2 py-1 w-full"
+                  value={actualSampleCompleteDate}
+                  onChange={e => setActualSampleCompleteDate(e.target.value)}
+                />
+                {sampleModal.sample.actualSampleCompleteDate && (
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Current: {new Date(sampleModal.sample.actualSampleCompleteDate).toLocaleDateString()}
+                  </div>
+                )}
+              </div>
+              <div className="col-span-2 flex justify-end">
+                <Button
+                  onClick={handleUpdateSample}
+                  disabled={isSampleUpdating}
+                >
+                  {isSampleUpdating ? "Updating..." : "Update"}
+                </Button>
               </div>
             </div>
           )}
-          <Button onClick={() => setSampleModal({ open: false, sample: null })}>
-            Close
-          </Button>
         </DialogContent>
       </Dialog>
     </div>
