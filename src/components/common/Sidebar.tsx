@@ -259,10 +259,10 @@ export function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps) {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-sidebar-foreground truncate">
-                  Admin User
+                  {user?.name}
                 </p>
                 <p className="text-xs text-sidebar-foreground/70 truncate">
-                  admin@company.com
+                  {user?.email}
                 </p>
               </div>
             </div>
