@@ -11,6 +11,7 @@ import { merchandiserApi } from "./api/merchandiserApi";
 import { cadApi } from "./api/cadApi";
 import { sampleDevelopmentApi } from "./api/sampleDevelopementApi";
 import { fabricBookingApi } from "./api/fabricBooking";
+import { dhlTrackingApi } from "./api/dHLTrackingApi";
 
 // No-op storage for server-side rendering
 const createNoopStorage = () => ({
@@ -46,6 +47,7 @@ const reducers = {
   [cadApi.reducerPath]: cadApi.reducer,
   [sampleDevelopmentApi.reducerPath]: sampleDevelopmentApi.reducer,
   [fabricBookingApi.reducerPath]: fabricBookingApi.reducer,
+  [dhlTrackingApi.reducerPath]: dhlTrackingApi.reducer,
 };
 
 // Configure store
@@ -66,6 +68,7 @@ export const store = configureStore({
       cadApi.middleware,
       sampleDevelopmentApi.middleware,
       fabricBookingApi.middleware,
+      dhlTrackingApi.middleware,
     ] as Middleware[]),
 });
 

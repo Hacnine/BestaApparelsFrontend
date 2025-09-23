@@ -29,7 +29,11 @@ export const tnaApi = createApi({
       providesTags: ["TNA"],
     }),
     getTNASummary: builder.query({
-      query: () => "tnas/get-tna-summary",
+      query: (params) => ({ url: "tnas/get-tna-summary", params }),
+      providesTags: ["Dashboard"],
+    }),
+    getTNASummaryCard: builder.query({
+      query: () => "tnas/get-tna-summary-card",
       providesTags: ["Dashboard"],
     }),
    
@@ -43,4 +47,5 @@ export const {
   useDeleteTNAMutation,
   useGetDepartmentProgressQuery,
   useGetTNASummaryQuery,
+  useGetTNASummaryCardQuery,
 } = tnaApi;
