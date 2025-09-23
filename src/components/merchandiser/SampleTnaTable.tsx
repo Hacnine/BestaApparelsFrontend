@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Table,
   TableHeader,
@@ -58,13 +58,31 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
   const [actualSampleReceiveDate, setActualSampleReceiveDate] = useState("");
   const [actualSampleCompleteDate, setActualSampleCompleteDate] = useState("");
   const { data, isLoading } = useGetTNASummaryQuery({});
-  const tnaSummary = data?.data || [];
-  const totalPages = data?.totalPages || 1;
   const [page, setPage] = useState(1);
   const [pageSize] = useState(10);
-  const [dhlTrackingInputs, setDhlTrackingInputs] = useState<{ [style: string]: { trackingNumber: string; date: string } }>({});
 
-  console.log("TNA Summary:", tnaSummary);
+  // Search state
+  const [search, setSearch] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
+  // Query with search and date range
+  const { data: queryData, isLoading: queryLoading } = useGetTNASummaryQuery({
+    page,
+    pageSize,
+    search: search || undefined,
+    startDate: startDate || undefined,
+    endDate: endDate || undefined,
+  });
+
+  const tnaSummary = queryData?.data || [];
+  const totalPages = queryData?.totalPages || 1;
+
+  // Reset to first page on search/date change
+  useEffect(() => {
+    setPage(1);
+  }, [search, startDate, endDate]);
+
   const showBuyerModal = (buyer: string) => {
     setBuyerInfo(buyer);
     setBuyerModalVisible(true);
@@ -164,6 +182,9 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
     }
   };
 
+  // Add DHL Tracking input state
+  const [dhlTrackingInputs, setDhlTrackingInputs] = useState<{ [style: string]: { trackingNumber: string; date: string } }>({});
+
   // Handler for DHL Tracking input changes
   const handleDHLInputChange = (field: "trackingNumber" | "date", value: string) => {
     if (!dhlModal.style) return;
@@ -196,12 +217,54 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
   };
 
   return (
-    <div className=" 2xl:max-w-full xl:max-w-[900px] overflow-x-auto">
+    <div className="2xl:max-w-full xl:max-w-[900px] overflow-x-auto">
+      {/* Search Controls */}
+      <div className="flex flex-wrap gap-2 mb-4 items-end">
+        <div>
+          <label className="block text-xs font-medium mb-1">Search by Name</label>
+          <input
+            type="text"
+            className="border rounded px-2 py-1"
+            placeholder="Name, Date"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-medium mb-1">Start Date</label>
+          <input
+            type="date"
+            className="border rounded px-2 py-1"
+            value={startDate}
+            onChange={e => setStartDate(e.target.value)}
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-medium mb-1">End Date</label>
+          <input
+            type="date"
+            className="border rounded px-2 py-1"
+            value={endDate}
+            onChange={e => setEndDate(e.target.value)}
+          />
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            setSearch("");
+            setStartDate("");
+            setEndDate("");
+          }}
+        >
+          Clear
+        </Button>
+      </div>
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead>Merchandiser</TableHead>
-            <TableHead>Style</TableHead>
+            <TableHead className="text-nowrap">Style</TableHead>
             <TableHead>Buyer</TableHead>
             <TableHead className="text-nowrap">Sending Date</TableHead>
             <TableHead>Lead Time</TableHead>
@@ -309,7 +372,7 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
             return (
               <TableRow key={row.id}>
                 <TableCell>{row.merchandiser || ""}</TableCell>
-                <TableCell>{row.style || ""}</TableCell>
+                <TableCell className="text-nowrap">{row.style || ""}</TableCell>
                 <TableCell>
                   <Button
                     variant="link"
