@@ -19,6 +19,7 @@ import {
   GitCommitHorizontal,
   Rows4,
   Webhook,
+  SquareDashedKanban,
 } from "lucide-react";
 
 import { NavLink, useLocation } from "react-router-dom";
@@ -103,6 +104,13 @@ const navigationItemsMap: Record<string, any[]> = {
       icon: FileText,
     },
   ],
+   MANAGEMENT: [
+    {
+      title: "Dashboard",
+      href: `${APP_ROUTES.management_dashboard}`,
+      icon: LayoutDashboard,
+    },
+  ]
 };
 
 const settingsItemsMap: Record<string, any[]> = {

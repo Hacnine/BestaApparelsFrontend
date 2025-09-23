@@ -19,6 +19,7 @@ import FabricBooking from "@/components/fabricBooking/FabricBooking";
 import { MerchandiserDashboard } from "@/components/merchandiser/MerchandiserDashboard";
 import SampleTna from "@/components/merchandiser/SampleTna";
 import Reports from "@/components/merchandiser/Reports";
+import ManagementDashboard from "@/components/merchandiser/ManagementDashboard";
 
 // Create router with nested routes
 export const router = createBrowserRouter(
@@ -43,6 +44,7 @@ export const router = createBrowserRouter(
         element={<AdminLayout sidebarFor={"merchandiser"} />}
       >
         <Route path="dashboard" element={<MerchandiserDashboard />} />
+        <Route path="management-dashboard" element={<ManagementDashboard />} />
         <Route path="employee" element={<EmployeeManagement />} />
         <Route path="user" element={<UserManagement />} />
 
@@ -51,14 +53,18 @@ export const router = createBrowserRouter(
         <Route path="*" element={<NotFound />} />
       </Route>
 
-      <Route
-        path="merchandiser"
-        element={<AdminLayout sidebarFor={"cad"} />}
-      >
+      <Route path="merchandiser" element={<AdminLayout sidebarFor={"cad"} />}>
         <Route path="cad-designs" element={<CadDesignDashboard />} />
         <Route path="fabric-booking" element={<FabricBooking />} />
         <Route path="sample-development" element={<SampleDevelopement />} />
         <Route path="reports" element={<Reports />} />
+      </Route>
+
+      <Route
+        path="management"
+        element={<AdminLayout sidebarFor={"management"} />}
+      >
+        <Route path="dashboard" element={<ManagementDashboard />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />

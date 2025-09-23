@@ -15,7 +15,6 @@ export const APP_ROUTES = {
   admin_security: "/settings/security",
 
   merchandiser_dashboard: "/merchandiser/dashboard",
-  management_dashboard: "/management/dashboard",
   cad_dashboard: "/cad/dashboard",
   sample_fabric_dashboard: "/sample-fabric/dashboard",
   sample_room_dashboard: "/sample-room/dashboard",
@@ -25,6 +24,8 @@ export const APP_ROUTES = {
   fabric_booking: "/merchandiser/fabric-booking",
   sample_development: "/merchandiser/sample-development",
   reports: "/merchandiser/reports",
+
+  management_dashboard: "/management/dashboard",
 
   not_found: "*",
 };
