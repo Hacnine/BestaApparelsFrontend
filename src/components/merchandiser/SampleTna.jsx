@@ -25,9 +25,11 @@ export default function SampleTna() {
   // Pagination state
   const [page, setPage] = useState(1);
   const pageSize = 10;
+  // Search state
+  const [search, setSearch] = useState("");
 
-  // Fetch with pagination params
-  const { data, isLoading, error } = useGetTNAsQuery({ page, pageSize });
+  // Fetch with pagination and search params
+  const { data, isLoading, error } = useGetTNAsQuery({ page, pageSize, search });
   const [openTna, setOpenTna] = useState(false);
   const [modal, setModal] = useState({ open: false, type: null, details: null });
 console.log("TNA Data:", data, isLoading, error);
@@ -48,6 +50,30 @@ console.log("TNA Data:", data, isLoading, error);
         }
       />
 
+      {/* Search Input - match table width */}
+      <Card className="p-4 mb-4">
+        <div className="flex items-center gap-2 w-full">
+          <input
+            type="text"
+            placeholder="Search by style, item, buyer, etc."
+            value={search}
+            onChange={e => {
+              setSearch(e.target.value);
+              setPage(1); // Reset to first page on new search
+            }}
+            className="border rounded px-2 py-1 w-full max-w-[400px]"
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setSearch("")}
+            disabled={!search}
+          >
+            Clear
+          </Button>
+        </div>
+      </Card>
+
       {openTna && (
         <Card className="p-4 ">
           <TnaForm onSuccess={() => setOpenTna(false)} />
@@ -59,12 +85,12 @@ console.log("TNA Data:", data, isLoading, error);
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Style</TableHead>
-              <TableHead>Item Name</TableHead>
-              <TableHead>Sample Sending Date</TableHead>
-              <TableHead>Order Date</TableHead>
+              <TableHead  className="text-nowrap">Style</TableHead>
+              <TableHead  className="text-nowrap">Item Name</TableHead>
+              <TableHead  className="text-nowrap">Sample Sending Date</TableHead>
+              <TableHead  className="text-nowrap">Order Date</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Sample Type</TableHead>
+              <TableHead  className="text-nowrap">Sample Type</TableHead>
               <TableHead>Buyer</TableHead>
               <TableHead>Merchandiser</TableHead>
             </TableRow>
@@ -72,14 +98,14 @@ console.log("TNA Data:", data, isLoading, error);
           <TableBody>
             {(data?.data || []).map((row) => (
               <TableRow key={row.id}>
-                <TableCell>{row.style}</TableCell>
-                <TableCell>{row.itemName}</TableCell>
-                <TableCell>
+                <TableCell className="text-nowrap">{row.style}</TableCell>
+                <TableCell className="text-nowrap">{row.itemName}</TableCell>
+                <TableCell className="text-nowrap">
                   {row.sampleSendingDate
                     ? new Date(row.sampleSendingDate).toLocaleDateString()
                     : ""}
                 </TableCell>
-                <TableCell>
+                <TableCell className="text-nowrap">
                   {row.orderDate
                     ? new Date(row.orderDate).toLocaleDateString()
                     : ""}
