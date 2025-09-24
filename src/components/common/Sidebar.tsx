@@ -173,8 +173,8 @@ export function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps) {
               <img className="size-10" src="/images/logo.webp" alt="" />
             </div>
             <div>
-              <h2 className="font-semibold text-sm">Sample TNA</h2>
-              <p className="text-xs text-sidebar-foreground/70">Admin Panel</p>
+              <h2 className="font-semibold text-sm text-nowrap">Sample TNA</h2>
+              {/* <p className="text-xs text-sidebar-foreground/70">Admin Panel</p> */}
             </div>
           </div>
         )}
