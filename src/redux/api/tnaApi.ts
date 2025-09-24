@@ -1,42 +1,42 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import ulr from "@/config/urls";
 
+const TNA_BASE = "tnas";
+const tnaUrl = (path: string = "") => path ? `${TNA_BASE}/${path}` : TNA_BASE;
+
 export const tnaApi = createApi({
   reducerPath: "tnaApi",
-  baseQuery: fetchBaseQuery({ baseUrl: ulr.BASE_URL }),
+  baseQuery: fetchBaseQuery({ baseUrl: ulr.BASE_URL, credentials: "include" }),
   tagTypes: [ "TNA", "AuditLog", "Dashboard"],
   endpoints: (builder) => ({
-
-    // TNAs
     getTNAs: builder.query({
-      query: (params) => ({ url: "tnas", params }),
+      query: (params) => ({ url: tnaUrl(), params }),
       providesTags: ["TNA"],
     }),
     createTNA: builder.mutation({
-      query: (body) => ({ url: "tnas", method: "POST", body }),
+      query: (body) => ({ url: tnaUrl(), method: "POST", body }),
       invalidatesTags: ["TNA"],
     }),
     updateTNA: builder.mutation({
-      query: ({ id, ...body }) => ({ url: `tnas/${id}`, method: "PUT", body }),
+      query: ({ id, ...body }) => ({ url: tnaUrl(id), method: "PUT", body }),
       invalidatesTags: ["TNA"],
     }),
     deleteTNA: builder.mutation({
-      query: (id) => ({ url: `tnas/${id}`, method: "DELETE" }),
+      query: (id) => ({ url: tnaUrl(id), method: "DELETE" }),
       invalidatesTags: ["TNA"],
     }),
     getDepartmentProgress: builder.query({
-      query: () => "tnas/department-progress",
+      query: () => tnaUrl("department-progress"),
       providesTags: ["TNA"],
     }),
     getTNASummary: builder.query({
-      query: (params) => ({ url: "tnas/get-tna-summary", params }),
+      query: (params) => ({ url: tnaUrl("get-tna-summary"), params }),
       providesTags: ["Dashboard"],
     }),
     getTNASummaryCard: builder.query({
-      query: () => "tnas/get-tna-summary-card",
+      query: () => tnaUrl("get-tna-summary-card"),
       providesTags: ["Dashboard"],
     }),
-   
   }),
 });
 
