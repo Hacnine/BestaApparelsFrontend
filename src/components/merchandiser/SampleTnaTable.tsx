@@ -16,6 +16,7 @@ import { getStatusBadge, getActualCompleteBadge } from "./SampleTnaBadges";
 import { BuyerModal, CadModal, FabricModal, LeadTimeModal, SampleModal } from "./SampleTnaModals";
 import { useCreateDHLTrackingMutation } from "@/redux/api/dHLTrackingApi";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Download, Filter } from "lucide-react";
 
 
 type SampleTnaTableProps = {
@@ -217,10 +218,11 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
   };
 
   return (
-    <div className="2xl:max-w-full xl:max-w-[900px] overflow-x-auto">
+    <div className="2xl:max-w-full xl:max-w-[1000px] overflow-x-auto">
       {/* Search Controls */}
-      <div className="flex flex-wrap gap-2 mb-4 items-end">
-        <div>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-wrap gap-2 mb-4 items-end">
+          <div>
           <label className="block text-xs font-medium mb-1">Search by Name</label>
           <input
             type="text"
@@ -259,6 +261,15 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
         >
           Clear
         </Button>
+        </div>
+
+         <div className="flex items-center justify-end gap-2">
+            
+            <Button size="sm">
+              <Download className="h-4 w-4 " />
+              Export All
+            </Button>
+          </div>
       </div>
       <Table>
         <TableHeader>
