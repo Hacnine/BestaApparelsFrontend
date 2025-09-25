@@ -3,7 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import toast from "react-hot-toast";
-import { useGetFabricBookingQuery, useCreateFabricBookingMutation } from "@/redux/api/cadApi";
+import {
+  useGetFabricBookingsQuery,
+  useCreateFabricBookingMutation,
+  useUpdateFabricBookingMutation,
+} from "@/redux/api/fabricBooking";
 import {
   Table,
   TableHeader,
@@ -24,21 +28,25 @@ const FabricBooking = () => {
   const [endDate, setEndDate] = useState("");
 
   // Query with search and date range
-  const { data, error, isLoading } = useGetFabricBookingQuery({
+  const { data, error, isLoading } = useGetFabricBookingsQuery({
     page,
     pageSize,
     search: search || undefined,
     startDate: startDate || undefined,
     endDate: endDate || undefined,
   });
-  const [createFabricBooking, { isLoading: isCreating }] = useCreateFabricBookingMutation();
+  const [createFabricBooking, { isLoading: isCreating }] =
+    useCreateFabricBookingMutation();
+  const [updateFabricBooking, { isLoading: isUpdating }] =
+    useUpdateFabricBookingMutation();
   const [openForm, setOpenForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({
     fabricStyle: "",
     bookingDate: "",
     receiveDate: "",
   });
-console.log(data)
+  console.log(data);
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -47,21 +55,46 @@ console.log(data)
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      await createFabricBooking({
-        style: form.fabricStyle,
-        bookingDate: form.bookingDate,
-        receiveDate: form.receiveDate,
-      }).unwrap();
+      if (editingId) {
+        await updateFabricBooking({
+          id: editingId,
+          style: form.fabricStyle,
+          bookingDate: form.bookingDate,
+          receiveDate: form.receiveDate,
+        }).unwrap();
+        toast.success("Fabric booking updated successfully");
+      } else {
+        await createFabricBooking({
+          style: form.fabricStyle,
+          bookingDate: form.bookingDate,
+          receiveDate: form.receiveDate,
+        }).unwrap();
+        toast.success("Fabric booking created successfully");
+      }
       setForm({
         fabricStyle: "",
         bookingDate: "",
         receiveDate: "",
       });
       setOpenForm(false);
-      toast.success("Fabric booking created successfully");
+      setEditingId(null);
     } catch (error) {
-      toast.error("Failed to create fabric booking");
+      toast.error(
+        editingId
+          ? "Failed to update fabric booking"
+          : "Failed to create fabric booking"
+      );
     }
+  };
+
+  const handleEdit = (row: any) => {
+    setForm({
+      fabricStyle: row.style || "",
+      bookingDate: row.bookingDate ? row.bookingDate.slice(0, 10) : "",
+      receiveDate: row.receiveDate ? row.receiveDate.slice(0, 10) : "",
+    });
+    setEditingId(row.id);
+    setOpenForm(true);
   };
 
   // Reset to first page on filter change
@@ -71,63 +104,62 @@ console.log(data)
 
   return (
     <div className="p-4 space-y-6 ">
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Fabric Booking</h1>
+      <div>
+        <h1 className="text-3xl font-bold text-foreground">Fabric Booking</h1>
         <p className="text-muted-foreground text-sm mt-1">
           Manage fabric bookings and track their status efficiently.
-        </p> 
-        </div>
-        <div className="">
-          <Button onClick={() => setOpenForm((prev) => !prev)}>
-        {openForm ? "Close Form" : "Add Fabric Booking"}
-      </Button>
-      {openForm && (
-        <Card className="mt-4">
-          <CardContent className="py-6">
-            <form
-              className="grid md:grid-cols-2 grid-cols-1 gap-4"
-              onSubmit={handleSubmit}
-            >
-              <div className=" col-span-2">
-                <label className="text-sm font-medium">Fabric Style</label>
-                <Input
-                  name="fabricStyle"
-                  value={form.fabricStyle}
-                  onChange={handleChange}
-                  placeholder="Enter fabric style"
-                  required
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Booking Date</label>
-                <Input
-                  name="bookingDate"
-                  type="date"
-                  value={form.bookingDate}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Receive Date</label>
-                <Input
-                  name="receiveDate"
-                  type="date"
-                  value={form.receiveDate}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div className="col-span-2 flex justify-center">
-                <Button type="submit" disabled={isCreating}>Submit</Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-      )}
-        </div>
-       
+        </p>
+      </div>
+      <div className="">
+        <Button onClick={() => setOpenForm((prev) => !prev)}>
+          {openForm ? "Close Form" : "Add Fabric Booking"}
+        </Button>
+        {openForm && (
+          <Card className="mt-4">
+            <CardContent className="py-6">
+              <form
+                className="grid md:grid-cols-2 grid-cols-1 gap-4"
+                onSubmit={handleSubmit}
+              >
+                <div className=" col-span-2">
+                  <label className="text-sm font-medium">Fabric Style</label>
+                  <Input
+                    name="fabricStyle"
+                    value={form.fabricStyle}
+                    onChange={handleChange}
+                    placeholder="Enter fabric style"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Booking Date</label>
+                  <Input
+                    name="bookingDate"
+                    type="date"
+                    value={form.bookingDate}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Receive Date</label>
+                  <Input
+                    name="receiveDate"
+                    type="date"
+                    value={form.receiveDate}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div className="col-span-2 flex justify-center">
+                  <Button type="submit" disabled={isCreating || isUpdating}>
+                    {editingId ? "Update" : "Submit"}
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        )}
       </div>
       {/* Search Controls */}
       <div className="flex flex-wrap gap-2 mb-4 items-end w-[85%]">
@@ -138,7 +170,7 @@ console.log(data)
             className="border rounded px-2 py-1 md:w-[300px]"
             placeholder="Search By Style"
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={(e) => setSearch(e.target.value)}
           />
         </div>
         <div>
@@ -147,7 +179,7 @@ console.log(data)
             type="date"
             className="border rounded px-2 py-1"
             value={startDate}
-            onChange={e => setStartDate(e.target.value)}
+            onChange={(e) => setStartDate(e.target.value)}
           />
         </div>
         <div>
@@ -156,7 +188,7 @@ console.log(data)
             type="date"
             className="border rounded px-2 py-1"
             value={endDate}
-            onChange={e => setEndDate(e.target.value)}
+            onChange={(e) => setEndDate(e.target.value)}
           />
         </div>
         <Button
@@ -171,7 +203,6 @@ console.log(data)
           Clear
         </Button>
       </div>
-      
 
       {/* Fabric Booking Table */}
       <Card className="mt-4">
@@ -184,6 +215,7 @@ console.log(data)
                 <TableHead>Receive Date</TableHead>
                 <TableHead>Created At</TableHead>
                 <TableHead>Updated At</TableHead>
+                <TableHead>Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -210,6 +242,15 @@ console.log(data)
                       ? new Date(row.updatedAt).toLocaleDateString()
                       : ""}
                   </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEdit(row)}
+                    >
+                      Edit
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -233,9 +274,7 @@ console.log(data)
               disabled={data?.page >= data?.totalPages}
               onClick={() =>
                 setPage((p) =>
-                  data?.totalPages
-                    ? Math.min(data.totalPages, p + 1)
-                    : p + 1
+                  data?.totalPages ? Math.min(data.totalPages, p + 1) : p + 1
                 )
               }
             >
