@@ -2,8 +2,19 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import toast from "react-hot-toast";
-import { useCreateTnaMutation, useGetBuyersQuery, useGetMerchandisersQuery } from "@/redux/api/merchandiserApi";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  useGetBuyersQuery,
+  useGetMerchandisersQuery,
+} from "@/redux/api/merchandiserApi";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
+import { useCreateTNAMutation } from "@/redux/api/tnaApi";
 
 interface TnaFormProps {
   onSuccess: () => void;
@@ -14,12 +25,18 @@ interface TnaFormState {
   itemName: string;
   sampleSendingDate: string;
   orderDate: string;
-  userId: string;
+  userId: string; // <-- keep this
   status: string;
   sampleType: string;
 }
-interface Buyer { id: string; name: string; }
-interface Merchandiser { id: string; userName: string; }
+interface Buyer {
+  id: string;
+  name: string;
+}
+interface Merchandiser {
+  id: string;
+  userName: string;
+}
 
 export default function TnaForm({ onSuccess }: TnaFormProps) {
   const [form, setForm] = useState<TnaFormState>({
@@ -28,13 +45,15 @@ export default function TnaForm({ onSuccess }: TnaFormProps) {
     itemName: "",
     sampleSendingDate: "",
     orderDate: "",
-    userId: "",
+    userId: "", // <-- keep this
     status: "ACTIVE",
     sampleType: "",
   });
-  const [createTna, { isLoading }] = useCreateTnaMutation();
+  const [createTna, { isLoading }] = useCreateTNAMutation();
   const { data: buyersResponse } = useGetBuyersQuery({});
   const { data: merchandisers } = useGetMerchandisersQuery({});
+  const [imageFile, setImageFile] = useState<File | null>(null); // store file, not url
+  const [uploading, setUploading] = useState(false);
 
   const buyers = buyersResponse?.data ?? [];
 
@@ -47,11 +66,43 @@ export default function TnaForm({ onSuccess }: TnaFormProps) {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Change handleImageChange to only store the file, not upload
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) setImageFile(file);
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!imageFile) {
+      toast.error("Please select an item image before submitting.");
+      return;
+    }
+    setUploading(true);
+    let imageUrl = "";
     try {
+      // Upload image first
+      const formData = new FormData();
+      formData.append("image", imageFile);
+      // Use backend URL for image upload
+      const res = await fetch("http://192.168.0.98:3001/tnas/upload-image", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (data.imageUrl) {
+        imageUrl = data.imageUrl;
+      } else {
+        toast.error("Image upload failed");
+        setUploading(false);
+        return;
+      }
+
+      // Now create TNA with imageUrl
       await createTna({
         ...form,
+        itemImage: imageUrl,
         sampleSendingDate: new Date(form.sampleSendingDate).toISOString(),
         orderDate: new Date(form.orderDate).toISOString(),
       }).unwrap();
@@ -66,9 +117,12 @@ export default function TnaForm({ onSuccess }: TnaFormProps) {
         status: "ACTIVE",
         sampleType: "",
       });
+      setImageFile(null);
       onSuccess();
     } catch (error: any) {
       toast.error(error?.data?.error || "Failed to create TNA");
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -76,49 +130,172 @@ export default function TnaForm({ onSuccess }: TnaFormProps) {
     <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
       <div>
         <label className="text-sm font-medium">Buyer</label>
-        <Select value={form.buyerId} onValueChange={(v) => handleSelectChange("buyerId", v)} required>
+        <Select
+          value={form.buyerId}
+          onValueChange={(v) => handleSelectChange("buyerId", v)}
+          required
+        >
           <SelectTrigger>
             <SelectValue placeholder="Select buyer" />
           </SelectTrigger>
           <SelectContent>
             {buyers.map((buyer: Buyer) => (
-              <SelectItem key={buyer.id} value={buyer.id}>{buyer.name}</SelectItem>
+              <SelectItem key={buyer.id} value={buyer.id}>
+                {buyer.name}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
       <div>
         <label className="text-sm font-medium">Style</label>
-        <Input name="style" value={form.style} onChange={handleChange} placeholder="Enter style" required />
+        <Input
+          name="style"
+          value={form.style}
+          onChange={handleChange}
+          placeholder="Enter style"
+          required
+        />
       </div>
       <div>
         <label className="text-sm font-medium">Item Name</label>
-        <Input name="itemName" value={form.itemName} onChange={handleChange} placeholder="Enter item name" required />
+        <Input
+          name="itemName"
+          value={form.itemName}
+          onChange={handleChange}
+          placeholder="Enter item name"
+          required
+        />
+      </div>
+      <div>
+        <label className="text-sm font-medium mb-1 block">Item Image</label>
+        <div
+          className={cn(
+            "relative flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-4 bg-muted/40 transition hover:bg-muted/60",
+            uploading ? "opacity-70 pointer-events-none" : ""
+          )}
+        >
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            disabled={uploading}
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            style={{ zIndex: 2 }}
+            key={imageFile ? imageFile.name : "empty"}
+            // Remove value="" (not needed)
+            // Add ref to reset input when imageFile is cleared
+            ref={(input) => {
+              if (!imageFile && input) input.value = "";
+            }}
+          />
+          {!imageFile ? (
+            <div className="flex  items-center justify-center h-[5px] ">
+              <svg
+                width="32"
+                height="12"
+                fill="none"
+                className="mb-2 text-muted-foreground"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M4 16V4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <rect
+                  x="2"
+                  y="16"
+                  width="20"
+                  height="6"
+                  rx="2"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                />
+                <circle
+                  cx="12"
+                  cy="11"
+                  r="3"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                />
+              </svg>
+              <span className="text-xs text-muted-foreground">
+                Click or drag to upload image
+              </span>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-2 w-full">
+              <img
+                src={URL.createObjectURL(imageFile)}
+                alt="Item"
+                className="max-h-32 rounded shadow border"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                tabIndex={0} // Ensure button is focusable
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent parent click event
+                  setImageFile(null);
+                }}
+                disabled={uploading}
+              >
+                Remove
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
       <div>
         <label className="text-sm font-medium">File Receive Date</label>
-        <Input name="orderDate" type="date" value={form.orderDate} onChange={handleChange} required />
+        <Input
+          name="orderDate"
+          type="date"
+          value={form.orderDate}
+          onChange={handleChange}
+          required
+        />
       </div>
       <div>
         <label className="text-sm font-medium">Sample Sending Date</label>
-        <Input name="sampleSendingDate" type="date" value={form.sampleSendingDate} onChange={handleChange} required />
+        <Input
+          name="sampleSendingDate"
+          type="date"
+          value={form.sampleSendingDate}
+          onChange={handleChange}
+          required
+        />
       </div>
       <div>
         <label className="text-sm font-medium">Merchandiser</label>
-        <Select value={form.userId} onValueChange={(v) => handleSelectChange("userId", v)} required>
+        <Select
+          value={form.userId}
+          onValueChange={(v) => handleSelectChange("userId", v)}
+          required
+        >
           <SelectTrigger>
             <SelectValue placeholder="Select merchandiser" />
           </SelectTrigger>
           <SelectContent>
             {merchandisers?.map((user: Merchandiser) => (
-              <SelectItem key={user.id} value={user.id}>{user.userName}</SelectItem>
+              <SelectItem key={user.id} value={user.id}>
+                {user.userName}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
       <div>
         <label className="text-sm font-medium">Sample Type</label>
-        <Select value={form.sampleType} onValueChange={(v) => handleSelectChange("sampleType", v)} required>
+        <Select
+          value={form.sampleType}
+          onValueChange={(v) => handleSelectChange("sampleType", v)}
+          required
+        >
           <SelectTrigger>
             <SelectValue placeholder="Select sample type" />
           </SelectTrigger>
@@ -132,9 +309,13 @@ export default function TnaForm({ onSuccess }: TnaFormProps) {
           </SelectContent>
         </Select>
       </div>
-      {/* <div>
+
+      <div>
         <label className="text-sm font-medium">Status</label>
-        <Select value={form.status} onValueChange={(v) => handleSelectChange("status", v)}>
+        <Select
+          value={form.status}
+          onValueChange={(v) => handleSelectChange("status", v)}
+        >
           <SelectTrigger>
             <SelectValue placeholder="Select status" />
           </SelectTrigger>
@@ -144,9 +325,15 @@ export default function TnaForm({ onSuccess }: TnaFormProps) {
             <SelectItem value="INACTIVE">Inactive</SelectItem>
           </SelectContent>
         </Select>
-      </div> */}
+      </div>
       <div className="col-span-2 flex justify-center">
-        <Button className="w-[400px] self-end" type="submit" disabled={isLoading}>Create TNA</Button>
+        <Button
+          className="w-[400px] self-end"
+          type="submit"
+          disabled={isLoading || uploading}
+        >
+          Submit TNA Form
+        </Button>
       </div>
     </form>
   );
