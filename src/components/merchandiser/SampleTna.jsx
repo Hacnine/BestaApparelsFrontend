@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Plus } from "lucide-react";
 import TnaForm from "./TnaForm";
+import url from "@/config/urls";
+
 import { useGetTNAsQuery } from "@/redux/api/tnaApi"; 
 import {
   Dialog,
@@ -32,7 +34,7 @@ export default function SampleTna() {
   const { data, isLoading, error } = useGetTNAsQuery({ page, pageSize, search });
   const [openTna, setOpenTna] = useState(false);
   const [modal, setModal] = useState({ open: false, type: null, details: null });
-console.log("TNA Data:", data, isLoading, error);
+
   // Modal state for merchandiser and buyer
   const openDetailsModal = (type, details) => setModal({ open: true, type, details });
   const closeModal = () => setModal({ open: false, type: null, details: null });
@@ -85,6 +87,7 @@ console.log("TNA Data:", data, isLoading, error);
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="text-nowrap">Image</TableHead> {/* Add image column */}
               <TableHead  className="text-nowrap">Style</TableHead>
               <TableHead  className="text-nowrap">Item Name</TableHead>
               <TableHead  className="text-nowrap">Sample Sending Date</TableHead>
@@ -98,6 +101,19 @@ console.log("TNA Data:", data, isLoading, error);
           <TableBody>
             {(data?.data || []).map((row) => (
               <TableRow key={row.id}>
+                <TableCell>
+                  {row.itemImage ? (
+                    <img
+                      src={`${url.BASE_URL}${encodeURI(row.itemImage)}`}
+                      alt={row.style}
+                      className="h-12 w-12 object-cover rounded border"
+                      style={{ maxWidth: 48, maxHeight: 48 }}
+                      loading="lazy"
+                    />
+                  ) : (
+                    <span className="text-xs text-muted-foreground">No image</span>
+                  )}
+                </TableCell>
                 <TableCell className="text-nowrap">{row.style}</TableCell>
                 <TableCell className="text-nowrap">{row.itemName}</TableCell>
                 <TableCell className="text-nowrap">
