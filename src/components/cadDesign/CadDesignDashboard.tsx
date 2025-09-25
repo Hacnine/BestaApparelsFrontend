@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -30,10 +30,27 @@ const CadDesignDashboard = () => {
   const [page, setPage] = useState(1);
   const pageSize = 10;
 
+  // Search and date filter state
+  const [search, setSearch] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
+  // Query with search and date range
   const { data: cadApprovals, isLoading: isTableLoading } = useGetCadApprovalQuery(
-    { page, pageSize }
+    {
+      page,
+      pageSize,
+      search: search || undefined,
+      startDate: startDate || undefined,
+      endDate: endDate || undefined,
+    }
   );
-  console.log("CAD Approvals:", cadApprovals);
+
+  // Reset to first page on filter change
+  useEffect(() => {
+    setPage(1);
+  }, [search, startDate, endDate]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -63,17 +80,64 @@ const CadDesignDashboard = () => {
 
   return (
     <div className="p-4 space-y-6 ">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">
+      <div className="flex items-center justify-between">
+        <div className="">
+          <h1 className="text-3xl font-bold text-foreground">
           CAD Design Approval
         </h1>
         <p className="text-muted-foreground text-sm mt-1">
           Manage CAD design entries and track progress efficiently.
         </p>
-      </div>
-      <Button onClick={() => setOpenForm((prev) => !prev)}>
+        </div>
+
+        <Button onClick={() => setOpenForm((prev) => !prev)}>
         {openForm ? "Close Form" : "Add CAD Approval"}
       </Button>
+      </div>
+      
+      {/* Search Controls */}
+      <div className="flex flex-wrap gap-2 mb-4 items-end w-[85%]">
+        <div>
+          <label className="block text-xs font-medium mb-1">Search</label>
+          <input
+            type="text"
+            className="border rounded px-2 py-1 md:w-[300px] placeholder:text-sm"
+            placeholder="Search By Style, Name "
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-medium mb-1">Start Date</label>
+          <input
+            type="date"
+            className="border rounded px-2 py-1"
+            value={startDate}
+            onChange={e => setStartDate(e.target.value)}
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-medium mb-1">End Date</label>
+          <input
+            type="date"
+            className="border rounded px-2 py-1"
+            value={endDate}
+            onChange={e => setEndDate(e.target.value)}
+          />
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            setSearch("");
+            setStartDate("");
+            setEndDate("");
+          }}
+        >
+          Clear
+        </Button>
+      </div>
+      
       {openForm && (
         <Card className="mt-4">
           <CardContent className="py-6">

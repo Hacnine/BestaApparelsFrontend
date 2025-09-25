@@ -5,6 +5,7 @@ export const cadApi = createApi({
   reducerPath: "cadApi",
   baseQuery: fetchBaseQuery({
     baseUrl: `${ulr.BASE_URL}/cad`,
+    credentials: "include",
   }),
   tagTypes: ["Cad", "SampleDevelopment", "FabricBooking"],
   endpoints: (builder) => ({
