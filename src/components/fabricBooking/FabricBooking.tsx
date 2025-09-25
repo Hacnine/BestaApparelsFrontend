@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -17,7 +17,20 @@ const FabricBooking = () => {
   // Pagination state
   const [page, setPage] = useState(1);
   const pageSize = 10;
-  const { data, error, isLoading } = useGetFabricBookingQuery({ page, pageSize });
+
+  // Search and date filter state
+  const [search, setSearch] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
+  // Query with search and date range
+  const { data, error, isLoading } = useGetFabricBookingQuery({
+    page,
+    pageSize,
+    search: search || undefined,
+    startDate: startDate || undefined,
+    endDate: endDate || undefined,
+  });
   const [createFabricBooking, { isLoading: isCreating }] = useCreateFabricBookingMutation();
   const [openForm, setOpenForm] = useState(false);
   const [form, setForm] = useState({
@@ -51,15 +64,22 @@ console.log(data)
     }
   };
 
+  // Reset to first page on filter change
+  useEffect(() => {
+    setPage(1);
+  }, [search, startDate, endDate]);
+
   return (
     <div className="p-4 space-y-6 ">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Fabric Booking</h1>
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Fabric Booking</h1>
         <p className="text-muted-foreground text-sm mt-1">
           Manage fabric bookings and track their status efficiently.
-        </p>
-      </div>
-      <Button onClick={() => setOpenForm((prev) => !prev)}>
+        </p> 
+        </div>
+        <div className="">
+          <Button onClick={() => setOpenForm((prev) => !prev)}>
         {openForm ? "Close Form" : "Add Fabric Booking"}
       </Button>
       {openForm && (
@@ -106,6 +126,52 @@ console.log(data)
           </CardContent>
         </Card>
       )}
+        </div>
+       
+      </div>
+      {/* Search Controls */}
+      <div className="flex flex-wrap gap-2 mb-4 items-end w-[85%]">
+        <div>
+          <label className="block text-xs font-medium mb-1">Search</label>
+          <input
+            type="text"
+            className="border rounded px-2 py-1 md:w-[300px]"
+            placeholder="Search By Style"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-medium mb-1">Start Date</label>
+          <input
+            type="date"
+            className="border rounded px-2 py-1"
+            value={startDate}
+            onChange={e => setStartDate(e.target.value)}
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-medium mb-1">End Date</label>
+          <input
+            type="date"
+            className="border rounded px-2 py-1"
+            value={endDate}
+            onChange={e => setEndDate(e.target.value)}
+          />
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            setSearch("");
+            setStartDate("");
+            setEndDate("");
+          }}
+        >
+          Clear
+        </Button>
+      </div>
+      
 
       {/* Fabric Booking Table */}
       <Card className="mt-4">
