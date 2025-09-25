@@ -25,14 +25,6 @@ export const merchandiserApi = createApi({
       }),
       invalidatesTags: ["Department", "Merchandiser"],
     }),
-    createTna: builder.mutation({
-      query: (body) => ({
-        url: "create-tna",
-        method: "POST",
-        body,
-      }),
-      invalidatesTags: ["Tna", "Merchandiser"],
-    }),
     getMerchandisers: builder.query({
       query: () => ({
         url: "merchandisers",
@@ -60,7 +52,6 @@ export const merchandiserApi = createApi({
 export const {
   useCreateBuyerMutation,
   useCreateDepartmentMutation,
-  useCreateTnaMutation,
   useGetMerchandisersQuery,
   useGetBuyersQuery,
   useGetDepartmentsQuery,
