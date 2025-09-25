@@ -45,18 +45,9 @@ const ManagementDashboard = () => {
       <PageHeader
         title="Management Dashboard"
         description=" Overview of all samples and their statuses"
-        actions={
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm">
-              <Filter className="h-4 w-4 mr-2" />
-              Filters
-            </Button>
-            <Button size="sm">
-              <Download className="h-4 w-4 mr-2" />
-              Export All
-            </Button>
-          </div>
-        }
+        // actions={
+         
+        // }
       />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
