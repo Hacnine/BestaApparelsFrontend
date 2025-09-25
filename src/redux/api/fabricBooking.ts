@@ -3,7 +3,7 @@ import ulr from "@/config/urls";
 
 export const fabricBookingApi = createApi({
   reducerPath: "fabricBookingApi",
-  baseQuery: fetchBaseQuery({ baseUrl: ulr.BASE_URL }),
+  baseQuery: fetchBaseQuery({ baseUrl: ulr.BASE_URL, credentials: "include" }),
   tagTypes: ["FabricBooking"],
   endpoints: (builder) => ({
     getFabricBookings: builder.query({
@@ -16,7 +16,7 @@ export const fabricBookingApi = createApi({
     }),
     updateFabricBooking: builder.mutation({
       query: ({ id, ...body }) => ({
-        url: `fabric-booking/${id}`,
+        url: `fabric-booking/update/${id}`,
         method: "PUT",
         body,
       }),
@@ -24,7 +24,7 @@ export const fabricBookingApi = createApi({
     }),
     deleteFabricBooking: builder.mutation({
       query: (id) => ({
-        url: `fabric-booking/${id}`,
+        url: `fabric-booking/delete/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["FabricBooking"],
