@@ -221,13 +221,13 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
     <div className="2xl:max-w-full xl:max-w-[1000px] overflow-x-auto">
       {/* Search Controls */}
       <div className="flex items-center justify-between mb-4">
-        <div className="flex flex-wrap gap-2 mb-4 items-end">
+        <div className="flex flex-wrap gap-2 mb-4 items-end  w-[85%]">
           <div>
-          <label className="block text-xs font-medium mb-1">Search by Name</label>
+          <label className="block text-xs font-medium mb-1">Search</label>
           <input
             type="text"
-            className="border rounded px-2 py-1"
-            placeholder="Name, Date"
+            className="border rounded px-2 py-1 md:w-[400px]"
+            placeholder="Name, Date, Style"
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
@@ -263,7 +263,7 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
         </Button>
         </div>
 
-         <div className="flex items-center justify-end gap-2">
+         <div className="flex items-center justify-end gap-2 ">
             
             <Button size="sm">
               <Download className="h-4 w-4 " />
