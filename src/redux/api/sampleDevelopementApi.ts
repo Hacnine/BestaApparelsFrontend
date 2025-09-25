@@ -3,7 +3,10 @@ import ulr from "@/config/urls";
 
 export const sampleDevelopmentApi = createApi({
   reducerPath: "sampleDevelopmentApi",
-  baseQuery: fetchBaseQuery({ baseUrl: ulr.BASE_URL }),
+  baseQuery: fetchBaseQuery({ 
+    baseUrl: ulr.BASE_URL,
+    credentials: 'include',
+  }),
   tagTypes: ["SampleDevelopment"],
   endpoints: (builder) => ({
     getSampleDevelopments: builder.query({
