@@ -16,15 +16,15 @@ export const sampleDevelopmentApi = createApi({
     }),
     updateSampleDevelopment: builder.mutation({
       query: ({ id, ...body }) => ({
-        url: `sample-developments/${id}`,
-        method: "PUT",
+        url: `sample-developments/update/${id}`,
+        method: "PATCH",
         body,
       }),
       invalidatesTags: ["SampleDevelopment"],
     }),
     deleteSampleDevelopment: builder.mutation({
       query: (id) => ({
-        url: `sample-developments/${id}`,
+        url: `sample-developments/delete/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["SampleDevelopment"],
