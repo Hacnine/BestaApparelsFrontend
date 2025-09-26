@@ -61,6 +61,7 @@ export const router = createBrowserRouter(
           <Route path="buyer" element={<BuyerManagement />} />
           <Route path="tna" element={<TNAProgress />} />
           <Route path="audit" element={<AuditLogs />} />
+          <Route path="reports" element={<Reports />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Route>
@@ -78,7 +79,6 @@ export const router = createBrowserRouter(
           />
           <Route path="employee" element={<EmployeeManagement />} />
           <Route path="user" element={<UserManagement />} />
-
           <Route path="tna" element={<SampleTna />} />
           <Route path="audit" element={<AuditLogs />} />
           <Route path="*" element={<NotFound />} />
