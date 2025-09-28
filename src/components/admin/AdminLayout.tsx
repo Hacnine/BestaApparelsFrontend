@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import { AdminSidebar } from "../common/Sidebar";
 
@@ -22,16 +22,46 @@ interface AdminLayoutProps {
 }
 
 export function AdminLayout({ sidebarFor }: AdminLayoutProps) {
-    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const mainRef = useRef<HTMLDivElement>(null);
+  const sidebarRef = useRef<HTMLDivElement>(null);
+
+  // Dynamically set maxWidth for main content to prevent overflow
+  useEffect(() => {
+    function updateMainWidth() {
+      const sidebar = sidebarRef.current;
+      const main = mainRef.current;
+      if (sidebar && main) {
+        const sidebarWidth = sidebar.offsetWidth;
+        main.style.maxWidth = `calc(100vw - ${sidebarWidth}px)`;
+        main.style.overflowX = "auto";
+      }
+    }
+    updateMainWidth();
+    window.addEventListener("resize", updateMainWidth);
+    return () => window.removeEventListener("resize", updateMainWidth);
+  }, [sidebarCollapsed]);
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
-        <AdminSidebar
-          collapsed={sidebarCollapsed}
-          onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
-        />
-
-        <div className="flex-1 flex flex-col">
+        {/* Sidebar: fixed position, full height, scrollable */}
+        <div
+          ref={sidebarRef}
+          className="fixed left-0 top-0 h-screen overflow-y-auto flex-shrink-0 z-40"
+          style={{ width: sidebarCollapsed ? 64 : 240 }} // adjust widths as per your collapsed/expanded sidebar
+        >
+          <AdminSidebar
+            collapsed={sidebarCollapsed}
+            onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+          />
+        </div>
+        {/* Main content: margin-left to match sidebar width */}
+        <div
+          ref={mainRef}
+          className="flex-1 flex flex-col h-screen overflow-y-auto"
+          style={{ marginLeft: sidebarCollapsed ? 64 : 240 }}
+        >
           {/* Top Header */}
           <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="flex h-16 items-center px-6 gap-4">
