@@ -152,7 +152,7 @@ interface AdminSidebarProps {
 }
 
 
-export function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps) {
+export function Sidebar({ collapsed, onToggle }: AdminSidebarProps) {
   const { user } = useUser();
 
   const location = useLocation();
