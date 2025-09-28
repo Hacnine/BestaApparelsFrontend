@@ -323,14 +323,24 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
                   );
                 }
               }
-              // Lead Time
+               // Days left
               let leadTimeRemaining = null;
               if (row.sampleSendingDate) {
                 const sampleSendDate = new Date(row.sampleSendingDate);
                 const today = new Date();
-                leadTimeRemaining = Math.round(
-                  (sampleSendDate.getTime() - today.setHours(0, 0, 0, 0)) /
-                    (1000 * 60 * 60 * 24)
+                // Set both dates to midnight UTC to avoid timezone issues
+                const sampleSendDateUTC = Date.UTC(
+                  sampleSendDate.getFullYear(),
+                  sampleSendDate.getMonth(),
+                  sampleSendDate.getDate()
+                );
+                const todayUTC = Date.UTC(
+                  today.getFullYear(),
+                  today.getMonth(),
+                  today.getDate()
+                );
+                leadTimeRemaining = Math.ceil(
+                  (sampleSendDateUTC - todayUTC) / (1000 * 60 * 60 * 24)
                 );
               }
               // Fabric
