@@ -282,7 +282,7 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
               <TableHead className="text-nowrap sticky left-0 top-0 bg-background z-30">Style</TableHead>
               <TableHead className="sticky top-0 bg-background z-20">Buyer</TableHead>
               <TableHead className="text-nowrap sticky top-0 bg-background z-20">Sending Date</TableHead>
-              <TableHead className="sticky top-0 bg-background z-20">Lead Time</TableHead>
+              <TableHead className="sticky top-0 bg-background z-20">Days Left</TableHead>
               <TableHead className="text-nowrap sticky top-0 bg-background z-20">Sample Type</TableHead>
               <TableHead className="sticky top-0 bg-background z-20">CAD</TableHead>
               <TableHead className="sticky top-0 bg-background z-20">Fabric</TableHead>
@@ -336,21 +336,26 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
               let leadTimeRemaining = null;
               if (row.sampleSendingDate) {
                 const sampleSendDate = new Date(row.sampleSendingDate);
-                const today = new Date();
+                // If DHLTracking date exists, use it as the reference date, else use today
+                let referenceDate = new Date();
+                if (row.dhlTracking && row.dhlTracking.date) {
+                  referenceDate = new Date(row.dhlTracking.date);
+                }
                 // Set both dates to midnight UTC to avoid timezone issues
                 const sampleSendDateUTC = Date.UTC(
-                  sampleSendDate.getFullYear(),
-                  sampleSendDate.getMonth(),
-                  sampleSendDate.getDate()
+                  sampleSendDate.getUTCFullYear(),
+                  sampleSendDate.getUTCMonth(),
+                  sampleSendDate.getUTCDate()
                 );
-                const todayUTC = Date.UTC(
-                  today.getFullYear(),
-                  today.getMonth(),
-                  today.getDate()
+                const referenceDateUTC = Date.UTC(
+                  referenceDate.getUTCFullYear(),
+                  referenceDate.getUTCMonth(),
+                  referenceDate.getUTCDate()
                 );
                 leadTimeRemaining = Math.ceil(
-                  (sampleSendDateUTC - todayUTC) / (1000 * 60 * 60 * 24)
+                  (sampleSendDateUTC - referenceDateUTC) / (1000 * 60 * 60 * 24)
                 );
+                // If DHLTracking date exceeds target date, leadTimeRemaining will be negative
               }
               // Fabric
               let fabricRemaining = null;
@@ -405,7 +410,7 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
                   sampleActualBadge = (
                     <span
                       className={
-                        diffDays < 0
+                        diffDays < 0 
                           ? "text-red-500"
                           : diffDays > 0
                           ? "text-blue-600"
@@ -458,7 +463,7 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
                   </TableCell>
                   <TableCell>
                     {row.sampleSendingDate
-                      ? new Date(row.sampleSendingDate).toLocaleDateString()
+                      ? new Date(row.sampleSendingDate).toLocaleDateString(undefined, { timeZone: "UTC" })
                       : ""}
                   </TableCell>
                   <TableCell>
@@ -519,8 +524,13 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
                         <div>
                           <span className="font-semibold">Date:</span> {row.dhlTracking.date ? new Date(row.dhlTracking.date).toLocaleDateString() : ""}
                         </div> */}
-                        <div className=" text-nowrap">
-                          <span className="font-semibold">Complete:</span> {row.dhlTracking.isComplete ? "Yes" : "No"}
+                        <div className=" text-nowrap justify-center flex ">
+                          <span className="font-semibold text-green-500 border-2 border-green-200 rounded-md px-1"> {row.dhlTracking.isComplete ? "Completed" : "Not Completed"}</span>
+                          <p>
+                            {/* {row.dhlTracking.date
+                              ? new Date(row.dhlTracking.date).toLocaleDateString(undefined, { timeZone: "UTC" })
+                              : ""} */}
+                          </p>
                         </div>
                       </div>
                     ) : (
@@ -568,7 +578,7 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
           onClose={handleBuyerModalClose}
           buyerInfo={buyerInfo}
         />
-        {/* Lead Time Modal */}
+        {/* Days Left Modal */}
         <LeadTimeModal
           open={leadTimeModal.open}
           onOpenChange={(open) =>
