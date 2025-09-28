@@ -1,28 +1,18 @@
 import { useState, useRef, useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import { Sidebar } from "../common/Sidebar";
-
-import { ReactNode } from "react";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { Search, Bell, User } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 interface AdminLayoutProps {
   sidebarFor: "admin" | "merchandiser" | "management" | "cad" | "sample_fabric" | "sample_room";
 }
 
 export function Layout({ sidebarFor }: AdminLayoutProps) {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
+  // Use localStorage to persist sidebar state
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    const stored = localStorage.getItem("sidebarCollapsed");
+    return stored === "true";
+  });
   const mainRef = useRef<HTMLDivElement>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
 
@@ -40,6 +30,10 @@ export function Layout({ sidebarFor }: AdminLayoutProps) {
     updateMainWidth();
     window.addEventListener("resize", updateMainWidth);
     return () => window.removeEventListener("resize", updateMainWidth);
+  }, [sidebarCollapsed]);
+
+  useEffect(() => {
+    localStorage.setItem("sidebarCollapsed", sidebarCollapsed ? "true" : "false");
   }, [sidebarCollapsed]);
 
   return (
