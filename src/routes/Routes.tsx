@@ -5,7 +5,7 @@ import {
 } from "react-router-dom";
 import { APP_ROUTES } from "./APP_ROUTES";
 import { LoginPage } from "@/components/auth/LoginPage";
-import { AdminLayout } from "@/components/admin/AdminLayout";
+import { Layout } from "@/components/admin/Layout";
 import { AdminDashboardOverview } from "@/components/admin/AdminDashboardOverview";
 import { UserManagement } from "@/components/admin/UserManagement";
 import { TNAProgress } from "@/components/admin/TNAProgress";
@@ -54,7 +54,7 @@ export const router = createBrowserRouter(
       <Route path="/" element={<RootRoute />} />
       {/* Admin layout + nested routes protected by AdminRoutes */}
       <Route element={<AdminRoutes />}>
-        <Route path="admin" element={<AdminLayout sidebarFor={"admin"} />}>
+        <Route path="admin" element={<Layout sidebarFor={"admin"} />}>
           <Route path="dashboard" element={<AdminDashboardOverview />} />
           <Route path="employee" element={<EmployeeManagement />} />
           <Route path="user" element={<UserManagement />} />
@@ -70,7 +70,7 @@ export const router = createBrowserRouter(
       <Route element={<MerchandiserRoutes />}>
         <Route
           path="merchandiser"
-          element={<AdminLayout sidebarFor={"merchandiser"} />}
+          element={<Layout sidebarFor={"merchandiser"} />}
         >
           <Route path="dashboard" element={<MerchandiserDashboard />} />
           <Route
@@ -85,7 +85,7 @@ export const router = createBrowserRouter(
         </Route>
       </Route>
 
-      <Route path="merchandiser" element={<AdminLayout sidebarFor={"cad"} />}>
+      <Route path="merchandiser" element={<Layout sidebarFor={"cad"} />}>
         <Route path="cad-designs" element={<CadDesignDashboard />} />
         <Route path="fabric-booking" element={<FabricBooking />} />
         <Route path="sample-development" element={<SampleDevelopement />} />
@@ -95,7 +95,7 @@ export const router = createBrowserRouter(
       <Route element={<ManagementRoutes />}>
         <Route
           path="management"
-          element={<AdminLayout sidebarFor={"management"} />}
+          element={<Layout sidebarFor={"management"} />}
         >
           <Route path="dashboard" element={<ManagementDashboard />} />
         </Route>
