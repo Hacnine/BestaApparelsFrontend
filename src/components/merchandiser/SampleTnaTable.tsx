@@ -305,7 +305,16 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
                   );
                   // Show badge with negative if late, positive if early/on time
                   cadActualBadge = (
-                    <span className={diffDays < 0 ? "text-red-500" : "text-green-600"}>
+                    <span
+                      className={
+                        diffDays < 0
+                          ? "text-red-500"
+                          : diffDays > 0
+                          ? "text-blue-600"
+                          : "text-green-600"
+                      }
+                      style={diffDays > 0 ? { color: "#2563eb" } : undefined} // force blue if needed
+                    >
                       {diffDays < 0
                         ? `${diffDays} days late`
                         : diffDays > 0
@@ -355,7 +364,16 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
                     (planned.getTime() - actual.getTime()) / (1000 * 60 * 60 * 24)
                   );
                   fabricActualBadge = (
-                    <span className={diffDays < 0 ? "text-red-500" : "text-green-600"}>
+                    <span
+                      className={
+                        diffDays < 0
+                          ? "text-red-500"
+                          : diffDays > 0
+                          ? "text-blue-600"
+                          : "text-green-600"
+                      }
+                      style={diffDays > 0 ? { color: "#2563eb" } : undefined}
+                    >
                       {diffDays < 0
                         ? `${diffDays} days late`
                         : diffDays > 0
@@ -385,7 +403,16 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
                     (planned.getTime() - actual.getTime()) / (1000 * 60 * 60 * 24)
                   );
                   sampleActualBadge = (
-                    <span className={diffDays < 0 ? "text-red-500" : "text-green-600"}>
+                    <span
+                      className={
+                        diffDays < 0
+                          ? "text-red-500"
+                          : diffDays > 0
+                          ? "text-blue-600"
+                          : "text-green-600"
+                      }
+                      style={diffDays > 0 ? { color: "#2563eb" } : undefined}
+                    >
                       {diffDays < 0
                         ? `${diffDays} days late`
                         : diffDays > 0
