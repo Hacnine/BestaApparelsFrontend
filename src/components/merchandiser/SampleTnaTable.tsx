@@ -479,7 +479,19 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
                       variant="link"
                       onClick={() => setLeadTimeModal({ open: true, row })}
                     >
-                      {getStatusBadge(leadTimeRemaining)}
+                      {/* If DHL tracking is complete, show blue badge, else normal */}
+                      {row.dhlTracking?.isComplete
+                        ? (
+                          <span className="bg-blue-100 text-blue-700 font-medium px-2 py-0.5 rounded">
+                            {leadTimeRemaining > 0
+                              ? `+${leadTimeRemaining} days`
+                              : leadTimeRemaining === 0
+                              ? "0 days"
+                              : `-${Math.abs(leadTimeRemaining)} days`}
+                          </span>
+                        )
+                        : getStatusBadge(leadTimeRemaining)
+                      }
                     </Button>
                   )
                 : ""}
