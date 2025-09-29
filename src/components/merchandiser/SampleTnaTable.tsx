@@ -314,16 +314,19 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
             const diffDays = Math.round(
               (planned.getTime() - actual.getTime()) / (1000 * 60 * 60 * 24)
             );
+            const isCadStepComplete = !!row.cad.finalCompleteDate;
             cadActualBadge = (
               <span
                 className={
-                  diffDays < 0
+                  isCadStepComplete
+                    ? "bg-blue-100 text-blue-700 font-medium px-2 py-0.5 rounded"
+                    : diffDays < 0
                     ? "text-red-500"
                     : "bg-blue-100 text-blue-700 font-medium px-2 py-0.5 rounded"
                 }
               >
                 {diffDays < 0
-                  ? `- ${diffDays} days`
+                  ? `${diffDays} days`
                   : diffDays > 0
                   ? `+ ${Math.abs(diffDays)} days`
                   : "0 day"}
@@ -375,16 +378,19 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
             const diffDays = Math.round(
               (planned.getTime() - actual.getTime()) / (1000 * 60 * 60 * 24)
             );
+            const isFabricStepComplete = !!row.fabricBooking.actualReceiveDate;
             fabricActualBadge = (
               <span
                 className={
-                  diffDays < 0
+                  isFabricStepComplete
+                    ? "bg-blue-100 text-blue-700 font-medium px-2 py-0.5 rounded"
+                    : diffDays < 0
                     ? "text-red-500"
                     : "bg-blue-100 text-blue-700 font-medium px-2 py-0.5 rounded"
                 }
               >
                 {diffDays < 0
-                  ? `- ${diffDays} days`
+                  ? `${diffDays} days `
                   : diffDays > 0
                   ? `+ ${Math.abs(diffDays)} days`
                   : "0 day"}
@@ -411,16 +417,19 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
             const diffDays = Math.round(
               (planned.getTime() - actual.getTime()) / (1000 * 60 * 60 * 24)
             );
+            const isSampleStepComplete = !!row.sampleDevelopment.actualSampleCompleteDate;
             sampleActualBadge = (
               <span
                 className={
-                  diffDays < 0
+                  isSampleStepComplete
+                    ? "bg-blue-100 text-blue-700 font-medium px-2 py-0.5 rounded"
+                    : diffDays < 0
                     ? "text-red-500"
                     : "bg-blue-100 text-blue-700 font-medium px-2 py-0.5 rounded"
                 }
               >
                 {diffDays < 0
-                  ? `- ${diffDays} days`
+                  ? `${diffDays} days`
                   : diffDays > 0
                   ? `+ ${Math.abs(diffDays)} days`
                   : "0 day"}
@@ -702,4 +711,3 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
 };
 
 export default SampleTnaTable;
-               
