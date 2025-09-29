@@ -10,7 +10,7 @@ export const getStatusBadge = (remaining: number | null) => {
     );
   } else if (remaining === 0) {
     return (
-      <span className="-ml-4 inline-block px-2 py-0.5 rounded bg-green-100 text-green-700 font-medium">
+      <span className="-ml-0 inline-block px-2 py-0.5 rounded bg-green-100 text-green-700 font-medium">
         0 days
       </span>
     );
