@@ -29,7 +29,7 @@ export const LeadTimeModal = ({ open, onOpenChange, row }: any) => (
             {row.orderDate ? new Date(row.orderDate).toLocaleDateString() : ""}
           </div>
           <div>
-            <strong>Sample Sending Date:</strong>{" "}
+            <strong>Sending Date:</strong>{" "}
             {row.sampleSendingDate ? new Date(row.sampleSendingDate).toLocaleDateString() : ""}
           </div>
           <div>
