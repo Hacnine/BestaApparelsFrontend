@@ -28,7 +28,7 @@ import {
   Download,
   Filter,
 } from "lucide-react";
-import { useGetTNASummaryCardQuery } from "@/redux/api/tnaApi";
+import { useGetTNASummaryCardQuery, useGetDepartmentProgressV2Query } from "@/redux/api/tnaApi";
 import TnaSummaryCards from "./TnaSummaryCards";
 
 const tnaCardConfig = [
@@ -128,15 +128,9 @@ const tnaList = [
   },
 ];
 
-const departmentProgress = [
-  { department: "Merchandising", completed: 156, total: 180, percentage: 87 },
-  { department: "CAD Room", completed: 89, total: 105, percentage: 85 },
-  { department: "Sample Fabric", completed: 67, total: 95, percentage: 71 },
-  { department: "Sample Room", completed: 134, total: 155, percentage: 86 },
-];
-
 export function MerchandiserDashboard() {
   const { data: summaryCardData } = useGetTNASummaryCardQuery({});
+  const { data: departmentProgressData, isLoading: isDeptLoading } = useGetDepartmentProgressV2Query({});
 
   return (
     <div className="space-y-6 px-4">
@@ -178,24 +172,28 @@ export function MerchandiserDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {departmentProgress.map((dept) => (
-              <div key={dept.department} className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-foreground">
-                    {dept.department}
-                  </span>
-                  <span className="text-sm text-muted-foreground">
-                    {dept.completed}/{dept.total}
-                  </span>
+            {isDeptLoading ? (
+              <div className="text-center text-muted-foreground py-8">Loading...</div>
+            ) : (
+              (departmentProgressData?.data || []).map((dept: any) => (
+                <div key={dept.department} className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-foreground">
+                      {dept.department}
+                    </span>
+                    <span className="text-sm text-muted-foreground">
+                      {dept.completed}/{dept.total}
+                    </span>
+                  </div>
+                  <Progress value={dept.percentage} className="h-2" />
+                  <div className="text-right">
+                    <span className="text-xs text-muted-foreground">
+                      {dept.percentage}% complete
+                    </span>
+                  </div>
                 </div>
-                <Progress value={dept.percentage} className="h-2" />
-                <div className="text-right">
-                  <span className="text-xs text-muted-foreground">
-                    {dept.percentage}% complete
-                  </span>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </CardContent>
         </Card>
 
@@ -350,3 +348,4 @@ export function MerchandiserDashboard() {
     </div>
   );
 }
+ 
