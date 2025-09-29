@@ -116,7 +116,7 @@ export default function Reports() {
       />
       <SampleTnaTable/>
       {/* Filters */}
-      <Card className="shadow-soft">
+      {/* <Card className="shadow-soft">
         <CardContent className="pt-6">
           <div className="flex flex-wrap gap-4">
             <Select defaultValue="all">
@@ -159,10 +159,10 @@ export default function Reports() {
             </Select>
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
 
       {/* Reports Grid */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {/* <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {reports.map((report) => {
           const IconComponent = report.icon;
           
@@ -239,10 +239,10 @@ export default function Reports() {
             </Card>
           );
         })}
-      </div>
+      </div> */}
 
       {/* Quick Insights */}
-      <Card className="shadow-soft">
+      {/* <Card className="shadow-soft">
         <CardHeader>
           <CardTitle>Key Insights</CardTitle>
         </CardHeader>
@@ -279,7 +279,7 @@ export default function Reports() {
             </div>
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
     </div>
   );
 }
