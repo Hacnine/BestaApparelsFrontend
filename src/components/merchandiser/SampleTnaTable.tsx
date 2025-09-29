@@ -549,7 +549,7 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
                     <span className="font-semibold">Date:</span> {row.dhlTracking.date ? new Date(row.dhlTracking.date).toLocaleDateString() : ""}
                   </div> */}
                   <div className=" text-nowrap justify-center flex ">
-                    <span className="font-semibold text-green-700 border-2 border-green-700 bg-green-100 rounded-md px-2 py-0.5"> {row.dhlTracking.isComplete ? "Completed" : "Not Completed"}</span>
+                    <span className="font-semibold text-green-700  bg-green-100 rounded px-2 py-0.5"> {row.dhlTracking.isComplete ? "Completed" : "Not Completed"}</span>
                     <p>
                       {/* {row.dhlTracking.date
                         ? new Date(row.dhlTracking.date).toLocaleDateString(undefined, { timeZone: "UTC" })
