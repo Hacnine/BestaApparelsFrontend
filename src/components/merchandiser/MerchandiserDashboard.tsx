@@ -295,8 +295,8 @@ export function MerchandiserDashboard() {
                   <TableCell>
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm">
-                          {tna.completedTasks}/{tna.totalTasks} tasks
+                        <span className="text-sm text-nowrap mr-1">
+                          {tna.completedTasks}/{tna.totalTasks} tasks:
                         </span>
                         <span className="text-sm font-medium">
                           {tna.percentage}%
@@ -306,7 +306,7 @@ export function MerchandiserDashboard() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline">{tna.currentStage}</Badge>
+                    <Badge className="text-nowrap" variant="outline">{tna.currentStage}</Badge>
                   </TableCell>
                   <TableCell>
                     <Badge
@@ -319,9 +319,9 @@ export function MerchandiserDashboard() {
                       }
                       className={
                         tna.status === "On Track"
-                          ? "bg-gradient-success"
+                          ? "bg-gradient-success text-nowrap"
                           : tna.status === "At Risk"
-                          ? "bg-gradient-accent"
+                          ? "bg-gradient-accent text-nowrap"
                           : ""
                       }
                     >
