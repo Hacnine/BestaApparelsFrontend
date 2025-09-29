@@ -13,6 +13,7 @@ import {
 import {
   useCreateCadApprovalMutation,
   useGetCadApprovalQuery,
+  useUpdateCadDesignMutation, // <-- import mutation
 } from "@/redux/api/cadApi";
 import toast from "react-hot-toast";
 
@@ -25,6 +26,10 @@ const CadDesignDashboard = () => {
     cadMasterName: "",
   });
   const [createCadApproval, { isLoading }] = useCreateCadApprovalMutation();
+  const [updateCadDesign, { isLoading: isUpdating }] = useUpdateCadDesignMutation(); // <-- add mutation
+
+  // Edit state
+  const [editId, setEditId] = useState<string | null>(null);
 
   // Pagination state
   const [page, setPage] = useState(1);
@@ -59,13 +64,26 @@ const CadDesignDashboard = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      await createCadApproval({
-        style: form.style,
-        fileReceiveDate: new Date(form.fileReceiveDate).toISOString(),
-        completeDate: new Date(form.completeDate).toISOString(),
-        cadMasterName: form.cadMasterName,
-      }).unwrap();
-      toast.success("CAD Design approval created successfully");
+      if (editId) {
+        // Edit mode
+        await updateCadDesign({
+          id: editId,
+          style: form.style,
+          fileReceiveDate: new Date(form.fileReceiveDate).toISOString(),
+          completeDate: new Date(form.completeDate).toISOString(),
+          CadMasterName: form.cadMasterName,
+        }).unwrap();
+        toast.success("CAD Design approval updated successfully");
+      } else {
+        // Create mode
+        await createCadApproval({
+          style: form.style,
+          fileReceiveDate: new Date(form.fileReceiveDate).toISOString(),
+          completeDate: new Date(form.completeDate).toISOString(),
+          cadMasterName: form.cadMasterName,
+        }).unwrap();
+        toast.success("CAD Design approval created successfully");
+      }
       setForm({
         style: "",
         fileReceiveDate: "",
@@ -73,9 +91,26 @@ const CadDesignDashboard = () => {
         cadMasterName: "",
       });
       setOpenForm(false);
+      setEditId(null);
     } catch (error: any) {
-      toast.error(error?.data?.error || "Failed to create CAD Design approval");
+      toast.error(error?.data?.error || "Failed to submit CAD Design approval");
     }
+  };
+
+  // Edit handler
+  const handleEdit = (row: any) => {
+    setForm({
+      style: row.style || "",
+      fileReceiveDate: row.fileReceiveDate
+        ? new Date(row.fileReceiveDate).toISOString().slice(0, 10)
+        : "",
+      completeDate: row.completeDate
+        ? new Date(row.completeDate).toISOString().slice(0, 10)
+        : "",
+      cadMasterName: row.CadMasterName || "",
+    });
+    setEditId(row.id);
+    setOpenForm(true);
   };
 
   return (
@@ -187,9 +222,28 @@ const CadDesignDashboard = () => {
                 />
               </div>
               <div className="col-span-2  flex justify-center">
-                <Button className="" type="submit" disabled={isLoading}>
-                  Submit
+                <Button className="" type="submit" disabled={isLoading || isUpdating}>
+                  {editId ? "Update" : "Submit"}
                 </Button>
+                {editId && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="ml-2"
+                    onClick={() => {
+                      setEditId(null);
+                      setForm({
+                        style: "",
+                        fileReceiveDate: "",
+                        completeDate: "",
+                        cadMasterName: "",
+                      });
+                      setOpenForm(false);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                )}
               </div>
             </form>
           </CardContent>
@@ -208,6 +262,7 @@ const CadDesignDashboard = () => {
                 <TableHead>Complete Date</TableHead>
                 <TableHead>Created At</TableHead>
                 <TableHead>Updated At</TableHead>
+                <TableHead>Action</TableHead> {/* Add Action column */}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -234,6 +289,15 @@ const CadDesignDashboard = () => {
                     {row.updatedAt
                       ? new Date(row.updatedAt).toLocaleDateString()
                       : ""}
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEdit(row)}
+                    >
+                      Edit
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
