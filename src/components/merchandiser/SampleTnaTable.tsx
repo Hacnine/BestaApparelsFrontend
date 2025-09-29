@@ -323,7 +323,7 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
                 }
               >
                 {diffDays < 0
-                  ? `${diffDays} days late`
+                  ? `- ${diffDays} days`
                   : diffDays > 0
                   ? `+ ${Math.abs(diffDays)} days`
                   : "0 day"}
@@ -384,7 +384,7 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
                 }
               >
                 {diffDays < 0
-                  ? `${diffDays} days late`
+                  ? `- ${diffDays} days`
                   : diffDays > 0
                   ? `+ ${Math.abs(diffDays)} days`
                   : "0 day"}
@@ -420,7 +420,7 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
                 }
               >
                 {diffDays < 0
-                  ? `${diffDays} days late`
+                  ? `- ${diffDays} days`
                   : diffDays > 0
                   ? `+ ${Math.abs(diffDays)} days`
                   : "0 day"}
