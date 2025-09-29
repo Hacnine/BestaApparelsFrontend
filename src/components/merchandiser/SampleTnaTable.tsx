@@ -18,6 +18,8 @@ import { useCreateDHLTrackingMutation } from "@/redux/api/dHLTrackingApi";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Download, Filter } from "lucide-react";
 import url from "@/config/urls";
+import * as XLSX from "xlsx";
+import { exportSampleTnaExcel } from "../../utils/exportSampleTnaExcel";
 
 
 type SampleTnaTableProps = {
@@ -266,8 +268,7 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
           </div>
 
            <div className="flex items-center justify-end gap-2 ">
-              
-              <Button size="sm">
+              <Button size="sm" onClick={() => exportSampleTnaExcel(tnaSummary)}>
                 <Download className="h-4 w-4 " />
                 Export All
               </Button>
@@ -699,4 +700,6 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
     </div>
   );
 };
+
 export default SampleTnaTable;
+               
