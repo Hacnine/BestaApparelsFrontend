@@ -133,7 +133,7 @@ export function MerchandiserDashboard() {
   const { data: departmentProgressData, isLoading: isDeptLoading } = useGetDepartmentProgressV2Query({});
 
   return (
-    <div className="space-y-6 px-4 pb-7">
+    <div className="space-y-6 px-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -233,6 +233,118 @@ export function MerchandiserDashboard() {
           </CardContent>
         </Card>
       </div>
+
+      {/* TNA List Table */}
+      <Card className="bg-gradient-card border-0 shadow-md">
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Clock className="w-5 h-5 text-accent" />
+              <span>Active TNAs</span>
+            </div>
+            <Select>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="on-track">On Track</SelectItem>
+                <SelectItem value="at-risk">At Risk</SelectItem>
+                <SelectItem value="overdue">Overdue</SelectItem>
+              </SelectContent>
+            </Select>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>TNA Details</TableHead>
+                <TableHead>Buyer & Style</TableHead>
+                <TableHead>Progress</TableHead>
+                <TableHead>Current Stage</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Due Date</TableHead>
+                <TableHead>Merchandiser</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {tnaList.map((tna) => (
+                <TableRow key={tna.id}>
+                  <TableCell>
+                    <div>
+                      <div className="font-medium text-foreground">
+                        {tna.id}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {tna.orderNumber}
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div>
+                      <div className="font-medium text-foreground">
+                        {tna.buyer}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {tna.style}
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-nowrap mr-1">
+                          {tna.completedTasks}/{tna.totalTasks} tasks:
+                        </span>
+                        <span className="text-sm font-medium">
+                          {tna.percentage}%
+                        </span>
+                      </div>
+                      <Progress value={tna.percentage} className="h-2" />
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge className="text-nowrap" variant="outline">{tna.currentStage}</Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={
+                        tna.status === "On Track"
+                          ? "default"
+                          : tna.status === "At Risk"
+                          ? "secondary"
+                          : "destructive"
+                      }
+                      className={
+                        tna.status === "On Track"
+                          ? "bg-gradient-success text-nowrap"
+                          : tna.status === "At Risk"
+                          ? "bg-gradient-accent text-nowrap"
+                          : ""
+                      }
+                    >
+                      {tna.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {tna.dueDate}
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {tna.merchandiser}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button variant="ghost" size="sm">
+                      <Eye className="w-4 h-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </div>
   );
 }
