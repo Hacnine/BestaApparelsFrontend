@@ -307,29 +307,25 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
         let cadActualBadge = null;
         if (row.cad && row.cad.completeDate) {
           if (row.cad.finalCompleteDate) {
-            // Show days difference (negative = late, positive = early/on time)
+            // Show days difference (negative = late, positive = early/0 day)
             const planned = new Date(row.cad.completeDate);
             const actual = new Date(row.cad.finalCompleteDate);
             const diffDays = Math.round(
               (planned.getTime() - actual.getTime()) / (1000 * 60 * 60 * 24)
             );
-            // Show badge with negative if late, positive if early/on time
             cadActualBadge = (
               <span
                 className={
                   diffDays < 0
                     ? "text-red-500"
-                    : diffDays > 0
-                    ? "text-blue-600"
-                    : "text-green-600"
+                    : "bg-blue-100 text-blue-700 font-medium px-2 py-0.5 rounded"
                 }
-                style={diffDays > 0 ? { color: "#2563eb" } : undefined} // force blue if needed
               >
                 {diffDays < 0
                   ? `${diffDays} days late`
                   : diffDays > 0
-                  ? `${Math.abs(diffDays)} days early`
-                  : "On time"}
+                  ? `+ ${Math.abs(diffDays)} days`
+                  : "0 day"}
               </span>
             );
           } else {
@@ -372,7 +368,7 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
         let fabricActualBadge = null;
         if (row.fabricBooking && row.fabricBooking.receiveDate) {
           if (row.fabricBooking.actualReceiveDate) {
-            // Show days difference (negative = late, positive = early/on time)
+            // Show days difference (negative = late, positive = early/0 day)
             const planned = new Date(row.fabricBooking.receiveDate);
             const actual = new Date(row.fabricBooking.actualReceiveDate);
             const diffDays = Math.round(
@@ -383,17 +379,14 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
                 className={
                   diffDays < 0
                     ? "text-red-500"
-                    : diffDays > 0
-                    ? "text-blue-600"
-                    : "text-green-600"
+                    : "bg-blue-100 text-blue-700 font-medium px-2 py-0.5 rounded"
                 }
-                style={diffDays > 0 ? { color: "#2563eb" } : undefined}
               >
                 {diffDays < 0
                   ? `${diffDays} days late`
                   : diffDays > 0
-                  ? `${Math.abs(diffDays)} days early`
-                  : "On time"}
+                  ? `+ ${Math.abs(diffDays)} days`
+                  : "0 day"}
               </span>
             );
           } else {
@@ -411,7 +404,7 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
         let sampleActualBadge = null;
         if (row.sampleDevelopment && row.sampleDevelopment.sampleCompleteDate) {
           if (row.sampleDevelopment.actualSampleCompleteDate) {
-            // Show days difference (negative = late, positive = early/on time)
+            // Show days difference (negative = late, positive = early/0 day)
             const planned = new Date(row.sampleDevelopment.sampleCompleteDate);
             const actual = new Date(row.sampleDevelopment.actualSampleCompleteDate);
             const diffDays = Math.round(
@@ -420,19 +413,16 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
             sampleActualBadge = (
               <span
                 className={
-                  diffDays < 0 
+                  diffDays < 0
                     ? "text-red-500"
-                    : diffDays > 0
-                    ? "text-blue-600"
-                    : "text-green-600"
+                    : "bg-blue-100 text-blue-700 font-medium px-2 py-0.5 rounded"
                 }
-                style={diffDays > 0 ? { color: "#2563eb" } : undefined}
               >
                 {diffDays < 0
                   ? `${diffDays} days late`
                   : diffDays > 0
-                  ? `${Math.abs(diffDays)} days early`
-                  : "On time"}
+                  ? `+ ${Math.abs(diffDays)} days`
+                  : "0 day"}
               </span>
             );
           } else {
@@ -444,6 +434,12 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
             );
           }
         }
+
+        // Check if CAD, Fabric, and Sample are complete
+        const isCadComplete = !!row.cad?.finalCompleteDate;
+        const isFabricComplete = !!row.fabricBooking?.actualReceiveDate;
+        const isSampleComplete = !!row.sampleDevelopment?.actualSampleCompleteDate;
+        const canAddDHLTracking = isCadComplete && isFabricComplete && isSampleComplete;
 
         return (
           <TableRow key={row.id}>
@@ -493,6 +489,7 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
               {row.cad ? (
                 <Button
                   variant="link"
+                  className="-ml-4"
                   onClick={() => openCadModal(row.cad)}
                 >
                   {cadActualBadge ? cadActualBadge : getStatusBadge(cadRemaining)}
@@ -505,6 +502,7 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
               {row.fabricBooking ? (
                 <Button
                   variant="link"
+                  className="-ml-4"
                   onClick={() => openFabricModal(row.fabricBooking)}
                 >
                   {fabricActualBadge ? fabricActualBadge : getStatusBadge(fabricRemaining)}
@@ -517,6 +515,7 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
               {row.sampleDevelopment ? (
                 <Button
                   variant="link"
+                  className="-ml-4"
                   onClick={() => openSampleModal(row.sampleDevelopment)}
                 >
                   {sampleActualBadge ? sampleActualBadge : getStatusBadge(sampleRemaining)}
@@ -535,7 +534,7 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
                     <span className="font-semibold">Date:</span> {row.dhlTracking.date ? new Date(row.dhlTracking.date).toLocaleDateString() : ""}
                   </div> */}
                   <div className=" text-nowrap justify-center flex ">
-                    <span className="font-semibold text-green-500 border-2 border-green-200 rounded-md px-1"> {row.dhlTracking.isComplete ? "Completed" : "Not Completed"}</span>
+                    <span className="font-semibold text-green-700 border-2 border-green-700 bg-green-100 rounded-md px-2 py-0.5"> {row.dhlTracking.isComplete ? "Completed" : "Not Completed"}</span>
                     <p>
                       {/* {row.dhlTracking.date
                         ? new Date(row.dhlTracking.date).toLocaleDateString(undefined, { timeZone: "UTC" })
@@ -549,6 +548,12 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
                     size="sm"
                     variant="outline"
                     onClick={() => setDhlModal({ open: true, style: row.style })}
+                    disabled={!canAddDHLTracking}
+                    title={
+                      canAddDHLTracking
+                        ? "Add DHL Tracking"
+                        : "Complete CAD, Fabric, and Sample first"
+                    }
                   >
                     Add DHL Tracking
                   </Button>
@@ -680,5 +685,4 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
     </div>
   );
 };
-
 export default SampleTnaTable;
