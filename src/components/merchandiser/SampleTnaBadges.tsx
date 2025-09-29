@@ -4,7 +4,7 @@ export const getStatusBadge = (remaining: number | null) => {
   if (remaining === null) return null;
   if (remaining > 0) {
     return (
-      <span className="-ml-4 inline-block px-2 py-0.5 rounded bg-green-100 text-green-700 font-medium">
+      <span className=" inline-block px-2 py-0.5 rounded bg-green-100 text-green-700 font-medium">
         +{remaining} days
       </span>
     );
@@ -16,7 +16,7 @@ export const getStatusBadge = (remaining: number | null) => {
     );
   } else {
     return (
-      <span className="-ml-4 inline-block px-2 py-0.5 rounded bg-red-100 text-red-700 font-medium">
+      <span className=" inline-block px-2 py-0.5 rounded bg-red-100 text-red-700 font-medium">
         -{Math.abs(remaining)} days
       </span>
     );
