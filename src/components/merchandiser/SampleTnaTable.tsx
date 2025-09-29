@@ -287,7 +287,7 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
               <TableHead className="text-nowrap sticky top-0 bg-background z-20">Sample Type</TableHead>
               <TableHead className="sticky top-0 bg-background z-20">CAD</TableHead>
               <TableHead className="sticky top-0 bg-background z-20">Fabric</TableHead>
-              <TableHead className="sticky top-0 bg-background z-20">Sample</TableHead>
+              <TableHead className="sticky top-0 bg-background z-20">Sample Swing</TableHead>
               <TableHead className="sticky top-0 bg-background z-20">DHL Tracking</TableHead>
             </TableRow>
           </TableHeader>
