@@ -73,7 +73,7 @@ export function exportSampleTnaExcel(tnaSummary: any[]) {
         );
         cadBadge =
           diffDays < 0
-            ? `${diffDays} days late`
+            ? `-${diffDays} days`
             : diffDays > 0
             ? `+${Math.abs(diffDays)} days`
             : "0 day";
@@ -103,7 +103,7 @@ export function exportSampleTnaExcel(tnaSummary: any[]) {
         );
         fabricBadge =
           diffDays < 0
-            ? `${diffDays} days late`
+            ? `-${Math.abs(diffDays)} days`
             : diffDays > 0
             ? `+${Math.abs(diffDays)} days`
             : "0 day";
@@ -133,7 +133,7 @@ export function exportSampleTnaExcel(tnaSummary: any[]) {
         );
         sampleBadge =
           diffDays < 0
-            ? `${diffDays} days late`
+            ? `-${Math.abs(diffDays)} days`
             : diffDays > 0
             ? `+${Math.abs(diffDays)} days`
             : "0 day";
