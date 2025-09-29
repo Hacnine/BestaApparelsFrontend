@@ -61,7 +61,6 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
   const [actualReceiveDate, setActualReceiveDate] = useState("");
   const [actualSampleReceiveDate, setActualSampleReceiveDate] = useState("");
   const [actualSampleCompleteDate, setActualSampleCompleteDate] = useState("");
-  const { data, isLoading } = useGetTNASummaryQuery({});
   const [page, setPage] = useState(1);
   const [pageSize] = useState(10);
 
@@ -69,14 +68,17 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
   const [search, setSearch] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  // Add completed dropdown state
+  const [completed, setCompleted] = useState<"false" | "true">("false");
 
-  // Query with search and date range
+  // Query with search, date range, and completed
   const { data: queryData, isLoading: queryLoading } = useGetTNASummaryQuery({
     page,
     pageSize,
     search: search || undefined,
     startDate: startDate || undefined,
     endDate: endDate || undefined,
+    completed,
   });
 
   const tnaSummary = queryData?.data || [];
@@ -253,6 +255,18 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
               value={endDate}
               onChange={e => setEndDate(e.target.value)}
             />
+          </div>
+          {/* Completed Dropdown */}
+          <div>
+            <label className="block text-xs font-medium mb-1">Status</label>
+            <select
+              className="border rounded px-2 py-1"
+              value={completed}
+              onChange={e => setCompleted(e.target.value as "false" | "true")}
+            >
+              <option value="false">On Process</option>
+              <option value="true">Completed</option>
+            </select>
           </div>
           <Button
             variant="outline"
