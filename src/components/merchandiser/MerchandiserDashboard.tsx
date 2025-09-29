@@ -2,44 +2,57 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { 
-  TrendingUp, 
-  Calendar, 
-  Clock, 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  TrendingUp,
+  Calendar,
+  Clock,
   CheckCircle,
   AlertTriangle,
   XCircle,
   Eye,
   Download,
-  Filter
+  Filter,
 } from "lucide-react";
-import SampleDevelopement from "../SampleDevelopment/SampleDevelopment";
-import SampleTnaTable from "./SampleTnaTable";
+import { useGetTNASummaryCardQuery } from "@/redux/api/tnaApi";
+import TnaSummaryCards from "./TnaSummaryCards";
 
-const tnaOverview = [
+const tnaCardConfig = [
   {
     status: "On Track",
-    count: 45,
-    percentage: 67,
+    key: "onProcess",
     color: "bg-gradient-success",
-    textColor: "text-success"
+    textColor: "text-success",
+    icon: <CheckCircle className="w-6 h-6 text-white" />,
   },
   {
-    status: "At Risk",
-    count: 15,
-    percentage: 22,
+    status: "Completed",
+    key: "completed",
     color: "bg-gradient-accent",
-    textColor: "text-warning"
+    textColor: "text-warning",
+    icon: <AlertTriangle className="w-6 h-6 text-white" />,
   },
   {
     status: "Overdue",
-    count: 7,
-    percentage: 11,
+    key: "overdue",
     color: "bg-destructive",
-    textColor: "text-destructive"
-  }
+    textColor: "text-destructive",
+    icon: <XCircle className="w-6 h-6 text-white" />,
+  },
 ];
 
 const tnaList = [
@@ -55,7 +68,7 @@ const tnaList = [
     dueDate: "2024-02-15",
     currentStage: "Sample Room",
     merchandiser: "Sarah Chen",
-    priority: "High"
+    priority: "High",
   },
   {
     id: "TNA-2024-002",
@@ -69,7 +82,7 @@ const tnaList = [
     dueDate: "2024-02-20",
     currentStage: "CAD Room",
     merchandiser: "Mike Johnson",
-    priority: "Medium"
+    priority: "Medium",
   },
   {
     id: "TNA-2024-003",
@@ -83,7 +96,7 @@ const tnaList = [
     dueDate: "2024-01-30",
     currentStage: "Sample Fabric",
     merchandiser: "Lisa Wang",
-    priority: "High"
+    priority: "High",
   },
   {
     id: "TNA-2024-004",
@@ -97,7 +110,7 @@ const tnaList = [
     dueDate: "2024-02-10",
     currentStage: "Final Review",
     merchandiser: "David Kim",
-    priority: "Low"
+    priority: "Low",
   },
   {
     id: "TNA-2024-005",
@@ -111,25 +124,31 @@ const tnaList = [
     dueDate: "2024-03-01",
     currentStage: "Sample Fabric",
     merchandiser: "Emma Rodriguez",
-    priority: "Medium"
-  }
+    priority: "Medium",
+  },
 ];
 
 const departmentProgress = [
   { department: "Merchandising", completed: 156, total: 180, percentage: 87 },
   { department: "CAD Room", completed: 89, total: 105, percentage: 85 },
   { department: "Sample Fabric", completed: 67, total: 95, percentage: 71 },
-  { department: "Sample Room", completed: 134, total: 155, percentage: 86 }
+  { department: "Sample Room", completed: 134, total: 155, percentage: 86 },
 ];
 
 export function MerchandiserDashboard() {
+  const { data: summaryCardData } = useGetTNASummaryCardQuery({});
+
   return (
     <div className="space-y-6 px-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">TNA Progress Monitoring</h1>
-          <p className="text-muted-foreground">Track and monitor Time & Action progress across all orders</p>
+          <h1 className="text-3xl font-bold text-foreground">
+            TNA Progress Monitoring
+          </h1>
+          <p className="text-muted-foreground">
+            Track and monitor Time & Action progress across all orders
+          </p>
         </div>
         <div className="flex space-x-2">
           <Button variant="outline" size="sm">
@@ -144,32 +163,11 @@ export function MerchandiserDashboard() {
       </div>
 
       {/* TNA Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {tnaOverview.map((item) => (
-          <Card key={item.status} className="bg-gradient-card border-0 shadow-md">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">{item.status} TNAs</p>
-                  <p className="text-3xl font-bold text-foreground">{item.count}</p>
-                </div>
-                <div className={`p-3 rounded-lg ${item.color}`}>
-                  {item.status === "On Track" && <CheckCircle className="w-6 h-6 text-white" />}
-                  {item.status === "At Risk" && <AlertTriangle className="w-6 h-6 text-white" />}
-                  {item.status === "Overdue" && <XCircle className="w-6 h-6 text-white" />}
-                </div>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Progress value={item.percentage} className="flex-1" />
-                <span className={`text-sm font-medium ${item.textColor}`}>
-                  {item.percentage}%
-                </span>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
 
+      <TnaSummaryCards
+        tnaCardConfig={tnaCardConfig}
+        summaryCardData={summaryCardData || {}}
+      />
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Department Progress */}
         <Card className="bg-gradient-card border-0 shadow-md">
@@ -183,14 +181,18 @@ export function MerchandiserDashboard() {
             {departmentProgress.map((dept) => (
               <div key={dept.department} className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-foreground">{dept.department}</span>
+                  <span className="text-sm font-medium text-foreground">
+                    {dept.department}
+                  </span>
                   <span className="text-sm text-muted-foreground">
                     {dept.completed}/{dept.total}
                   </span>
                 </div>
                 <Progress value={dept.percentage} className="h-2" />
                 <div className="text-right">
-                  <span className="text-xs text-muted-foreground">{dept.percentage}% complete</span>
+                  <span className="text-xs text-muted-foreground">
+                    {dept.percentage}% complete
+                  </span>
                 </div>
               </div>
             ))}
@@ -209,15 +211,21 @@ export function MerchandiserDashboard() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="text-center p-4 bg-primary/5 rounded-lg">
                 <div className="text-2xl font-bold text-primary">67</div>
-                <div className="text-sm text-muted-foreground">Total Active TNAs</div>
+                <div className="text-sm text-muted-foreground">
+                  Total Active TNAs
+                </div>
               </div>
               <div className="text-center p-4 bg-success/5 rounded-lg">
                 <div className="text-2xl font-bold text-success">23</div>
-                <div className="text-sm text-muted-foreground">Completed This Week</div>
+                <div className="text-sm text-muted-foreground">
+                  Completed This Week
+                </div>
               </div>
               <div className="text-center p-4 bg-warning/5 rounded-lg">
                 <div className="text-2xl font-bold text-warning">12</div>
-                <div className="text-sm text-muted-foreground">Due This Week</div>
+                <div className="text-sm text-muted-foreground">
+                  Due This Week
+                </div>
               </div>
               <div className="text-center p-4 bg-destructive/5 rounded-lg">
                 <div className="text-2xl font-bold text-destructive">7</div>
@@ -268,21 +276,33 @@ export function MerchandiserDashboard() {
                 <TableRow key={tna.id}>
                   <TableCell>
                     <div>
-                      <div className="font-medium text-foreground">{tna.id}</div>
-                      <div className="text-sm text-muted-foreground">{tna.orderNumber}</div>
+                      <div className="font-medium text-foreground">
+                        {tna.id}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {tna.orderNumber}
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div>
-                      <div className="font-medium text-foreground">{tna.buyer}</div>
-                      <div className="text-sm text-muted-foreground">{tna.style}</div>
+                      <div className="font-medium text-foreground">
+                        {tna.buyer}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {tna.style}
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm">{tna.completedTasks}/{tna.totalTasks} tasks</span>
-                        <span className="text-sm font-medium">{tna.percentage}%</span>
+                        <span className="text-sm">
+                          {tna.completedTasks}/{tna.totalTasks} tasks
+                        </span>
+                        <span className="text-sm font-medium">
+                          {tna.percentage}%
+                        </span>
                       </div>
                       <Progress value={tna.percentage} className="h-2" />
                     </div>
@@ -291,16 +311,20 @@ export function MerchandiserDashboard() {
                     <Badge variant="outline">{tna.currentStage}</Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge 
+                    <Badge
                       variant={
-                        tna.status === "On Track" ? "default" :
-                        tna.status === "At Risk" ? "secondary" :
-                        "destructive"
+                        tna.status === "On Track"
+                          ? "default"
+                          : tna.status === "At Risk"
+                          ? "secondary"
+                          : "destructive"
                       }
                       className={
-                        tna.status === "On Track" ? "bg-gradient-success" :
-                        tna.status === "At Risk" ? "bg-gradient-accent" :
-                        ""
+                        tna.status === "On Track"
+                          ? "bg-gradient-success"
+                          : tna.status === "At Risk"
+                          ? "bg-gradient-accent"
+                          : ""
                       }
                     >
                       {tna.status}
