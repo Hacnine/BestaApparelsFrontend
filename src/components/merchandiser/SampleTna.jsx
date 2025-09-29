@@ -87,13 +87,13 @@ export default function SampleTna() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="text-nowrap">Image</TableHead> {/* Add image column */}
-              <TableHead  className="text-nowrap">Style</TableHead>
-              <TableHead  className="text-nowrap">Item Name</TableHead>
-              <TableHead  className="text-nowrap">Sample Sending Date</TableHead>
-              <TableHead  className="text-nowrap">Order Date</TableHead>
+              <TableHead className="text-nowrap">Item Name</TableHead>
+              <TableHead className="text-nowrap">Image</TableHead>
+              <TableHead className="text-nowrap">Style</TableHead>
+              <TableHead className="text-nowrap">Order Date</TableHead>
+              <TableHead className="text-nowrap">Sending Date</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead  className="text-nowrap">Sample Type</TableHead>
+              <TableHead className="text-nowrap">Sample Type</TableHead>
               <TableHead>Buyer</TableHead>
               <TableHead>Merchandiser</TableHead>
             </TableRow>
@@ -101,6 +101,7 @@ export default function SampleTna() {
           <TableBody>
             {(data?.data || []).map((row) => (
               <TableRow key={row.id}>
+                <TableCell className="text-nowrap">{row.itemName}</TableCell>
                 <TableCell>
                   {row.itemImage ? (
                     <img
@@ -115,15 +116,14 @@ export default function SampleTna() {
                   )}
                 </TableCell>
                 <TableCell className="text-nowrap">{row.style}</TableCell>
-                <TableCell className="text-nowrap">{row.itemName}</TableCell>
-                <TableCell className="text-nowrap">
-                  {row.sampleSendingDate
-                    ? new Date(row.sampleSendingDate).toLocaleDateString()
-                    : ""}
-                </TableCell>
                 <TableCell className="text-nowrap">
                   {row.orderDate
                     ? new Date(row.orderDate).toLocaleDateString()
+                    : ""}
+                </TableCell>
+                <TableCell className="text-nowrap">
+                  {row.sampleSendingDate
+                    ? new Date(row.sampleSendingDate).toLocaleDateString()
                     : ""}
                 </TableCell>
                 <TableCell>{row.status}</TableCell>
@@ -132,6 +132,7 @@ export default function SampleTna() {
                   {row.buyer?.name ? (
                     <Button
                       variant="link"
+                      className="-ml-4"
                       onClick={() => openDetailsModal("buyer", row.buyer)}
                     >
                       {row.buyer.name}
@@ -144,6 +145,7 @@ export default function SampleTna() {
                   {row.merchandiser?.userName ? (
                     <Button
                       variant="link"
+                      className="-ml-4"
                       onClick={() => openDetailsModal("merchandiser", row.merchandiser)}
                     >
                       {row.merchandiser.userName}
