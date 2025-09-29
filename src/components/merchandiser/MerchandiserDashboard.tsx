@@ -53,16 +53,6 @@ export function MerchandiserDashboard() {
             Track and monitor Time & Action progress across all orders
           </p>
         </div>
-        <div className="flex space-x-2">
-          <Button variant="outline" size="sm">
-            <Download className="w-4 h-4 mr-2" />
-            Export Report
-          </Button>
-          <Button variant="outline" size="sm">
-            <Filter className="w-4 h-4 mr-2" />
-            Filters
-          </Button>
-        </div>
       </div>
 
       {/* TNA Overview Cards */}
