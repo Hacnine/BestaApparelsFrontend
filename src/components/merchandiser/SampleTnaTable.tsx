@@ -282,7 +282,7 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
               <TableHead className="text-nowrap sticky left-0 top-0 bg-background z-30">Style</TableHead>
               <TableHead className="sticky top-0 bg-background z-20">Buyer</TableHead>
               <TableHead className="text-nowrap sticky top-0 bg-background z-20">Sending Date</TableHead>
-              <TableHead className="sticky top-0 bg-background z-20">Days Left</TableHead>
+              <TableHead className="sticky top-0 bg-background z-20 text-left">Days Left</TableHead>
               <TableHead className="text-nowrap sticky top-0 bg-background z-20">Sample Type</TableHead>
               <TableHead className="sticky top-0 bg-background z-20">CAD</TableHead>
               <TableHead className="sticky top-0 bg-background z-20">Fabric</TableHead>
@@ -462,6 +462,7 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
             <TableCell>
               <Button
                 variant="link"
+                className=" -ml-4"
                 onClick={() => showBuyerModal(row.buyerName || "")}
               >
                 {row.buyerName || ""}
@@ -472,17 +473,18 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
                 ? new Date(row.sampleSendingDate).toLocaleDateString(undefined, { timeZone: "UTC" })
                 : ""}
             </TableCell>
-            <TableCell>
+            <TableCell className="text-left">
               {leadTimeRemaining !== null
                 ? (
                     <Button
                       variant="link"
+                      className="p-0 m-0  justify-start text-left"
                       onClick={() => setLeadTimeModal({ open: true, row })}
                     >
                       {/* If DHL tracking is complete, show blue badge, else normal */}
                       {row.dhlTracking?.isComplete
                         ? (
-                          <span className="bg-blue-100 text-blue-700 font-medium px-2 py-0.5 rounded">
+                          <span className="bg-blue-100 text-blue-700 font-medium px-2 py-0.5 rounded inline-block  text-left">
                             {leadTimeRemaining > 0
                               ? `+${leadTimeRemaining} days`
                               : leadTimeRemaining === 0
@@ -490,7 +492,7 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
                               : `-${Math.abs(leadTimeRemaining)} days`}
                           </span>
                         )
-                        : getStatusBadge(leadTimeRemaining)
+                        : <span className="inline-block  text-left">{getStatusBadge(leadTimeRemaining)}</span>
                       }
                     </Button>
                   )
