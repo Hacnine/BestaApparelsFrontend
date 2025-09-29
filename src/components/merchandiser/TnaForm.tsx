@@ -168,7 +168,7 @@ export default function TnaForm({ onSuccess }: TnaFormProps) {
         />
       </div>
       <div>
-        <label className="text-sm font-medium mb-1 block">Item Image</label>
+        <label className="text-sm font-medium mb-1 block">Image</label>
         <div
           className={cn(
             "relative flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-4 bg-muted/40 transition hover:bg-muted/60",
