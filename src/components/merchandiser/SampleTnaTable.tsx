@@ -291,263 +291,274 @@ const SampleTnaTable = ({ readOnlyModals = false }: SampleTnaTableProps) => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {(tnaSummary || []).map((row: any) => {
-              // CAD
-              let cadRemaining = null;
-              let cadActualBadge = null;
-              if (row.cad && row.cad.completeDate) {
-                if (row.cad.finalCompleteDate) {
-                  // Show days difference (negative = late, positive = early/on time)
-                  const planned = new Date(row.cad.completeDate);
-                  const actual = new Date(row.cad.finalCompleteDate);
-                  const diffDays = Math.round(
-                    (planned.getTime() - actual.getTime()) / (1000 * 60 * 60 * 24)
-                  );
-                  // Show badge with negative if late, positive if early/on time
-                  cadActualBadge = (
-                    <span
-                      className={
-                        diffDays < 0
-                          ? "text-red-500"
-                          : diffDays > 0
-                          ? "text-blue-600"
-                          : "text-green-600"
-                      }
-                      style={diffDays > 0 ? { color: "#2563eb" } : undefined} // force blue if needed
-                    >
-                      {diffDays < 0
-                        ? `${diffDays} days late`
-                        : diffDays > 0
-                        ? `${Math.abs(diffDays)} days early`
-                        : "On time"}
-                    </span>
-                  );
-                } else {
-                  // Show remaining days from today to planned complete date
-                  const completeDate = new Date(row.cad.completeDate);
-                  const today = new Date();
-                  cadRemaining = Math.round(
-                    (completeDate.getTime() - today.setHours(0, 0, 0, 0)) /
-                      (1000 * 60 * 60 * 24)
-                  );
+            {queryLoading ? (
+      <TableRow>
+        <TableCell colSpan={12} className="text-center py-8">
+          <div className="flex flex-col items-center justify-center gap-2">
+            <span className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-400 mb-2"></span>
+            <span className="text-muted-foreground">Loading...</span>
+          </div>
+        </TableCell>
+      </TableRow>
+    ) : (
+      (tnaSummary || []).map((row: any) => {
+        // CAD
+        let cadRemaining = null;
+        let cadActualBadge = null;
+        if (row.cad && row.cad.completeDate) {
+          if (row.cad.finalCompleteDate) {
+            // Show days difference (negative = late, positive = early/on time)
+            const planned = new Date(row.cad.completeDate);
+            const actual = new Date(row.cad.finalCompleteDate);
+            const diffDays = Math.round(
+              (planned.getTime() - actual.getTime()) / (1000 * 60 * 60 * 24)
+            );
+            // Show badge with negative if late, positive if early/on time
+            cadActualBadge = (
+              <span
+                className={
+                  diffDays < 0
+                    ? "text-red-500"
+                    : diffDays > 0
+                    ? "text-blue-600"
+                    : "text-green-600"
                 }
-              }
-               // Days left
-              let leadTimeRemaining = null;
-              if (row.sampleSendingDate) {
-                const sampleSendDate = new Date(row.sampleSendingDate);
-                // If DHLTracking date exists, use it as the reference date, else use today
-                let referenceDate = new Date();
-                if (row.dhlTracking && row.dhlTracking.date) {
-                  referenceDate = new Date(row.dhlTracking.date);
+                style={diffDays > 0 ? { color: "#2563eb" } : undefined} // force blue if needed
+              >
+                {diffDays < 0
+                  ? `${diffDays} days late`
+                  : diffDays > 0
+                  ? `${Math.abs(diffDays)} days early`
+                  : "On time"}
+              </span>
+            );
+          } else {
+            // Show remaining days from today to planned complete date
+            const completeDate = new Date(row.cad.completeDate);
+            const today = new Date();
+            cadRemaining = Math.round(
+              (completeDate.getTime() - today.setHours(0, 0, 0, 0)) /
+                (1000 * 60 * 60 * 24)
+            );
+          }
+        }
+         // Days left
+        let leadTimeRemaining = null;
+        if (row.sampleSendingDate) {
+          const sampleSendDate = new Date(row.sampleSendingDate);
+          // If DHLTracking date exists, use it as the reference date, else use today
+          let referenceDate = new Date();
+          if (row.dhlTracking && row.dhlTracking.date) {
+            referenceDate = new Date(row.dhlTracking.date);
+          }
+          // Set both dates to midnight UTC to avoid timezone issues
+          const sampleSendDateUTC = Date.UTC(
+            sampleSendDate.getUTCFullYear(),
+            sampleSendDate.getUTCMonth(),
+            sampleSendDate.getUTCDate()
+          );
+          const referenceDateUTC = Date.UTC(
+            referenceDate.getUTCFullYear(),
+            referenceDate.getUTCMonth(),
+            referenceDate.getUTCDate()
+          );
+          leadTimeRemaining = Math.ceil(
+            (sampleSendDateUTC - referenceDateUTC) / (1000 * 60 * 60 * 24)
+          );
+          // If DHLTracking date exceeds target date, leadTimeRemaining will be negative
+        }
+        // Fabric
+        let fabricRemaining = null;
+        let fabricActualBadge = null;
+        if (row.fabricBooking && row.fabricBooking.receiveDate) {
+          if (row.fabricBooking.actualReceiveDate) {
+            // Show days difference (negative = late, positive = early/on time)
+            const planned = new Date(row.fabricBooking.receiveDate);
+            const actual = new Date(row.fabricBooking.actualReceiveDate);
+            const diffDays = Math.round(
+              (planned.getTime() - actual.getTime()) / (1000 * 60 * 60 * 24)
+            );
+            fabricActualBadge = (
+              <span
+                className={
+                  diffDays < 0
+                    ? "text-red-500"
+                    : diffDays > 0
+                    ? "text-blue-600"
+                    : "text-green-600"
                 }
-                // Set both dates to midnight UTC to avoid timezone issues
-                const sampleSendDateUTC = Date.UTC(
-                  sampleSendDate.getUTCFullYear(),
-                  sampleSendDate.getUTCMonth(),
-                  sampleSendDate.getUTCDate()
-                );
-                const referenceDateUTC = Date.UTC(
-                  referenceDate.getUTCFullYear(),
-                  referenceDate.getUTCMonth(),
-                  referenceDate.getUTCDate()
-                );
-                leadTimeRemaining = Math.ceil(
-                  (sampleSendDateUTC - referenceDateUTC) / (1000 * 60 * 60 * 24)
-                );
-                // If DHLTracking date exceeds target date, leadTimeRemaining will be negative
-              }
-              // Fabric
-              let fabricRemaining = null;
-              let fabricActualBadge = null;
-              if (row.fabricBooking && row.fabricBooking.receiveDate) {
-                if (row.fabricBooking.actualReceiveDate) {
-                  // Show days difference (negative = late, positive = early/on time)
-                  const planned = new Date(row.fabricBooking.receiveDate);
-                  const actual = new Date(row.fabricBooking.actualReceiveDate);
-                  const diffDays = Math.round(
-                    (planned.getTime() - actual.getTime()) / (1000 * 60 * 60 * 24)
-                  );
-                  fabricActualBadge = (
-                    <span
-                      className={
-                        diffDays < 0
-                          ? "text-red-500"
-                          : diffDays > 0
-                          ? "text-blue-600"
-                          : "text-green-600"
-                      }
-                      style={diffDays > 0 ? { color: "#2563eb" } : undefined}
-                    >
-                      {diffDays < 0
-                        ? `${diffDays} days late`
-                        : diffDays > 0
-                        ? `${Math.abs(diffDays)} days early`
-                        : "On time"}
-                    </span>
-                  );
-                } else {
-                  // Show remaining days from today to planned receive date
-                  const receiveDate = new Date(row.fabricBooking.receiveDate);
-                  const today = new Date();
-                  fabricRemaining = Math.round(
-                    (receiveDate.getTime() - today.setHours(0, 0, 0, 0)) / (1000 * 60 * 60 * 24)
-                  );
-                }
-              }
+                style={diffDays > 0 ? { color: "#2563eb" } : undefined}
+              >
+                {diffDays < 0
+                  ? `${diffDays} days late`
+                  : diffDays > 0
+                  ? `${Math.abs(diffDays)} days early`
+                  : "On time"}
+              </span>
+            );
+          } else {
+            // Show remaining days from today to planned receive date
+            const receiveDate = new Date(row.fabricBooking.receiveDate);
+            const today = new Date();
+            fabricRemaining = Math.round(
+              (receiveDate.getTime() - today.setHours(0, 0, 0, 0)) / (1000 * 60 * 60 * 24)
+            );
+          }
+        }
 
-              // Sample
-              let sampleRemaining = null;
-              let sampleActualBadge = null;
-              if (row.sampleDevelopment && row.sampleDevelopment.sampleCompleteDate) {
-                if (row.sampleDevelopment.actualSampleCompleteDate) {
-                  // Show days difference (negative = late, positive = early/on time)
-                  const planned = new Date(row.sampleDevelopment.sampleCompleteDate);
-                  const actual = new Date(row.sampleDevelopment.actualSampleCompleteDate);
-                  const diffDays = Math.round(
-                    (planned.getTime() - actual.getTime()) / (1000 * 60 * 60 * 24)
-                  );
-                  sampleActualBadge = (
-                    <span
-                      className={
-                        diffDays < 0 
-                          ? "text-red-500"
-                          : diffDays > 0
-                          ? "text-blue-600"
-                          : "text-green-600"
-                      }
-                      style={diffDays > 0 ? { color: "#2563eb" } : undefined}
-                    >
-                      {diffDays < 0
-                        ? `${diffDays} days late`
-                        : diffDays > 0
-                        ? `${Math.abs(diffDays)} days early`
-                        : "On time"}
-                    </span>
-                  );
-                } else {
-                  // Show remaining days from today to planned complete date
-                  const completeDate = new Date(row.sampleDevelopment.sampleCompleteDate);
-                  const today = new Date();
-                  sampleRemaining = Math.round(
-                    (completeDate.getTime() - today.setHours(0, 0, 0, 0)) / (1000 * 60 * 60 * 24)
-                  );
+        // Sample
+        let sampleRemaining = null;
+        let sampleActualBadge = null;
+        if (row.sampleDevelopment && row.sampleDevelopment.sampleCompleteDate) {
+          if (row.sampleDevelopment.actualSampleCompleteDate) {
+            // Show days difference (negative = late, positive = early/on time)
+            const planned = new Date(row.sampleDevelopment.sampleCompleteDate);
+            const actual = new Date(row.sampleDevelopment.actualSampleCompleteDate);
+            const diffDays = Math.round(
+              (planned.getTime() - actual.getTime()) / (1000 * 60 * 60 * 24)
+            );
+            sampleActualBadge = (
+              <span
+                className={
+                  diffDays < 0 
+                    ? "text-red-500"
+                    : diffDays > 0
+                    ? "text-blue-600"
+                    : "text-green-600"
                 }
-              }
+                style={diffDays > 0 ? { color: "#2563eb" } : undefined}
+              >
+                {diffDays < 0
+                  ? `${diffDays} days late`
+                  : diffDays > 0
+                  ? `${Math.abs(diffDays)} days early`
+                  : "On time"}
+              </span>
+            );
+          } else {
+            // Show remaining days from today to planned complete date
+            const completeDate = new Date(row.sampleDevelopment.sampleCompleteDate);
+            const today = new Date();
+            sampleRemaining = Math.round(
+              (completeDate.getTime() - today.setHours(0, 0, 0, 0)) / (1000 * 60 * 60 * 24)
+            );
+          }
+        }
 
-              return (
-                <TableRow key={row.id}>
-                  <TableCell>{row.itemName || ""}</TableCell>
-                  <TableCell>
-                    {row.itemImage ? (
-                      <img
-                        src={`${url.BASE_URL}${encodeURI(row.itemImage)}`}
-                        alt={row.style}
-                        className="h-12 w-12 object-cover rounded border"
-                        style={{ maxWidth: 48, maxHeight: 48 }}
-                        loading="lazy"
-                      />
-                    ) : (
-                      <span className="text-xs text-muted-foreground">No image</span>
-                    )}
-                  </TableCell>
-                  <TableCell>{row.merchandiser || ""}</TableCell>
-                  <TableCell className="text-nowrap sticky left-0 bg-background z-20">{row.style || ""}</TableCell>
-                  <TableCell>
+        return (
+          <TableRow key={row.id}>
+            <TableCell>{row.itemName || ""}</TableCell>
+            <TableCell>
+              {row.itemImage ? (
+                <img
+                  src={`${url.BASE_URL}${encodeURI(row.itemImage)}`}
+                  alt={row.style}
+                  className="h-12 w-12 object-cover rounded border"
+                  style={{ maxWidth: 48, maxHeight: 48 }}
+                  loading="lazy"
+                />
+              ) : (
+                <span className="text-xs text-muted-foreground">No image</span>
+              )}
+            </TableCell>
+            <TableCell>{row.merchandiser || ""}</TableCell>
+            <TableCell className="text-nowrap sticky left-0 bg-background z-20">{row.style || ""}</TableCell>
+            <TableCell>
+              <Button
+                variant="link"
+                onClick={() => showBuyerModal(row.buyerName || "")}
+              >
+                {row.buyerName || ""}
+              </Button>
+            </TableCell>
+            <TableCell>
+              {row.sampleSendingDate
+                ? new Date(row.sampleSendingDate).toLocaleDateString(undefined, { timeZone: "UTC" })
+                : ""}
+            </TableCell>
+            <TableCell>
+              {leadTimeRemaining !== null
+                ? (
                     <Button
                       variant="link"
-                      onClick={() => showBuyerModal(row.buyerName || "")}
+                      onClick={() => setLeadTimeModal({ open: true, row })}
                     >
-                      {row.buyerName || ""}
+                      {getStatusBadge(leadTimeRemaining)}
                     </Button>
-                  </TableCell>
-                  <TableCell>
-                    {row.sampleSendingDate
-                      ? new Date(row.sampleSendingDate).toLocaleDateString(undefined, { timeZone: "UTC" })
-                      : ""}
-                  </TableCell>
-                  <TableCell>
-                    {leadTimeRemaining !== null
-                      ? (
-                          <Button
-                            variant="link"
-                            onClick={() => setLeadTimeModal({ open: true, row })}
-                          >
-                            {getStatusBadge(leadTimeRemaining)}
-                          </Button>
-                        )
-                      : ""}
-                  </TableCell>
-                  <TableCell>{row.sampleType || ""}</TableCell>
-                  <TableCell>
-                    {row.cad ? (
-                      <Button
-                        variant="link"
-                        onClick={() => openCadModal(row.cad)}
-                      >
-                        {cadActualBadge ? cadActualBadge : getStatusBadge(cadRemaining)}
-                      </Button>
-                    ) : (
-                      ""
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {row.fabricBooking ? (
-                      <Button
-                        variant="link"
-                        onClick={() => openFabricModal(row.fabricBooking)}
-                      >
-                        {fabricActualBadge ? fabricActualBadge : getStatusBadge(fabricRemaining)}
-                      </Button>
-                    ) : (
-                      ""
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {row.sampleDevelopment ? (
-                      <Button
-                        variant="link"
-                        onClick={() => openSampleModal(row.sampleDevelopment)}
-                      >
-                        {sampleActualBadge ? sampleActualBadge : getStatusBadge(sampleRemaining)}
-                      </Button>
-                    ) : (
-                      ""
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {row.dhlTracking ? (
-                      <div>
-                        {/* <div>
-                          <span className="font-semibold">No:</span> {row.dhlTracking.trackingNumber}
-                        </div>
-                        <div>
-                          <span className="font-semibold">Date:</span> {row.dhlTracking.date ? new Date(row.dhlTracking.date).toLocaleDateString() : ""}
-                        </div> */}
-                        <div className=" text-nowrap justify-center flex ">
-                          <span className="font-semibold text-green-500 border-2 border-green-200 rounded-md px-1"> {row.dhlTracking.isComplete ? "Completed" : "Not Completed"}</span>
-                          <p>
-                            {/* {row.dhlTracking.date
-                              ? new Date(row.dhlTracking.date).toLocaleDateString(undefined, { timeZone: "UTC" })
-                              : ""} */}
-                          </p>
-                        </div>
-                      </div>
-                    ) : (
-                      !readOnlyModals && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => setDhlModal({ open: true, style: row.style })}
-                        >
-                          Add DHL Tracking
-                        </Button>
-                      )
-                    )}
-                  </TableCell>
-                </TableRow>
-              );
-            })}
+                  )
+                : ""}
+            </TableCell>
+            <TableCell>{row.sampleType || ""}</TableCell>
+            <TableCell>
+              {row.cad ? (
+                <Button
+                  variant="link"
+                  onClick={() => openCadModal(row.cad)}
+                >
+                  {cadActualBadge ? cadActualBadge : getStatusBadge(cadRemaining)}
+                </Button>
+              ) : (
+                ""
+              )}
+            </TableCell>
+            <TableCell>
+              {row.fabricBooking ? (
+                <Button
+                  variant="link"
+                  onClick={() => openFabricModal(row.fabricBooking)}
+                >
+                  {fabricActualBadge ? fabricActualBadge : getStatusBadge(fabricRemaining)}
+                </Button>
+              ) : (
+                ""
+              )}
+            </TableCell>
+            <TableCell>
+              {row.sampleDevelopment ? (
+                <Button
+                  variant="link"
+                  onClick={() => openSampleModal(row.sampleDevelopment)}
+                >
+                  {sampleActualBadge ? sampleActualBadge : getStatusBadge(sampleRemaining)}
+                </Button>
+              ) : (
+                ""
+              )}
+            </TableCell>
+            <TableCell>
+              {row.dhlTracking ? (
+                <div>
+                  {/* <div>
+                    <span className="font-semibold">No:</span> {row.dhlTracking.trackingNumber}
+                  </div>
+                  <div>
+                    <span className="font-semibold">Date:</span> {row.dhlTracking.date ? new Date(row.dhlTracking.date).toLocaleDateString() : ""}
+                  </div> */}
+                  <div className=" text-nowrap justify-center flex ">
+                    <span className="font-semibold text-green-500 border-2 border-green-200 rounded-md px-1"> {row.dhlTracking.isComplete ? "Completed" : "Not Completed"}</span>
+                    <p>
+                      {/* {row.dhlTracking.date
+                        ? new Date(row.dhlTracking.date).toLocaleDateString(undefined, { timeZone: "UTC" })
+                        : ""} */}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                !readOnlyModals && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setDhlModal({ open: true, style: row.style })}
+                  >
+                    Add DHL Tracking
+                  </Button>
+                )
+              )}
+            </TableCell>
+          </TableRow>
+        );
+      })
+    )}
           </TableBody>
         </Table>
         {/* Pagination Controls */}
