@@ -204,9 +204,9 @@ const SampleDevelopement = () => {
               <TableRow>
                 <TableHead>Style</TableHead>
                 <TableHead>Sampleman Name</TableHead>
-                <TableHead>Sample Receive Date</TableHead>
-                <TableHead>Sample Complete Date</TableHead>
-                <TableHead>Sample Quantity</TableHead>
+                <TableHead> Receive Date</TableHead>
+                <TableHead> Complete Date</TableHead>
+                <TableHead> Quantity</TableHead>
                 <TableHead>Action</TableHead>
               </TableRow>
             </TableHeader>
