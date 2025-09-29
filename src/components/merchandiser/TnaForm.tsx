@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import toast from "react-hot-toast";
@@ -14,10 +14,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { useCreateTNAMutation } from "@/redux/api/tnaApi";
+import { useCreateTNAMutation, useUpdateTNAMutation } from "@/redux/api/tnaApi";
 
 interface TnaFormProps {
   onSuccess: () => void;
+  initialValues?: Partial<
+    TnaFormState & {
+      id?: string;
+      itemImage?: string;
+      merchandiser?: { id: string; userName?: string }; // <-- add this
+    }
+  >;
+  onEdit?: (values: any) => Promise<void>;
 }
 interface TnaFormState {
   buyerId: string;
@@ -38,7 +46,7 @@ interface Merchandiser {
   userName: string;
 }
 
-export default function TnaForm({ onSuccess }: TnaFormProps) {
+export default function TnaForm({ onSuccess, initialValues, onEdit }: TnaFormProps) {
   const [form, setForm] = useState<TnaFormState>({
     buyerId: "",
     style: "",
@@ -50,12 +58,51 @@ export default function TnaForm({ onSuccess }: TnaFormProps) {
     sampleType: "",
   });
   const [createTna, { isLoading }] = useCreateTNAMutation();
+  const [updateTna, { isLoading: isUpdating }] = useUpdateTNAMutation();
   const { data: buyersResponse } = useGetBuyersQuery({});
   const { data: merchandisers } = useGetMerchandisersQuery({});
-  const [imageFile, setImageFile] = useState<File | null>(null); // store file, not url
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [existingImage, setExistingImage] = useState<string | null>(null);
 
   const buyers = buyersResponse?.data ?? [];
+
+  // Autofill form when editing
+  useEffect(() => {
+    if (initialValues) {
+      setForm({
+        buyerId: initialValues.buyerId || "",
+        style: initialValues.style || "",
+        itemName: initialValues.itemName || "",
+        sampleSendingDate: initialValues.sampleSendingDate
+          ? initialValues.sampleSendingDate.slice(0, 10)
+          : "",
+        orderDate: initialValues.orderDate
+          ? initialValues.orderDate.slice(0, 10)
+          : "",
+        userId: initialValues.merchandiser?.id || initialValues.userId || "",
+        status: initialValues.status || "ACTIVE",
+        sampleType: initialValues.sampleType || "",
+      });
+      setExistingImage(initialValues.itemImage || null);
+      setEditMode(true);
+    } else {
+      setEditMode(false);
+      setExistingImage(null);
+      setImageFile(null);
+      setForm({
+        buyerId: "",
+        style: "",
+        itemName: "",
+        sampleSendingDate: "",
+        orderDate: "",
+        userId: "",
+        status: "ACTIVE",
+        sampleType: "",
+      });
+    }
+  }, [initialValues]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -69,44 +116,61 @@ export default function TnaForm({ onSuccess }: TnaFormProps) {
   // Change handleImageChange to only store the file, not upload
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) setImageFile(file);
+    if (file) {
+      setImageFile(file);
+      setExistingImage(null);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!imageFile) {
-      toast.error("Please select an item image before submitting.");
-      return;
-    }
     setUploading(true);
-    let imageUrl = "";
+    let imageUrl = existingImage || "";
     try {
-      // Upload image first
-      const formData = new FormData();
-      formData.append("image", imageFile);
-      // Use backend URL for image upload
-      const res = await fetch("http://192.168.0.98:3001/tnas/upload-image", {
-        method: "POST",
-        body: formData,
-        credentials: "include",
-      });
-      const data = await res.json();
-      if (data.imageUrl) {
-        imageUrl = data.imageUrl;
-      } else {
-        toast.error("Image upload failed");
+      // If new image selected, upload it
+      if (imageFile) {
+        const formData = new FormData();
+        formData.append("image", imageFile);
+        const res = await fetch("http://192.168.0.98:3001/tnas/upload-image", {
+          method: "POST",
+          body: formData,
+          credentials: "include",
+        });
+        const data = await res.json();
+        if (data.imageUrl) {
+          imageUrl = data.imageUrl;
+        } else {
+          toast.error("Image upload failed");
+          setUploading(false);
+          return;
+        }
+      } else if (!editMode) {
+        toast.error("Please select an item image before submitting.");
         setUploading(false);
         return;
       }
 
-      // Now create TNA with imageUrl
-      await createTna({
+      const payload = {
         ...form,
         itemImage: imageUrl,
         sampleSendingDate: new Date(form.sampleSendingDate).toISOString(),
         orderDate: new Date(form.orderDate).toISOString(),
-      }).unwrap();
-      toast.success("TNA created successfully");
+      };
+
+      if (editMode && initialValues?.id) {
+        // Update mode
+        if (onEdit) {
+          await onEdit(payload);
+        } else {
+          await updateTna({ id: initialValues.id, ...payload }).unwrap();
+        }
+        toast.success("TNA updated successfully");
+      } else {
+        // Create mode
+        await createTna(payload).unwrap();
+        toast.success("TNA created successfully");
+      }
+
       setForm({
         buyerId: "",
         style: "",
@@ -118,9 +182,11 @@ export default function TnaForm({ onSuccess }: TnaFormProps) {
         sampleType: "",
       });
       setImageFile(null);
+      setExistingImage(null);
+      setEditMode(false);
       onSuccess();
     } catch (error: any) {
-      toast.error(error?.data?.error || "Failed to create TNA");
+      toast.error(error?.data?.error || "Failed to submit TNA");
     } finally {
       setUploading(false);
     }
@@ -182,14 +248,12 @@ export default function TnaForm({ onSuccess }: TnaFormProps) {
             disabled={uploading}
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
             style={{ zIndex: 2 }}
-            key={imageFile ? imageFile.name : "empty"}
-            // Remove value="" (not needed)
-            // Add ref to reset input when imageFile is cleared
+            key={imageFile ? imageFile.name : existingImage || "empty"}
             ref={(input) => {
-              if (!imageFile && input) input.value = "";
+              if (!imageFile && !existingImage && input) input.value = "";
             }}
           />
-          {!imageFile ? (
+          {!imageFile && !existingImage ? (
             <div className="flex  items-center justify-center h-[5px] ">
               <svg
                 width="32"
@@ -229,23 +293,30 @@ export default function TnaForm({ onSuccess }: TnaFormProps) {
           ) : (
             <div className="flex flex-col items-center gap-2 w-full">
               <img
-                src={URL.createObjectURL(imageFile)}
+                src={
+                  imageFile
+                    ? URL.createObjectURL(imageFile)
+                    : existingImage
+                    ? existingImage
+                    : ""
+                }
                 alt="Item"
                 className="max-h-32 rounded shadow border"
               />
-              <Button
+              {/* <Button
                 type="button"
                 variant="outline"
                 size="sm"
-                tabIndex={0} // Ensure button is focusable
+                tabIndex={0}
                 onClick={(e) => {
-                  e.stopPropagation(); // Prevent parent click event
+                  e.stopPropagation();
                   setImageFile(null);
+                  setExistingImage(null);
                 }}
                 disabled={uploading}
               >
                 Remove
-              </Button>
+              </Button> */}
             </div>
           )}
         </div>
@@ -330,9 +401,9 @@ export default function TnaForm({ onSuccess }: TnaFormProps) {
         <Button
           className="w-[400px] self-end"
           type="submit"
-          disabled={isLoading || uploading}
+          disabled={isLoading || isUpdating || uploading}
         >
-          Submit TNA Form
+          {editMode ? "Update TNA" : "Submit TNA Form"}
         </Button>
       </div>
     </form>

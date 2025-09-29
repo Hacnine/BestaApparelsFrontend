@@ -7,7 +7,7 @@ import { Plus } from "lucide-react";
 import TnaForm from "./TnaForm";
 import url from "@/config/urls";
 
-import { useGetTNAsQuery } from "@/redux/api/tnaApi"; 
+import { useGetTNAsQuery, useUpdateTNAMutation } from "@/redux/api/tnaApi"; 
 import {
   Dialog,
   DialogContent,
@@ -34,6 +34,8 @@ export default function SampleTna() {
   const { data, isLoading, error } = useGetTNAsQuery({ page, pageSize, search });
   const [openTna, setOpenTna] = useState(false);
   const [modal, setModal] = useState({ open: false, type: null, details: null });
+  const [editTna, setEditTna] = useState(null);
+  const [updateTNA] = useUpdateTNAMutation();
 
   // Modal state for merchandiser and buyer
   const openDetailsModal = (type, details) => setModal({ open: true, type, details });
@@ -78,7 +80,17 @@ export default function SampleTna() {
 
       {openTna && (
         <Card className="p-4 ">
-          <TnaForm onSuccess={() => setOpenTna(false)} />
+          <TnaForm
+            onSuccess={() => {
+              setOpenTna(false);
+              setEditTna(null);
+            }}
+            initialValues={editTna}
+            onEdit={async (values) => {
+              if (!editTna) return;
+              await updateTNA({ id: editTna.id, ...values }).unwrap();
+            }}
+          />
         </Card>
       )}
 
@@ -96,6 +108,7 @@ export default function SampleTna() {
               <TableHead className="text-nowrap">Sample Type</TableHead>
               <TableHead>Buyer</TableHead>
               <TableHead>Merchandiser</TableHead>
+              <TableHead>Actions</TableHead> 
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -153,6 +166,18 @@ export default function SampleTna() {
                   ) : (
                     ""
                   )}
+                </TableCell>
+                <TableCell>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setEditTna(row);
+                      setOpenTna(true);
+                    }}
+                  >
+                    Edit
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}
