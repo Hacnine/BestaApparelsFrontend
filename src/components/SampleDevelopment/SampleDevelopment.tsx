@@ -2,7 +2,10 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useCreateSampleDevelopmentMutation, useGetSampleDevelopmentQuery } from '@/redux/api/cadApi';
+import { useGetSampleDevelopmentsQuery,
+  useCreateSampleDevelopmentMutation,
+  useUpdateSampleDevelopmentMutation,
+  useDeleteSampleDevelopmentMutation, } from '@/redux/api/sampleDevelopementApi';
 import toast from 'react-hot-toast';
 import {
   Table,
@@ -23,12 +26,16 @@ const SampleDevelopement = () => {
     sampleQuantity: "",
   });
   const [createSampleDevelopment, { isLoading }] = useCreateSampleDevelopmentMutation();
+  const [updateSampleDevelopment, { isLoading: isUpdating }] = useUpdateSampleDevelopmentMutation();
+
+  // Edit state
+  const [editId, setEditId] = useState<string | null>(null);
 
   // Pagination state
   const [page, setPage] = useState(1);
   const pageSize = 10;
-  const { data, isLoading: isTableLoading } = useGetSampleDevelopmentQuery
-    ? useGetSampleDevelopmentQuery({ page, pageSize })
+  const { data, isLoading: isTableLoading } = useGetSampleDevelopmentsQuery
+    ? useGetSampleDevelopmentsQuery({ page, pageSize })
     : { data: null, isLoading: false };
 
   const handleChange = (e: { target: { name: any; value: any; }; }) => {
@@ -39,14 +46,26 @@ const SampleDevelopement = () => {
   const handleSubmit = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
     try {
-      await createSampleDevelopment({
-        style: form.style,
-        samplemanName: form.samplemanName,
-        sampleReceiveDate: new Date(form.sampleReceiveDate).toISOString(),
-        sampleCompleteDate: new Date(form.sampleCompleteDate).toISOString(),
-        sampleQuantity: Number(form.sampleQuantity),
-      }).unwrap();
-      toast.success('Sample Development created successfully');
+      if (editId) {
+        await updateSampleDevelopment({
+          id: editId,
+          style: form.style,
+          samplemanName: form.samplemanName,
+          sampleReceiveDate: new Date(form.sampleReceiveDate).toISOString(),
+          sampleCompleteDate: new Date(form.sampleCompleteDate).toISOString(),
+          sampleQuantity: Number(form.sampleQuantity),
+        }).unwrap();
+        toast.success('Sample Development updated successfully');
+      } else {
+        await createSampleDevelopment({
+          style: form.style,
+          samplemanName: form.samplemanName,
+          sampleReceiveDate: new Date(form.sampleReceiveDate).toISOString(),
+          sampleCompleteDate: new Date(form.sampleCompleteDate).toISOString(),
+          sampleQuantity: Number(form.sampleQuantity),
+        }).unwrap();
+        toast.success('Sample Development created successfully');
+      }
       setForm({
         style: "",
         samplemanName: "",
@@ -55,9 +74,27 @@ const SampleDevelopement = () => {
         sampleQuantity: "",
       });
       setOpenForm(false);
+      setEditId(null);
     } catch (error) {
-      toast.error(error?.data?.error || 'Failed to create Sample Development');
+      toast.error(error?.data?.error || 'Failed to submit Sample Development');
     }
+  };
+
+  // Edit handler
+  const handleEdit = (row: any) => {
+    setForm({
+      style: row.style || "",
+      samplemanName: row.samplemanName || "",
+      sampleReceiveDate: row.sampleReceiveDate
+        ? new Date(row.sampleReceiveDate).toISOString().slice(0, 10)
+        : "",
+      sampleCompleteDate: row.sampleCompleteDate
+        ? new Date(row.sampleCompleteDate).toISOString().slice(0, 10)
+        : "",
+      sampleQuantity: row.sampleQuantity?.toString() || "",
+    });
+    setEditId(row.id);
+    setOpenForm(true);
   };
 
   return (
@@ -130,7 +167,29 @@ const SampleDevelopement = () => {
                 />
               </div>
               <div className="col-span-2 flex justify-center">
-                <Button type="submit" disabled={isLoading}>Submit</Button>
+                <Button type="submit" disabled={isLoading || isUpdating}>
+                  {editId ? "Update" : "Submit"}
+                </Button>
+                {editId && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="ml-2"
+                    onClick={() => {
+                      setEditId(null);
+                      setForm({
+                        style: "",
+                        samplemanName: "",
+                        sampleReceiveDate: "",
+                        sampleCompleteDate: "",
+                        sampleQuantity: "",
+                      });
+                      setOpenForm(false);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                )}
               </div>
             </form>
           </CardContent>
@@ -148,6 +207,7 @@ const SampleDevelopement = () => {
                 <TableHead>Sample Receive Date</TableHead>
                 <TableHead>Sample Complete Date</TableHead>
                 <TableHead>Sample Quantity</TableHead>
+                <TableHead>Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -166,6 +226,15 @@ const SampleDevelopement = () => {
                       : ""}
                   </TableCell>
                   <TableCell>{row.sampleQuantity}</TableCell>
+                  <TableCell>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEdit(row)}
+                    >
+                      Edit
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
