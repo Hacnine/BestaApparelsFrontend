@@ -23,6 +23,8 @@ import {
 } from "@/components/ui/popover";
 import BuyerForm from "../merchandiser/BuyerForm";
 import { useState } from "react";
+import { DepartmentProgress } from "../common/DepartmentProgress";
+import TnaSummaryCards from "../merchandiser/TnaSummaryCards";
 
 const statsCards = [
   {
@@ -120,7 +122,7 @@ const departmentProgress = [
 export function AdminDashboardOverview() {
   const [openBuyer, setOpenBuyer] = useState(false);
   return (
-    <div className="space-y-6 px-4">
+    <div className="space-y-6 p-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -131,78 +133,14 @@ export function AdminDashboardOverview() {
             Monitor and manage your Sample TNA
           </p>
         </div>
-       
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {statsCards.map((stat) => (
-          <Card
-            key={stat.title}
-            className="bg-gradient-card border-0 shadow-md"
-          >
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">
-                    {stat.title}
-                  </p>
-                  <div className="flex items-center space-x-2">
-                    <p className="text-2xl font-bold text-foreground">
-                      {stat.value}
-                    </p>
-                    <Badge
-                      variant={
-                        stat.changeType === "positive"
-                          ? "default"
-                          : "destructive"
-                      }
-                      className="text-xs"
-                    >
-                      {stat.change}
-                    </Badge>
-                  </div>
-                </div>
-                <div
-                  className={`p-3 rounded-lg ${
-                    stat.changeType === "positive"
-                      ? "bg-gradient-success"
-                      : "bg-gradient-primary"
-                  }`}
-                >
-                  <stat.icon className="w-6 h-6 text-white" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <TnaSummaryCards/>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Department Progress */}
-        <Card className="bg-gradient-card border-0 shadow-md">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <TrendingUp className="w-5 h-5 text-accent" />
-              <span>Department Progress</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {departmentProgress.map((dept) => (
-              <div key={dept.name} className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-foreground">
-                    {dept.name}
-                  </span>
-                  <span className="text-sm text-muted-foreground">
-                    {dept.completed}/{dept.total} tasks
-                  </span>
-                </div>
-                <Progress value={dept.percentage} className="h-2" />
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+        <DepartmentProgress />
 
         {/* Recent Activity */}
         <Card className="bg-gradient-card border-0 shadow-md">
@@ -265,47 +203,6 @@ export function AdminDashboardOverview() {
           </CardContent>
         </Card>
       </div>
-
-      {/* Quick Actions */}
-      <Card className="bg-gradient-card border-0 shadow-md">
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <FileText className="w-5 h-5 text-accent" />
-            <span>Quick Actions</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Button variant="outline" className="h-auto p-4 justify-start">
-              <Users className="w-5 h-5 mr-3 text-accent" />
-              <div className="text-left">
-                <div className="font-medium">Manage Users</div>
-                <div className="text-sm text-muted-foreground">
-                  Add or edit user roles
-                </div>
-              </div>
-            </Button>
-            <Button variant="outline" className="h-auto p-4 justify-start">
-              <Settings className="w-5 h-5 mr-3 text-accent" />
-              <div className="text-left">
-                <div className="font-medium">System Settings</div>
-                <div className="text-sm text-muted-foreground">
-                  Configure system options
-                </div>
-              </div>
-            </Button>
-            <Button variant="outline" className="h-auto p-4 justify-start">
-              <FileText className="w-5 h-5 mr-3 text-accent" />
-              <div className="text-left">
-                <div className="font-medium">Generate Report</div>
-                <div className="text-sm text-muted-foreground">
-                  Export system analytics
-                </div>
-              </div>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }

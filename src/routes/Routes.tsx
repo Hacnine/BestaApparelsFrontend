@@ -8,7 +8,6 @@ import { LoginPage, roleRoutes } from "@/components/auth/LoginPage";
 import { Layout } from "@/components/admin/Layout";
 import { AdminDashboardOverview } from "@/components/admin/AdminDashboardOverview";
 import { UserManagement } from "@/components/admin/UserManagement";
-import { TNAProgress } from "@/components/admin/TNAProgress";
 import { AuditLogs } from "@/components/admin/AuditLogs";
 import NotFound from "@/pages/NotFound";
 import EmployeeManagement from "@/components/admin/EmployeeManagement";
@@ -66,7 +65,6 @@ export const router = createBrowserRouter(
           <Route path="employee" element={<EmployeeManagement />} />
           <Route path="user" element={<UserManagement />} />
           <Route path="buyer" element={<BuyerManagement />} />
-          <Route path="tna" element={<TNAProgress />} />
           <Route path="audit" element={<AuditLogs />} />
           <Route path="reports" element={<Reports />} />
           <Route path="*" element={<NotFound />} />

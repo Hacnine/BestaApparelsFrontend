@@ -51,16 +51,16 @@ const navigationItemsMap: Record<string, any[]> = {
       href: `${APP_ROUTES.admin_buyer}`,
       icon: Barcode,
     },
-    {
-      title: "TNA Progress",
-      href: `${APP_ROUTES.admin_tna}`,
-      icon: TrendingUp,
-    },
-    {
-      title: "Audit Logs",
-      href: `${APP_ROUTES.admin_audit}`,
-      icon: Activity,
-    },
+    // {
+    //   title: "TNA Progress",
+    //   href: `${APP_ROUTES.admin_tna}`,
+    //   icon: TrendingUp,
+    // },
+    // {
+    //   title: "Audit Logs",
+    //   href: `${APP_ROUTES.admin_audit}`,
+    //   icon: Activity,
+    // },
     {
       title: "Reports",
       href: `${APP_ROUTES.admin_reports}`,

@@ -1,6 +1,15 @@
 import React from "react";
 import { Card, CardContent } from "../ui/card";
+import { Button } from "../ui/button";
 import { Progress } from "../ui/progress";
+import {
+  CheckCircle,
+  AlertTriangle,
+  XCircle,
+  Download,
+  Filter,
+} from "lucide-react";
+import { useGetTNASummaryCardQuery } from "@/redux/api/tnaApi";
 
 type TnaCardConfigItem = {
   status: string;
@@ -14,15 +23,37 @@ type TnaSummaryCardsProps = {
   tnaCardConfig: TnaCardConfigItem[];
   summaryCardData: Record<string, number>;
 };
+const tnaCardConfig = [
+  {
+    status: "On Track",
+    key: "onProcess",
+    color: "bg-gradient-success",
+    textColor: "text-success",
+    icon: <CheckCircle className="w-6 h-6 text-white" />,
+  },
+  {
+    status: "Completed",
+    key: "completed",
+    color: "bg-gradient-accent",
+    textColor: "text-warning",
+    icon: <AlertTriangle className="w-6 h-6 text-white" />,
+  },
+  {
+    status: "Overdue",
+    key: "overdue",
+    color: "bg-destructive",
+    textColor: "text-destructive",
+    icon: <XCircle className="w-6 h-6 text-white" />,
+  },
+];
+const TnaSummaryCards = () => {
+  const { data: summaryCardData } = useGetTNASummaryCardQuery({});
 
-const TnaSummaryCards: React.FC<TnaSummaryCardsProps> = ({
-  tnaCardConfig,
-  summaryCardData,
-}) => (
-  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-    {tnaCardConfig.map((item) => {
-      const count = summaryCardData?.[item.key] ?? 0;
-      const total = summaryCardData?.total ?? 1;
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {tnaCardConfig.map((item) => {
+        const count = summaryCardData?.[item.key] ?? 0;
+        const total = summaryCardData?.total ?? 1;
       const percentage = total ? Math.round((count / total) * 100) : 0;
       return (
         <Card
@@ -55,5 +86,5 @@ const TnaSummaryCards: React.FC<TnaSummaryCardsProps> = ({
     })}
   </div>
 );
-
+};
 export default TnaSummaryCards;
