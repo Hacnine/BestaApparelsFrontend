@@ -32,13 +32,6 @@ export const merchandiserApi = createApi({
       }),
       providesTags: ["Merchandiser"],
     }),
-    getBuyers: builder.query({
-      query: () => ({
-        url: "buyers",
-        method: "GET",
-      }),
-      providesTags: ["Buyer"],
-    }),
     getDepartments: builder.query({
       query: () => ({
         url: "departments",
@@ -53,6 +46,5 @@ export const {
   useCreateBuyerMutation,
   useCreateDepartmentMutation,
   useGetMerchandisersQuery,
-  useGetBuyersQuery,
   useGetDepartmentsQuery,
 } = merchandiserApi;

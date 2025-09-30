@@ -2,8 +2,9 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import toast from "react-hot-toast";
-import { useCreateBuyerMutation, useGetDepartmentsQuery } from "@/redux/api/merchandiserApi";
+import { useGetDepartmentsQuery } from "@/redux/api/merchandiserApi";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useCreateBuyerMutation } from "@/redux/api/buyerApi";
 
 interface BuyerFormProps {
   onSuccess: () => void;
@@ -20,8 +21,8 @@ interface Department {
 
 export default function BuyerForm() {
   const [form, setForm] = useState<BuyerFormState>({ name: "", country: "", buyerDepartmentId: "" });
-  const [createBuyer, { isLoading }] = useCreateBuyerMutation();
-  const { data: departments } = useGetDepartmentsQuery();
+  const [createBuyer, { isLoading }] = useCreateBuyerMutation({});
+  const { data: departments } = useGetDepartmentsQuery({});
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -38,7 +39,7 @@ export default function BuyerForm() {
       await createBuyer({ ...form, buyerDepartmentId: form.buyerDepartmentId || null }).unwrap();
       toast.success("Buyer created successfully");
       setForm({ name: "", country: "", buyerDepartmentId: "" });
-      onSuccess();
+      // onSuccess();
     } catch (error: any) {
       toast.error(error?.data?.error || "Failed to create buyer");
     }

@@ -12,6 +12,7 @@ import { cadApi } from "./api/cadApi";
 import { sampleDevelopmentApi } from "./api/sampleDevelopementApi";
 import { fabricBookingApi } from "./api/fabricBooking";
 import { dhlTrackingApi } from "./api/dHLTrackingApi";
+import { buyerApi } from "./api/buyerApi";
 
 // No-op storage for server-side rendering
 const createNoopStorage = () => ({
@@ -39,6 +40,7 @@ const userPersistConfig = createPersistConfig("userSlice", {
 const reducers = {
   userSlice: persistReducer(userPersistConfig, userReducer),
   [userApi.reducerPath]: userApi.reducer,
+  [buyerApi.reducerPath]: buyerApi.reducer,
   [employeeApi.reducerPath]: employeeApi.reducer,
   [auditApi.reducerPath]: auditApi.reducer,
   [dashboardApi.reducerPath]: dashboardApi.reducer,
@@ -60,6 +62,7 @@ export const store = configureStore({
       },
     }).concat([
       userApi.middleware,
+      buyerApi.middleware,
       employeeApi.middleware,
       auditApi.middleware,
       dashboardApi.middleware,
