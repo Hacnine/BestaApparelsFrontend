@@ -4,7 +4,7 @@ import {
   createRoutesFromElements,
 } from "react-router-dom";
 import { APP_ROUTES } from "./APP_ROUTES";
-import { LoginPage } from "@/components/auth/LoginPage";
+import { LoginPage, roleRoutes } from "@/components/auth/LoginPage";
 import { Layout } from "@/components/admin/Layout";
 import { AdminDashboardOverview } from "@/components/admin/AdminDashboardOverview";
 import { UserManagement } from "@/components/admin/UserManagement";
@@ -34,7 +34,14 @@ const RootRoute = () => {
     return <Navigate to={APP_ROUTES.login} replace />;
   }
   // Optionally, redirect to dashboard based on role if needed
-  return <Navigate to="/admin/dashboard" replace />;
+  return (
+    <Navigate
+      to={
+        roleRoutes[user.role as keyof typeof roleRoutes] || APP_ROUTES.login
+      }
+      replace
+    />
+  );
 };
 
 // Create router with nested routes
@@ -93,15 +100,11 @@ export const router = createBrowserRouter(
       </Route>
 
       <Route element={<ManagementRoutes />}>
-        <Route
-          path="management"
-          element={<Layout sidebarFor={"management"} />}
-        >
+        <Route path="management" element={<Layout sidebarFor={"management"} />}>
           <Route path="dashboard" element={<ManagementDashboard />} />
         </Route>
       </Route>
 
-      
       <Route element={<ManagementRoutes />}>
         <Route path="employee" element={<EmployeeManagement />} />
         <Route path="user" element={<UserManagement />} />

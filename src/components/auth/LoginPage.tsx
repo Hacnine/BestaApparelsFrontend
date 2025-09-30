@@ -13,7 +13,7 @@ import { selectIsAuthenticated } from "@/redux/slices/userSlice"; // Import sele
 import { APP_ROUTES } from "@/routes/APP_ROUTES";
 import toast from "react-hot-toast";
 
-const roleRoutes = {
+export const roleRoutes = {
   ADMIN: `${APP_ROUTES.admin_dashboard}`,
   MANAGEMENT: `${APP_ROUTES.management_dashboard}`,
   MERCHANDISER: `${APP_ROUTES.merchandiser_dashboard}`,
