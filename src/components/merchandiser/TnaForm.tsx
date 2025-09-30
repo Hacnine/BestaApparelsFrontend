@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import toast from "react-hot-toast";
 import {
-  useGetBuyersQuery,
   useGetMerchandisersQuery,
 } from "@/redux/api/merchandiserApi";
 import {
@@ -15,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { useCreateTNAMutation, useUpdateTNAMutation } from "@/redux/api/tnaApi";
+import { useGetBuyersQuery } from "@/redux/api/buyerApi";
 
 interface TnaFormProps {
   onSuccess: () => void;
