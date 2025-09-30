@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useGetTNASummaryCardQuery, useGetDepartmentProgressV2Query } from "@/redux/api/tnaApi";
 import TnaSummaryCards from "./TnaSummaryCards";
+import { DepartmentProgress } from "../common/DepartmentProgress";
 
 const tnaCardConfig = [
   {
@@ -39,7 +40,6 @@ const tnaCardConfig = [
 
 export function MerchandiserDashboard() {
   const { data: summaryCardData } = useGetTNASummaryCardQuery({});
-  const { data: departmentProgressData, isLoading: isDeptLoading } = useGetDepartmentProgressV2Query({});
 
   return (
     <div className="space-y-6 p-4">
@@ -63,38 +63,7 @@ export function MerchandiserDashboard() {
       />
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Department Progress */}
-        <Card className="bg-gradient-card border-0 shadow-md">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <TrendingUp className="w-5 h-5 text-accent" />
-              <span>Department Progress</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {isDeptLoading ? (
-              <div className="text-center text-muted-foreground py-8">Loading...</div>
-            ) : (
-              (departmentProgressData?.data || []).map((dept: any) => (
-                <div key={dept.department} className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-foreground">
-                      {dept.department}
-                    </span>
-                    <span className="text-sm text-muted-foreground">
-                      {dept.completed}/{dept.total}
-                    </span>
-                  </div>
-                  <Progress value={dept.percentage} className="h-2" />
-                  <div className="text-right">
-                    <span className="text-xs text-muted-foreground">
-                      {dept.percentage}% complete
-                    </span>
-                  </div>
-                </div>
-              ))
-            )}
-          </CardContent>
-        </Card>
+        <DepartmentProgress/>
 
         {/* Quick Stats */}
         <Card className="lg:col-span-2 bg-gradient-card border-0 shadow-md">
