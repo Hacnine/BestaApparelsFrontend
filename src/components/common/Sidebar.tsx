@@ -66,11 +66,6 @@ const navigationItemsMap: Record<string, any[]> = {
       href: `${APP_ROUTES.admin_reports}`,
       icon: FileText,
     },
-    {
-      title: "System Settings",
-      href: `${APP_ROUTES.admin_settings}`,
-      icon: Settings,
-    },
   ],
   MERCHANDISER: [
     {
@@ -115,26 +110,13 @@ const navigationItemsMap: Record<string, any[]> = {
 
 const settingsItemsMap: Record<string, any[]> = {
   ADMIN: [
-    {
-      title: "Company Info",
-      href: `${APP_ROUTES.admin_info}`,
-      icon: Building2,
-    },
+
     {
       title: "Notifications",
       href: `${APP_ROUTES.admin_notifications}`,
       icon: Bell,
     },
-    {
-      title: "Approval Flow",
-      href: `${APP_ROUTES.admin_approval}`,
-      icon: ClipboardList,
-    },
-    {
-      title: "Security",
-      href: `${APP_ROUTES.admin_security}`,
-      icon: Shield,
-    },
+
   ],
   MERCHANDISER: [
       {
