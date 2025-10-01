@@ -142,14 +142,14 @@ export default function BuyerManagement() {
                         >
                           <Pencil className="w-4 h-4" />
                         </Button>
-                        <Button
+                        {/* <Button
                           size="sm"
                           className="ml-2"
                           variant="destructive"
                           onClick={() => handleDelete(buyer.id)}
                         >
                           <Trash className="w-4 h-4" />
-                        </Button>
+                        </Button> */}
                       </>
                     )}
                   </TableCell>
