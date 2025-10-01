@@ -71,6 +71,10 @@ import UserForm from "./UserForm";
 
 const userRoles = [
   {
+    value: "all",
+    label: "All",
+  },
+  {
     value: "ADMIN",
     label: "Admin",
   },
@@ -311,4 +315,3 @@ export function UserManagement() {
 }
 
 export default UserManagement;
-           

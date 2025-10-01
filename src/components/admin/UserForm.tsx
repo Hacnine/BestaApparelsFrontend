@@ -102,7 +102,7 @@ export default function UserForm({
               {employeeSearchResults.map((employee: any) => (
                 <div
                   key={employee.id}
-                  className="p-2 hover:bg-accent cursor-pointer flex justify-between items-center"
+                  className="p-2 hover:bg-blue-200 cursor-pointer flex justify-between items-center"
                   onClick={() => handleSelectEmployee(employee)}
                 >
                   <div>
