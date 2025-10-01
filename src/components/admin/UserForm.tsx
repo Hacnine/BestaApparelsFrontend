@@ -166,7 +166,7 @@ export default function UserForm({
         </Select>
       </div>
       <div className="flex gap-2">
-        <Button type="submit">{mode === "add" ? "Add User" : "Save"}</Button>
+        <Button type="submit">{mode === "add" ? "Submit Form" : "Save"}</Button>
         <Button variant="outline" type="button" onClick={onCancel}>
           Cancel
         </Button>
