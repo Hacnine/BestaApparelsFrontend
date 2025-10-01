@@ -163,7 +163,8 @@ export function UserManagement() {
       setIsAddDialogOpen(false);
       toast.success(`${form.userName} has been successfully added.`);
     } catch (err: any) {
-      toast.error(err?.data?.message || "Failed to add user.");
+      console.log(err)
+      toast.error(err?.data?.error || "Failed to add user.");
     }
   };
 
