@@ -161,7 +161,7 @@ export function Sidebar({ collapsed, onToggle }: AdminSidebarProps) {
   return (
     <div
       className={cn(
-        "relative bg-sidebar text-sidebar-foreground border-r border-border transition-all duration-300 h-screen",
+        "relative bg-sidebar text-sidebar-foreground border-r border-border transition-all duration-300 h-screen overflow-y-auto",
         collapsed ? "w-16" : "min-w-68"
       )}
     >
@@ -250,7 +250,7 @@ export function Sidebar({ collapsed, onToggle }: AdminSidebarProps) {
       </div>
 
       {/* Footer */}
-      <div className="p-4 border-t border-sidebar-hover">
+      <div className="p-4 border-t border-sidebar-hover ">
         {!collapsed ? (
           <div className="space-y-3">
             <div className="flex items-center space-x-3">
