@@ -23,7 +23,9 @@ import toast from "react-hot-toast";
 export default function BuyerManagement() {
   const navigate = useNavigate();
   const [openTna, setOpenTna] = useState(false);
-  const { data } = useGetBuyersQuery({});
+  const [page, setPage] = useState(1);
+  const limit = 10;
+  const { data, isLoading } = useGetBuyersQuery({ page, limit });
   const [editBuyer] = useEditBuyerMutation();
   const [deleteBuyer] = useDeleteBuyerMutation();
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -78,78 +80,106 @@ export default function BuyerManagement() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data?.data?.map((buyer: any) => (
-              <TableRow key={buyer.id}>
-                <TableCell>{buyer.id}</TableCell>
-                <TableCell>
-                  {editingId === buyer.id ? (
-                    <input
-                      value={editForm.name}
-                      onChange={(e) =>
-                        setEditForm((f) => ({ ...f, name: e.target.value }))
-                      }
-                      className="border px-2 py-1"
-                    />
-                  ) : (
-                    buyer.name
-                  )}
-                </TableCell>
-                <TableCell>
-                  {editingId === buyer.id ? (
-                    <input
-                      value={editForm.country}
-                      onChange={(e) =>
-                        setEditForm((f) => ({ ...f, country: e.target.value }))
-                      }
-                      className="border px-2 py-1"
-                    />
-                  ) : (
-                    buyer.country
-                  )}
-                </TableCell>
-                <TableCell>{buyer.buyerDepartments?.name || "-"}</TableCell>
-                <TableCell>
-                  {editingId === buyer.id ? (
-                    <>
-                      <Button
-                        size="sm"
-                        onClick={() => handleEditSave(buyer.id)}
-                      >
-                        Save
-                      </Button>
-                      <Button
-                        size="sm"
-                        className="ml-2"
-                        variant="outline"
-                        onClick={() => setEditingId(null)}
-                      >
-                        Cancel
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleEditClick(buyer)}
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        className="ml-2"
-                        variant="destructive"
-                        onClick={() => handleDelete(buyer.id)}
-                      >
-                        <Trash className="w-4 h-4" />
-                      </Button>
-                    </>
-                  )}
-                </TableCell>
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={5}>Loading...</TableCell>
               </TableRow>
-            ))}
+            ) : (
+              data?.data?.map((buyer: any) => (
+                <TableRow key={buyer.id}>
+                  <TableCell>{buyer.id}</TableCell>
+                  <TableCell>
+                    {editingId === buyer.id ? (
+                      <input
+                        value={editForm.name}
+                        onChange={(e) =>
+                          setEditForm((f) => ({ ...f, name: e.target.value }))
+                        }
+                        className="border px-2 py-1"
+                      />
+                    ) : (
+                      buyer.name
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {editingId === buyer.id ? (
+                      <input
+                        value={editForm.country}
+                        onChange={(e) =>
+                          setEditForm((f) => ({ ...f, country: e.target.value }))
+                        }
+                        className="border px-2 py-1"
+                      />
+                    ) : (
+                      buyer.country
+                    )}
+                  </TableCell>
+                  <TableCell>{buyer.buyerDepartments?.name || "-"}</TableCell>
+                  <TableCell>
+                    {editingId === buyer.id ? (
+                      <>
+                        <Button
+                          size="sm"
+                          onClick={() => handleEditSave(buyer.id)}
+                        >
+                          Save
+                        </Button>
+                        <Button
+                          size="sm"
+                          className="ml-2"
+                          variant="outline"
+                          onClick={() => setEditingId(null)}
+                        >
+                          Cancel
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleEditClick(buyer)}
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          className="ml-2"
+                          variant="destructive"
+                          onClick={() => handleDelete(buyer.id)}
+                        >
+                          <Trash className="w-4 h-4" />
+                        </Button>
+                      </>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
+        {/* Pagination Controls */}
+        <div className="flex items-center justify-between mt-4">
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={page === 1}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+          >
+            Previous
+          </Button>
+          <span>
+            Page {page} of {data?.pagination?.totalPages || 1}
+          </span>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={page >= (data?.pagination?.totalPages || 1)}
+            onClick={() => setPage((p) => p + 1)}
+          >
+            Next
+          </Button>
+        </div>
       </Card>
     </div>
   );
