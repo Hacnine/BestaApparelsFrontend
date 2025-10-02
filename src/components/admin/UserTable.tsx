@@ -46,6 +46,25 @@ interface UserTableProps {
   onPageChange?: (page: number) => void;
 }
 
+const getRoleBadgeColor = (role: string) => {
+  switch (role) {
+    case "ADMIN":
+      return "bg-red-100 text-red-700 border-red-200";
+    case "MANAGEMENT":
+      return "bg-purple-100 text-purple-700 border-purple-200";
+    case "MERCHANDISER":
+      return "bg-yellow-100 text-yellow-700 border-yellow-200";
+    case "CAD":
+      return "bg-pink-100 text-pink-700 border-pink-200";
+    case "SAMPLE_FABRIC":
+      return "bg-teal-100 text-teal-700 border-teal-200";
+    case "SAMPLE_ROOM":
+      return "bg-orange-100 text-orange-700 border-orange-200";
+    default:
+      return "bg-gray-100 text-gray-700 border-gray-200";
+  }
+};
+
 export default function UserTable({
   users,
   isLoading,
@@ -97,7 +116,12 @@ export default function UserTable({
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Badge variant="outline">{user?.role}</Badge>
+                  <Badge
+                    variant="outline"
+                    className={getRoleBadgeColor(user?.role)}
+                  >
+                    {user?.role}
+                  </Badge>
                 </TableCell>
                 <TableCell className="text-muted-foreground">
                   {user?.phoneNumber}

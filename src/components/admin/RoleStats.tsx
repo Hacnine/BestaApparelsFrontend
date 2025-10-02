@@ -1,4 +1,4 @@
-import { Users, UserCheck } from "lucide-react"; // Assuming these are from lucide-react for icons
+import { Users, UserCheck, Shield, UserCog, Briefcase, Ruler, Shirt, Building2 } from "lucide-react"; // Add relevant icons
 import {
   Card,
   CardContent,
@@ -12,66 +12,42 @@ const cardData = [
   {
     title: "Total Users",
     key: "total",
-    icon: <Users className="h-8 w-8 text-primary" />,
+    icon: <Users className="h-8 w-8 text-blue-600" />,
   },
   {
     title: "Active Users",
     key: "active",
-    icon: <UserCheck className="h-8 w-8 text-green-500" />,
+    icon: <UserCheck className="h-8 w-8 text-green-600" />,
   },
   {
     title: "Admins",
     key: "admin",
-    icon: (
-      <div className="w-8 h-8 bg-primary/20 rounded-lg flex items-center justify-center">
-        <span className="text-primary font-bold text-sm">A</span>
-      </div>
-    ),
+    icon: <Shield className="h-8 w-8 text-red-600" />, // Shield for Admins
   },
   {
     title: "Merchandisers",
     key: "merchandiser",
-    icon: (
-      <div className="w-8 h-8 bg-accent/20 rounded-lg flex items-center justify-center">
-        <span className="text-accent font-bold text-sm">M</span>
-      </div>
-    ),
+    icon: <Shirt className="h-8 w-8 text-yellow-500" />, // Shirt for Merchandisers
   },
   {
     title: "Management",
     key: "management",
-    icon: (
-      <div className="w-8 h-8 bg-accent/20 rounded-lg flex items-center justify-center">
-        <span className="text-accent font-bold text-sm">MG</span>
-      </div>
-    ),
+    icon: <UserCog className="h-8 w-8 text-purple-600" />, // UserCog for Management
   },
   {
     title: "CAD",
     key: "cad",
-    icon: (
-      <div className="w-8 h-8 bg-accent/20 rounded-lg flex items-center justify-center">
-        <span className="text-accent font-bold text-sm">C</span>
-      </div>
-    ),
+    icon: <Ruler className="h-8 w-8 text-pink-500" />, // Ruler for CAD
   },
   {
     title: "Sample Fabric",
     key: "sampleFabric",
-    icon: (
-      <div className="w-8 h-8 bg-accent/20 rounded-lg flex items-center justify-center">
-        <span className="text-accent font-bold text-sm">SF</span>
-      </div>
-    ),
+    icon: <Briefcase className="h-8 w-8 text-teal-600" />, // Briefcase for Sample Fabric
   },
   {
     title: "Sample Room",
     key: "sampleRoom",
-    icon: (
-      <div className="w-8 h-8 bg-accent/20 rounded-lg flex items-center justify-center">
-        <span className="text-accent font-bold text-sm">SR</span>
-      </div>
-    ),
+    icon: <Building2 className="h-8 w-8 text-orange-500" />, // Building2 for Sample Room
   },
 ];
 

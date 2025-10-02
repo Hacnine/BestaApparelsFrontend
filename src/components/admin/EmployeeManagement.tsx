@@ -329,15 +329,15 @@ export function EmployeeManagement() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Custom ID</TableHead>
+                <TableHead className=" text-nowrap">Custom ID</TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Email</TableHead>
-                <TableHead>Phone Number</TableHead>
+                <TableHead className=" text-nowrap">Phone Number</TableHead>
                 <TableHead>Designation</TableHead>
                 <TableHead>Level</TableHead>
                 <TableHead>Department</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead className="text-right flex">Actions</TableHead>
+                <TableHead className="">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
