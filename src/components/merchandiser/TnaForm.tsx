@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import url from "@/config/urls";
 import toast from "react-hot-toast";
-import {
-  useGetMerchandisersQuery,
-} from "@/redux/api/merchandiserApi";
+import { useGetMerchandisersQuery } from "@/redux/api/merchandiserApi";
 import {
   Select,
   SelectContent,
@@ -28,12 +27,12 @@ interface TnaFormProps {
   onEdit?: (values: any) => Promise<void>;
 }
 interface TnaFormState {
-  buyerId: string;
+  buyerId: number | ""; 
   style: string;
   itemName: string;
   sampleSendingDate: string;
   orderDate: string;
-  userId: string; // <-- keep this
+  userId: number | "";
   status: string;
   sampleType: string;
 }
@@ -46,14 +45,18 @@ interface Merchandiser {
   userName: string;
 }
 
-export default function TnaForm({ onSuccess, initialValues, onEdit }: TnaFormProps) {
+export default function TnaForm({
+  onSuccess,
+  initialValues,
+  onEdit,
+}: TnaFormProps) {
   const [form, setForm] = useState<TnaFormState>({
     buyerId: "",
     style: "",
     itemName: "",
     sampleSendingDate: "",
     orderDate: "",
-    userId: "", // <-- keep this
+    userId: "", 
     status: "ACTIVE",
     sampleType: "",
   });
@@ -72,7 +75,10 @@ export default function TnaForm({ onSuccess, initialValues, onEdit }: TnaFormPro
   useEffect(() => {
     if (initialValues) {
       setForm({
-        buyerId: initialValues.buyerId || "",
+        buyerId:
+          initialValues.buyerId !== undefined && initialValues.buyerId !== null
+            ? Number(initialValues.buyerId)
+            : "",
         style: initialValues.style || "",
         itemName: initialValues.itemName || "",
         sampleSendingDate: initialValues.sampleSendingDate
@@ -81,7 +87,14 @@ export default function TnaForm({ onSuccess, initialValues, onEdit }: TnaFormPro
         orderDate: initialValues.orderDate
           ? initialValues.orderDate.slice(0, 10)
           : "",
-        userId: initialValues.merchandiser?.id || initialValues.userId || "",
+        userId:
+          initialValues.merchandiser?.id !== undefined &&
+          initialValues.merchandiser?.id !== null
+            ? Number(initialValues.merchandiser.id)
+            : initialValues.userId !== undefined &&
+              initialValues.userId !== null
+            ? Number(initialValues.userId)
+            : "",
         status: initialValues.status || "ACTIVE",
         sampleType: initialValues.sampleType || "",
       });
@@ -109,8 +122,12 @@ export default function TnaForm({ onSuccess, initialValues, onEdit }: TnaFormPro
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  // For buyerId and userId, convert string to integer before storing in state
   const handleSelectChange = (name: keyof TnaFormState, value: string) => {
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setForm((prev) => ({
+      ...prev,
+      [name]: name === "buyerId" || name === "userId" ? Number(value) : value,
+    }));
   };
 
   // Change handleImageChange to only store the file, not upload
@@ -131,7 +148,7 @@ export default function TnaForm({ onSuccess, initialValues, onEdit }: TnaFormPro
       if (imageFile) {
         const formData = new FormData();
         formData.append("image", imageFile);
-        const res = await fetch("http://192.168.0.98:3001/tnas/upload-image", {
+        const res = await fetch(`${url.BASE_URL}/tnas/upload-image`, {
           method: "POST",
           body: formData,
           credentials: "include",
@@ -145,7 +162,7 @@ export default function TnaForm({ onSuccess, initialValues, onEdit }: TnaFormPro
           return;
         }
       } else if (!editMode) {
-        toast.error("Please select an item image before submitting.");
+        toast.error("Please select an image before submitting.");
         setUploading(false);
         return;
       }
@@ -197,7 +214,7 @@ export default function TnaForm({ onSuccess, initialValues, onEdit }: TnaFormPro
       <div>
         <label className="text-sm font-medium">Buyer</label>
         <Select
-          value={form.buyerId}
+          value={form.buyerId !== "" ? String(form.buyerId) : ""}
           onValueChange={(v) => handleSelectChange("buyerId", v)}
           required
         >
@@ -206,7 +223,7 @@ export default function TnaForm({ onSuccess, initialValues, onEdit }: TnaFormPro
           </SelectTrigger>
           <SelectContent>
             {buyers.map((buyer: Buyer) => (
-              <SelectItem key={buyer.id} value={buyer.id}>
+              <SelectItem key={buyer.id} value={String(buyer.id)}>
                 {buyer.name}
               </SelectItem>
             ))}
@@ -344,7 +361,7 @@ export default function TnaForm({ onSuccess, initialValues, onEdit }: TnaFormPro
       <div>
         <label className="text-sm font-medium">Merchandiser</label>
         <Select
-          value={form.userId}
+          value={form.userId !== "" ? String(form.userId) : ""}
           onValueChange={(v) => handleSelectChange("userId", v)}
           required
         >
@@ -353,7 +370,7 @@ export default function TnaForm({ onSuccess, initialValues, onEdit }: TnaFormPro
           </SelectTrigger>
           <SelectContent>
             {merchandisers?.map((user: Merchandiser) => (
-              <SelectItem key={user.id} value={user.id}>
+              <SelectItem key={user.id} value={String(user.id)}>
                 {user.userName}
               </SelectItem>
             ))}
