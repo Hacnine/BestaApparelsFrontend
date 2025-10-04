@@ -79,18 +79,18 @@ const navigationItemsMap: Record<string, any[]> = {
       icon: Rows4,
     },
     {
-      title: "CAD Designs",
-      href: `${APP_ROUTES.cad_designs}`,
+      title: "CAD",
+      href: `${APP_ROUTES.cad}`,
       icon: Airplay,
     },
     {
-      title: "Fabric Booking",
-      href: `${APP_ROUTES.fabric_booking}`,
+      title: "Sample Fabric",
+      href: `${APP_ROUTES.sample_fabric}`,
       icon: GitCommitHorizontal,
     },
     {
-      title: "Sample Development",
-      href: `${APP_ROUTES.sample_development}`,
+      title: "Sample Room",
+      href: `${APP_ROUTES.sample_room}`,
       icon: Webhook,
     },
     {

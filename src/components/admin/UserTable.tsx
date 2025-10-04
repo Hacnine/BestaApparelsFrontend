@@ -55,7 +55,7 @@ const getRoleBadgeColor = (role: string) => {
     case "MERCHANDISER":
       return "bg-yellow-100 text-yellow-700 border-yellow-200";
     case "CAD":
-      return "bg-pink-100 text-pink-700 border-pink-200";
+      return "bg-blue-100 text-blue-700 border-blue-200";
     case "SAMPLE_FABRIC":
       return "bg-teal-100 text-teal-700 border-teal-200";
     case "SAMPLE_ROOM":

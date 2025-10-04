@@ -20,9 +20,9 @@ export const APP_ROUTES = {
   sample_room_dashboard: "/sample-room/dashboard",
 
   sample_tna: "/merchandiser/tna",
-  cad_designs: "/merchandiser/cad-designs",
-  fabric_booking: "/merchandiser/fabric-booking",
-  sample_development: "/merchandiser/sample-development",
+  cad: "/merchandiser/cad-designs",
+  sample_fabric: "/merchandiser/fabric-booking",
+  sample_room: "/merchandiser/sample-development",
   reports: "/merchandiser/reports",
 
   management_dashboard: "/management/dashboard",
