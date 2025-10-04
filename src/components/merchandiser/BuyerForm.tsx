@@ -69,7 +69,7 @@ export default function BuyerForm() {
           </SelectContent>
         </Select>
       </div>
-      <Button type="submit" disabled={isLoading}>Create Buyer</Button>
+      <Button type="submit" disabled={isLoading}>Submit Form</Button>
     </form>
   );
 }
