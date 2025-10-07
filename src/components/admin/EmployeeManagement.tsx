@@ -32,10 +32,12 @@ import {
 } from "@/redux/api/employeeApi";
 
 const departments = [
-  "Merchandising",
-  "CAD Room",
-  "Sample Fabric",
-  "Sample Room",
+  "MERCHANDISING",
+  "MANAGEMENT",
+  "IT",
+  "CAD_ROOM",
+  "SAMPLE_FABRIC",
+  "SAMPLE_SEWING",
 ];
 
 interface Employee {
@@ -45,7 +47,6 @@ interface Employee {
   name: string;
   email: string;
   designation: string;
-  level: string;
   department: string;
   status: string;
 }
@@ -56,7 +57,6 @@ interface EmployeeFormData {
   name: string;
   email: string;
   designation: string;
-  level: string;
   department: string;
   status: string;
 }
@@ -72,7 +72,6 @@ export function EmployeeManagement() {
     name: "",
     email: "",
     designation: "",
-    level: "",
     department: "",
     status: "ACTIVE",
   });
@@ -85,7 +84,7 @@ export function EmployeeManagement() {
     page,
     search: searchTerm,
     department: departmentFilter !== "all" ? departmentFilter : "",
-  });
+  }); 
   const [updateEmployeeStatus, { isLoading: isUpdatingStatus }] =
     useUpdateEmployeeStatusMutation();
 
@@ -103,7 +102,6 @@ export function EmployeeManagement() {
         name: "",
         email: "",
         designation: "",
-        level: "",
         department: "",
         status: "ACTIVE",
       });
@@ -228,17 +226,6 @@ export function EmployeeManagement() {
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Input
-                  id="level"
-                  placeholder="Level (e.g., Junior, Senior)"
-                  className="col-span-3"
-                  value={formData.level}
-                  onChange={(e) =>
-                    setFormData({ ...formData, level: e.target.value })
-                  }
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
                 <Select
                   value={formData.department}
                   onValueChange={(dept) =>
@@ -334,7 +321,6 @@ export function EmployeeManagement() {
                 <TableHead>Email</TableHead>
                 <TableHead className=" text-nowrap">Phone Number</TableHead>
                 <TableHead>Designation</TableHead>
-                <TableHead>Level</TableHead>
                 <TableHead>Department</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="">Actions</TableHead>
@@ -349,7 +335,6 @@ export function EmployeeManagement() {
                   <TableCell>{employee.email}</TableCell>
                   <TableCell>{employee.phoneNumber}</TableCell>
                   <TableCell>{employee.designation}</TableCell>
-                  <TableCell>{employee.level}</TableCell>
                   <TableCell>{employee.department}</TableCell>
                   <TableCell>
                     <Badge
