@@ -18,7 +18,7 @@ export const tnaApi = createApi({
       invalidatesTags: ["TNA"],
     }),
     updateTNA: builder.mutation({
-      query: ({ id, ...body }) => ({ url: tnaUrl(id), method: "PUT", body }),
+      query: ({ id, ...body }) => ({ url: tnaUrl(id), method: "PATCH", body }),
       invalidatesTags: ["TNA"],
     }),
     deleteTNA: builder.mutation({
