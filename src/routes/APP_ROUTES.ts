@@ -24,8 +24,10 @@ export const APP_ROUTES = {
   sample_fabric: "/merchandiser/fabric-booking",
   sample_room: "/merchandiser/sample-development",
   reports: "/merchandiser/reports",
+  cost_sheet: "/merchandiser/cost-sheet",
 
   management_dashboard: "/management/dashboard",
+  management_cost_sheet: "/management/cost-sheet",
 
   not_found: "*",
 };

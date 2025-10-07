@@ -25,6 +25,7 @@ import { Navigate } from "react-router-dom";
 import AdminRoutes from "./private/AdminRoutes";
 import MerchandiserRoutes from "./private/MerchandiserRoutes";
 import ManagementRoutes from "./private/ManagementRoutes";
+import CostSheet from "@/pages/CostSheet";
 
 // Root route protection: redirect to /login if not authenticated
 const RootRoute = () => {
@@ -95,6 +96,8 @@ export const router = createBrowserRouter(
         <Route path="fabric-booking" element={<FabricBooking />} />
         <Route path="sample-development" element={<SampleDevelopement />} />
         <Route path="reports" element={<Reports />} />
+        <Route path="cost-sheet" element={<CostSheet />} />
+        
       </Route>
 
       <Route element={<ManagementRoutes />}>
@@ -105,6 +108,7 @@ export const router = createBrowserRouter(
 
       <Route element={<ManagementRoutes />}>
         <Route path="employee" element={<EmployeeManagement />} />
+        <Route path="cost-sheet" element={<CostSheet />} />
         <Route path="user" element={<UserManagement />} />
       </Route>
 

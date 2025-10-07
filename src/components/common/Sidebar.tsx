@@ -20,6 +20,7 @@ import {
   Rows4,
   Webhook,
   SquareDashedKanban,
+  Receipt,
 } from "lucide-react";
 
 import { NavLink, useLocation } from "react-router-dom";
@@ -96,35 +97,38 @@ const navigationItemsMap: Record<string, any[]> = {
     {
       title: "Reports",
       href: `${APP_ROUTES.reports}`,
-      icon: FileText,
+      icon: ClipboardList,
     },
+    { title: "Cost Sheet", href: `${APP_ROUTES.cost_sheet}`, icon: Receipt },
   ],
-   MANAGEMENT: [
+  MANAGEMENT: [
     {
       title: "Dashboard",
       href: `${APP_ROUTES.management_dashboard}`,
-      icon: LayoutDashboard,
+      icon: Receipt,
     },
-  ]
+    {
+      title: "Cost Sheet",
+      href: `${APP_ROUTES.management_cost_sheet}`,
+      icon: Receipt,
+    },
+  ],
 };
 
 const settingsItemsMap: Record<string, any[]> = {
   ADMIN: [
-
     {
       title: "Notifications",
       href: `${APP_ROUTES.admin_notifications}`,
       icon: Bell,
     },
-
   ],
   MERCHANDISER: [
-      {
-        title: "Notifications",
-        href: `${APP_ROUTES.admin_notifications}`,
-        icon: Bell,
-      },
-    
+    {
+      title: "Notifications",
+      href: `${APP_ROUTES.admin_notifications}`,
+      icon: Bell,
+    },
   ],
 };
 
@@ -132,7 +136,6 @@ interface AdminSidebarProps {
   collapsed: boolean;
   onToggle: () => void;
 }
-
 
 export function Sidebar({ collapsed, onToggle }: AdminSidebarProps) {
   const { user } = useUser();
@@ -248,14 +251,14 @@ export function Sidebar({ collapsed, onToggle }: AdminSidebarProps) {
                 </p>
               </div>
             </div>
-            <LogoutButton collapsed={collapsed}/>
+            <LogoutButton collapsed={collapsed} />
           </div>
         ) : (
           <div className="flex flex-col items-center space-y-3">
             <div className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center">
               <span className="text-white text-sm font-medium">A</span>
             </div>
-            <LogoutButton collapsed={collapsed}/>
+            <LogoutButton collapsed={collapsed} />
           </div>
         )}
       </div>
