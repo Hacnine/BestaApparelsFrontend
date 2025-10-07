@@ -41,8 +41,8 @@ interface Buyer {
   name: string;
 }
 interface Merchandiser {
-  id: string;
-  userName: string;
+  id: number | string;
+  name: string;
 }
 
 export default function TnaForm({
@@ -64,6 +64,8 @@ export default function TnaForm({
   const [updateTna, { isLoading: isUpdating }] = useUpdateTNAMutation();
   const { data: buyersResponse } = useGetBuyersQuery({});
   const { data: merchandisers } = useGetMerchandisersQuery({});
+console.log(merchandisers)
+
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -371,7 +373,7 @@ export default function TnaForm({
           <SelectContent>
             {merchandisers?.map((user: Merchandiser) => (
               <SelectItem key={user.id} value={String(user.id)}>
-                {user.userName}
+                {user.name}
               </SelectItem>
             ))}
           </SelectContent>
