@@ -57,12 +57,11 @@ export function Layout({ sidebarFor }: AdminLayoutProps) {
           style={{ marginLeft: sidebarCollapsed ? 64 : 240 }}
         >
           {/* Top Header */}
-          <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          {/* <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="flex h-16 items-center px-6 gap-4">
               
 
-              {/* Search */}
-              {/* <div className="flex-1 max-w-md">
+              <div className="flex-1 max-w-md">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -70,19 +69,18 @@ export function Layout({ sidebarFor }: AdminLayoutProps) {
                     className="pl-10 bg-muted/50 border-none focus:bg-background"
                   />
                 </div>
-              </div> */}
+              </div> 
 
-              {/* Header Actions */}
-              {/* <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2">
                 <Button variant="ghost" size="sm" className="relative">
                   <Bell className="h-4 w-4" />
                   <span className="absolute -top-1 -right-1 h-3 w-3 bg-destructive rounded-full text-[10px] text-destructive-foreground flex items-center justify-center">
                     3
                   </span>
                 </Button>
-              </div> */}
+              </div>
             </div>
-          </header>
+          </header> */}
 
           {/* Main Content */}
           <main className="flex-1 bg-gradient-surface">

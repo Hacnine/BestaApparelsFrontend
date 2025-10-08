@@ -153,13 +153,13 @@ const CostSheetForm = ({ onClose }: CostSheetFormProps) => {
 
       {showSections && (
         <div className="space-y-4">
-          <div className="flex flex-wrap gap-2">
+          {/* <div className="flex flex-wrap gap-2">
             <Button variant="outline" size="sm">CAD Consumption</Button>
             <Button variant="outline" size="sm">Fabric Cost</Button>
             <Button variant="outline" size="sm">Trims & Accessories</Button>
             <Button variant="outline" size="sm">Summary</Button>
             <Button variant="outline" size="sm">Others</Button>
-          </div>
+          </div> */}
 
           <div className="space-y-6">
             <CadConsumptionSection data={cadData} onChange={setCadData} />

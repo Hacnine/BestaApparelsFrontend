@@ -9,7 +9,7 @@ const CostSheet = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="px-4 py-12">
+      <div className="p-4">
         <div className="flex flex-col items-center justify-center space-y-8">
           {/* Header */}
           <div className="flex items-center justify-between w-full">
@@ -23,9 +23,8 @@ const CostSheet = () => {
               </p>
             </div>
             <Button
-              size="lg"
               onClick={() => setOpenCostSheet(true)}
-              className="text-lg px-8 py-6"
+              className="text-base "
             >
               <Plus className="h-4 w-4 mr-2" />
               Create Cost Sheet

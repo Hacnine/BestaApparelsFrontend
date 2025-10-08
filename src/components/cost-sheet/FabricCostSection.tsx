@@ -120,7 +120,7 @@ const FabricCostSection = ({ data, onChange }: FabricCostSectionProps) => {
         <table className="w-full border-collapse">
           <thead>
             <tr className="border-b bg-muted/30">
-              <th className="text-left p-2 text-sm font-medium">Description</th>
+              <th className="text-left p-2 text-sm font-medium">Field Name</th>
               <th className="text-right p-2 text-sm font-medium">Unit</th>
               <th className="text-right p-2 text-sm font-medium">Rate ($)</th>
               <th className="text-right p-2 text-sm font-medium">Value ($)</th>
