@@ -53,7 +53,7 @@ const TrimsAccessoriesSection = ({ data, onChange }: TrimsAccessoriesSectionProp
       const initialRows = defaultTrims.map((trim, index) => ({
         id: `trim-${index}`,
         description: trim,
-        cost: 0,
+        cost: undefined, // <-- remove default 0
       }));
       setRows(initialRows);
       onChange(initialRows);
@@ -64,7 +64,12 @@ const TrimsAccessoriesSection = ({ data, onChange }: TrimsAccessoriesSectionProp
 
   const updateRow = (id: string, field: keyof TrimRow, value: any) => {
     const updatedRows = rows.map((row) =>
-      row.id === id ? { ...row, [field]: value } : row
+      row.id === id
+        ? {
+            ...row,
+            [field]: field === "cost" ? Number(value) : value,
+          }
+        : row
     );
     setRows(updatedRows);
     onChange(updatedRows);
@@ -74,7 +79,7 @@ const TrimsAccessoriesSection = ({ data, onChange }: TrimsAccessoriesSectionProp
     const newRow: TrimRow = {
       id: `trim-${Date.now()}`,
       description: "New Item",
-      cost: 0,
+      cost: undefined, // <-- remove default 0
     };
     const updatedRows = [...rows, newRow];
     setRows(updatedRows);
@@ -87,7 +92,7 @@ const TrimsAccessoriesSection = ({ data, onChange }: TrimsAccessoriesSectionProp
     onChange(updatedRows);
   };
 
-  const subtotal = rows.reduce((sum, row) => sum + (parseFloat(row.cost as any) || 0), 0);
+  const subtotal = rows.reduce((sum, row) => sum + (Number(row.cost) || 0), 0);
   const adjustment = subtotal * (adjustmentPercent / 100);
   const totalAccessoriesCost = subtotal + adjustment;
 
@@ -118,9 +123,8 @@ const TrimsAccessoriesSection = ({ data, onChange }: TrimsAccessoriesSectionProp
                   </td>
                   <td className="p-3">
                     <Input
-                      type="number"
-                      step="0.001"
-                      value={row.cost}
+                      type="string"
+                      value={Number(row.cost) || ""}
                       onChange={(e) => updateRow(row.id, "cost", e.target.value)}
                       className="text-right"
                       placeholder="0.000"
@@ -133,7 +137,7 @@ const TrimsAccessoriesSection = ({ data, onChange }: TrimsAccessoriesSectionProp
                       onClick={() => deleteRow(row.id)}
                       className="text-destructive hover:text-destructive"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-4 w-4  text-red-600" />
                     </Button>
                   </td>
                 </tr>
@@ -149,26 +153,32 @@ const TrimsAccessoriesSection = ({ data, onChange }: TrimsAccessoriesSectionProp
         <div className="mt-6 space-y-3 pt-6 border-t-2">
           <div className="flex justify-between items-center">
             <span className="font-medium">Accessories Cost</span>
-            <span className="font-semibold">${subtotal.toFixed(3)}</span>
+            <span className="font-semibold">
+              ${Number(subtotal) ? Number(subtotal).toFixed(3) : "0.000"}
+            </span>
           </div>
           
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
               <span className="font-medium">Add Adjustment</span>
               <Input
-                type="number"
+                type="string"
                 value={adjustmentPercent}
-                onChange={(e) => setAdjustmentPercent(parseFloat(e.target.value) || 0)}
+                onChange={(e) => setAdjustmentPercent(Number(e.target.value) || 0)}
                 className="w-20 h-8"
               />
               <span>%</span>
             </div>
-            <span className="font-semibold">${adjustment.toFixed(3)}</span>
+            <span className="font-semibold">
+              ${Number(adjustment) ? Number(adjustment).toFixed(3) : "0.000"}
+            </span>
           </div>
 
           <div className="flex justify-between items-center text-lg pt-3 border-t">
             <span className="font-bold">Total Accessories Cost</span>
-            <span className="font-bold text-primary">${totalAccessoriesCost.toFixed(3)} /Dzn</span>
+            <span className="font-bold text-primary">
+              ${Number(totalAccessoriesCost) ? Number(totalAccessoriesCost).toFixed(3) : "0.000"} /Dzn
+            </span>
           </div>
         </div>
       </CardContent>

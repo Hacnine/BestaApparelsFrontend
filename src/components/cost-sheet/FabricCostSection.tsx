@@ -20,37 +20,42 @@ interface FabricCostSectionProps {
 
 const FabricCostSection = ({ data, onChange }: FabricCostSectionProps) => {
   const [yarnRows, setYarnRows] = useState<FabricRow[]>([
-    { id: "yarn-1", description: "30/1, 100% Cotton", unit: 0, rate: 2.7, value: 0 },
-    { id: "yarn-2", description: "20/1, 100% Cotton", unit: 0, rate: 2.7, value: 0 },
+    { id: "yarn-1", description: "30/1, 100% Cotton", unit: undefined, rate: 2.7, value: undefined },
+    { id: "yarn-2", description: "20/1, 100% Cotton", unit: undefined, rate: 2.7, value: undefined },
   ]);
 
   const [knittingRows, setKnittingRows] = useState<FabricRow[]>([
-    { id: "knit-1", description: "F. Terry", unit: 0, rate: 0.3, value: 0 },
-    { id: "knit-2", description: "Rib", unit: 0, rate: 0.35, value: 0 },
-    { id: "knit-3", description: "SJ", unit: 0, rate: 0.15, value: 0 },
+    { id: "knit-1", description: "F. Terry", unit: undefined, rate: 0.3, value: undefined },
+    { id: "knit-2", description: "Rib", unit: undefined, rate: 0.35, value: undefined },
+    { id: "knit-3", description: "SJ", unit: undefined, rate: 0.15, value: undefined },
   ]);
 
   const [dyeingRows, setDyeingRows] = useState<FabricRow[]>([
-    { id: "dye-1", description: "Avarage Color shade", unit: 0, rate: 1.0, value: 0 },
-    { id: "dye-2", description: "Peach", unit: 0, rate: 0.53, value: 0 },
-    { id: "dye-3", description: "Brush", unit: 0, rate: 0.4, value: 0 },
-    { id: "dye-4", description: "Peach & Brush", unit: 0, rate: 0.67, value: 0 },
-    { id: "dye-5", description: "Heat set", unit: 0, rate: 0.25, value: 0 },
+    { id: "dye-1", description: "Avarage Color shade", unit: undefined, rate: 1.0, value: undefined },
+    { id: "dye-2", description: "Peach", unit: undefined, rate: 0.53, value: undefined },
+    { id: "dye-3", description: "Brush", unit: undefined, rate: 0.4, value: undefined },
+    { id: "dye-4", description: "Peach & Brush", unit: undefined, rate: 0.67, value: undefined },
+    { id: "dye-5", description: "Heat set", unit: undefined, rate: 0.25, value: undefined },
   ]);
 
   const [printEmbRows, setPrintEmbRows] = useState<FabricRow[]>([
-    { id: "print-1", description: "AOP", unit: 0, rate: 1.6, value: 0 },
-    { id: "print-2", description: "Screen print", unit: 0, rate: 0, value: 0 },
-    { id: "print-3", description: "Emb (Chest + Back)", unit: 0, rate: 0, value: 0 },
-    { id: "print-4", description: "Wash", unit: 0, rate: 0, value: 0 },
+    { id: "print-1", description: "AOP", unit: undefined, rate: 1.6, value: undefined },
+    { id: "print-2", description: "Screen print", unit: undefined, rate: undefined, value: undefined },
+    { id: "print-3", description: "Emb (Chest + Back)", unit: undefined, rate: undefined, value: undefined },
+    { id: "print-4", description: "Wash", unit: undefined, rate: undefined, value: undefined },
   ]);
 
   const updateRows = (rows: FabricRow[], setRows: any, id: string, field: keyof FabricRow, value: any) => {
     const updatedRows = rows.map((row) => {
       if (row.id === id) {
-        const updatedRow = { ...row, [field]: value };
+        let newValue = value;
+        // Convert string input to number for unit and rate
         if (field === "unit" || field === "rate") {
-          updatedRow.value = parseFloat(updatedRow.unit as any) * parseFloat(updatedRow.rate as any) || 0;
+          newValue = Number(value);
+        }
+        const updatedRow = { ...row, [field]: newValue };
+        if (field === "unit" || field === "rate") {
+          updatedRow.value = Number(updatedRow.unit) * Number(updatedRow.rate) || 0;
         }
         return updatedRow;
       }
@@ -64,9 +69,9 @@ const FabricCostSection = ({ data, onChange }: FabricCostSectionProps) => {
     const newRow: FabricRow = {
       id: `${prefix}-${Date.now()}`,
       description: "New Item",
-      unit: 0,
-      rate: 0,
-      value: 0,
+      unit: undefined, // <-- remove default 0
+      rate: undefined, // <-- remove default 0
+      value: undefined, // <-- remove default 0
     };
     setRows([...rows, newRow]);
   };
@@ -76,7 +81,7 @@ const FabricCostSection = ({ data, onChange }: FabricCostSectionProps) => {
   };
 
   const calculateTotal = (rows: FabricRow[]) => {
-    return rows.reduce((sum, row) => sum + (parseFloat(row.value as any) || 0), 0);
+    return rows.reduce((sum, row) => sum + (Number(row.value) || 0), 0);
   };
 
   const updateTotalData = () => {
@@ -134,8 +139,7 @@ const FabricCostSection = ({ data, onChange }: FabricCostSectionProps) => {
                 </td>
                 <td className="p-2">
                   <Input
-                    type="number"
-                    step="0.01"
+                    type="string"
                     value={row.unit}
                     onChange={(e) => updateRows(rows, setRows, row.id, "unit", e.target.value)}
                     className="h-8 text-right text-sm"
@@ -143,8 +147,7 @@ const FabricCostSection = ({ data, onChange }: FabricCostSectionProps) => {
                 </td>
                 <td className="p-2">
                   <Input
-                    type="number"
-                    step="0.01"
+                    type="string"
                     value={row.rate}
                     onChange={(e) => updateRows(rows, setRows, row.id, "rate", e.target.value)}
                     className="h-8 text-right text-sm"
@@ -152,9 +155,8 @@ const FabricCostSection = ({ data, onChange }: FabricCostSectionProps) => {
                 </td>
                 <td className="p-2">
                   <Input
-                    type="number"
-                    step="0.01"
-                    value={row.value.toFixed(2)}
+                    type="string"
+                    value={Number(row.value) ? Number(row.value).toFixed(2) : "0.00"}
                     readOnly
                     className="h-8 text-right bg-muted/50 text-sm"
                   />
@@ -166,7 +168,7 @@ const FabricCostSection = ({ data, onChange }: FabricCostSectionProps) => {
                     className="h-7 w-7"
                     onClick={() => deleteRow(rows, setRows, row.id)}
                   >
-                    <Trash2 className="h-3 w-3" />
+                    <Trash2 className="h-4 w-4  text-red-600" />
                   </Button>
                 </td>
               </tr>
@@ -181,8 +183,11 @@ const FabricCostSection = ({ data, onChange }: FabricCostSectionProps) => {
     </div>
   );
 
-  const totalFabricCost = calculateTotal(yarnRows) + calculateTotal(knittingRows) + 
-                          calculateTotal(dyeingRows) + calculateTotal(printEmbRows);
+  const totalFabricCost =
+    (Number(calculateTotal(yarnRows)) || 0) +
+    (Number(calculateTotal(knittingRows)) || 0) +
+    (Number(calculateTotal(dyeingRows)) || 0) +
+    (Number(calculateTotal(printEmbRows)) || 0);
 
   return (
     <Card>
@@ -201,7 +206,9 @@ const FabricCostSection = ({ data, onChange }: FabricCostSectionProps) => {
         <div className="pt-4 border-t-2">
           <div className="flex justify-between items-center font-semibold text-lg">
             <span>Total Fabric Cost (USD / Dozen Garments)</span>
-            <span className="text-primary">${totalFabricCost.toFixed(2)}</span>
+            <span className="text-primary">
+              ${Number(totalFabricCost) ? Number(totalFabricCost).toFixed(2) : "0.00"}
+            </span>
           </div>
         </div>
       </CardContent>

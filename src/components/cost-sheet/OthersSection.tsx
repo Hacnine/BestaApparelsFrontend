@@ -20,7 +20,12 @@ const OthersSection = ({ data, onChange }: OthersSectionProps) => {
 
   const updateRow = (id: string, field: keyof OtherRow, value: any) => {
     const updatedRows = rows.map((row) =>
-      row.id === id ? { ...row, [field]: value } : row
+      row.id === id
+        ? {
+            ...row,
+            [field]: field === "value" ? Number(value) : value,
+          }
+        : row
     );
     setRows(updatedRows);
     onChange(updatedRows);
@@ -30,7 +35,7 @@ const OthersSection = ({ data, onChange }: OthersSectionProps) => {
     const newRow: OtherRow = {
       id: `other-${Date.now()}`,
       label: "New Field",
-      value: 0,
+      value: undefined, // <-- remove default 0
     };
     const updatedRows = [...rows, newRow];
     setRows(updatedRows);
@@ -43,7 +48,7 @@ const OthersSection = ({ data, onChange }: OthersSectionProps) => {
     onChange(updatedRows);
   };
 
-  const total = rows.reduce((sum, row) => sum + (parseFloat(row.value as any) || 0), 0);
+  const total = rows.reduce((sum, row) => sum + (Number(row.value) || 0), 0);
 
   return (
     <Card>
@@ -78,9 +83,8 @@ const OthersSection = ({ data, onChange }: OthersSectionProps) => {
                     </td>
                     <td className="p-3">
                       <Input
-                        type="number"
-                        step="0.01"
-                        value={row.value}
+                        type="string"
+                        value={Number(row.value) || ""}
                         onChange={(e) => updateRow(row.id, "value", e.target.value)}
                         className="text-right"
                       />
@@ -92,7 +96,7 @@ const OthersSection = ({ data, onChange }: OthersSectionProps) => {
                         onClick={() => deleteRow(row.id)}
                         className="text-destructive hover:text-destructive"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4  text-red-600" />
                       </Button>
                     </td>
                   </tr>
@@ -100,7 +104,9 @@ const OthersSection = ({ data, onChange }: OthersSectionProps) => {
                 {rows.length > 0 && (
                   <tr className="border-t-2 font-semibold bg-muted/50">
                     <td className="p-3">Total</td>
-                    <td className="p-3 text-right">${total.toFixed(2)}</td>
+                    <td className="p-3 text-right">
+                      ${Number(total) ? Number(total).toFixed(2) : "0.00"}
+                    </td>
                     <td></td>
                   </tr>
                 )}

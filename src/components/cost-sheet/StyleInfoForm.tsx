@@ -26,7 +26,9 @@ const StyleInfoForm = ({
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="style">Style *</Label>
+          <Label htmlFor="style">
+            Style <span className="text-red-500">*</span>
+          </Label>
           <div className="relative">
             <Input
               id="style"
@@ -42,7 +44,9 @@ const StyleInfoForm = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="item">Item *</Label>
+          <Label htmlFor="item">
+            Item <span className="text-red-500">*</span>
+          </Label>
           <Input
             id="item"
             {...register("item")}
@@ -52,7 +56,9 @@ const StyleInfoForm = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="group">Group *</Label>
+          <Label htmlFor="group">
+            Group <span className="text-red-500">*</span>
+          </Label>
           <Input
             id="group"
             {...register("group")}
@@ -62,7 +68,9 @@ const StyleInfoForm = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="size">Size *</Label>
+          <Label htmlFor="size">
+            Size <span className="text-red-500">*</span>
+          </Label>
           <Input
             id="size"
             {...register("size")}
@@ -72,7 +80,9 @@ const StyleInfoForm = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="fabricType">Fabric Type *</Label>
+          <Label htmlFor="fabricType">
+            Fabric Type <span className="text-red-500">*</span>
+          </Label>
           <Input
             id="fabricType"
             {...register("fabricType")}
@@ -82,7 +92,9 @@ const StyleInfoForm = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="gsm">GSM *</Label>
+          <Label htmlFor="gsm">
+            GSM <span className="text-red-500">*</span>
+          </Label>
           <Input
             id="gsm"
             {...register("gsm")}
@@ -92,7 +104,9 @@ const StyleInfoForm = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="color">Color *</Label>
+          <Label htmlFor="color">
+            Color <span className="text-red-500">*</span>
+          </Label>
           <Input
             id="color"
             {...register("color")}

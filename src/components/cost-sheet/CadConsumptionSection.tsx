@@ -32,7 +32,9 @@ const CadConsumptionSection = ({ data, onChange }: CadConsumptionSectionProps) =
       const initialRows = defaultFields.map((field, index) => ({
         id: `cad-${index}`,
         ...field,
-        value: 0,
+        weight: undefined, // <-- remove default 0
+        price: undefined,  // <-- remove default 0
+        value: undefined,  // <-- remove default 0
       }));
       setRows(initialRows);
       onChange(initialRows);
@@ -44,9 +46,13 @@ const CadConsumptionSection = ({ data, onChange }: CadConsumptionSectionProps) =
   const updateRow = (id: string, field: keyof CadRow, value: any) => {
     const updatedRows = rows.map((row) => {
       if (row.id === id) {
-        const updatedRow = { ...row, [field]: value };
+        let newValue = value;
         if (field === "weight" || field === "price") {
-          updatedRow.value = parseFloat(updatedRow.weight as any) * parseFloat(updatedRow.price as any) || 0;
+          newValue = Number(value);
+        }
+        const updatedRow = { ...row, [field]: newValue };
+        if (field === "weight" || field === "price") {
+          updatedRow.value = Number(updatedRow.weight) * Number(updatedRow.price) || 0;
         }
         return updatedRow;
       }
@@ -60,9 +66,9 @@ const CadConsumptionSection = ({ data, onChange }: CadConsumptionSectionProps) =
     const newRow: CadRow = {
       id: `cad-${Date.now()}`,
       fieldName: "New Field",
-      weight: 0,
-      price: 0,
-      value: 0,
+      weight: undefined, // <-- remove default 0
+      price: undefined,  // <-- remove default 0
+      value: undefined,  // <-- remove default 0
     };
     const updatedRows = [...rows, newRow];
     setRows(updatedRows);
@@ -75,8 +81,8 @@ const CadConsumptionSection = ({ data, onChange }: CadConsumptionSectionProps) =
     onChange(updatedRows);
   };
 
-  const totalWeight = rows.reduce((sum, row) => sum + (parseFloat(row.weight as any) || 0), 0);
-  const totalValue = rows.reduce((sum, row) => sum + (parseFloat(row.value as any) || 0), 0);
+  const totalWeight = rows.reduce((sum, row) => sum + (Number(row.weight) || 0), 0);
+  const totalValue = rows.reduce((sum, row) => sum + (Number(row.value) || 0), 0);
 
   return (
     <Card>
@@ -107,27 +113,24 @@ const CadConsumptionSection = ({ data, onChange }: CadConsumptionSectionProps) =
                   </td>
                   <td className="p-3">
                     <Input
-                      type="number"
-                      step="0.01"
-                      value={row.weight}
+                      type="string"
+                      value={Number(row.weight) || ""}
                       onChange={(e) => updateRow(row.id, "weight", e.target.value)}
                       className="text-right"
                     />
                   </td>
                   <td className="p-3">
                     <Input
-                      type="number"
-                      step="0.01"
-                      value={row.price}
+                      type="string"
+                      value={Number(row.price) || ""}
                       onChange={(e) => updateRow(row.id, "price", e.target.value)}
                       className="text-right"
                     />
                   </td>
                   <td className="p-3">
                     <Input
-                      type="number"
-                      step="0.01"
-                      value={row.value.toFixed(2)}
+                      type="string"
+                      value={Number(row.value) ? Number(row.value).toFixed(2) : "0.00"}
                       readOnly
                       className="text-right bg-muted/50"
                     />
@@ -139,16 +142,20 @@ const CadConsumptionSection = ({ data, onChange }: CadConsumptionSectionProps) =
                       onClick={() => deleteRow(row.id)}
                       className="text-destructive hover:text-destructive"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-4 w-4  text-red-600" />
                     </Button>
                   </td>
                 </tr>
               ))}
               <tr className="border-b-2 font-semibold bg-muted/50">
                 <td className="p-3">Total</td>
-                <td className="p-3 text-right">{totalWeight.toFixed(2)}</td>
+                <td className="p-3 text-right">
+                  {Number(totalWeight) ? Number(totalWeight).toFixed(2) : "0.00"}
+                </td>
                 <td className="p-3"></td>
-                <td className="p-3 text-right">${totalValue.toFixed(2)}</td>
+                <td className="p-3 text-right">
+                  ${Number(totalValue) ? Number(totalValue).toFixed(2) : "0.00"}
+                </td>
                 <td></td>
               </tr>
             </tbody>
