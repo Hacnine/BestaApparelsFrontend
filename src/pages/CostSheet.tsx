@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Plus } from "lucide-react";
 import CostSheetForm from "@/components/cost-sheet/CostSheetForm";
+import CostSheetTable from "@/components/cost-sheet/CostSheetTable";
 
 const CostSheet = () => {
   const [openCostSheet, setOpenCostSheet] = useState(false);
@@ -64,12 +65,7 @@ const CostSheet = () => {
           )}
 
           {/* Placeholder for Cost Sheet Table/List */}
-          <Card className="p-4 w-full ">
-            <div className="text-center text-muted-foreground">
-              {/* Replace with cost sheet table/list */}
-              No cost sheets found.
-            </div>
-          </Card>
+          <CostSheetTable />
         </div>
       </div>
     </div>

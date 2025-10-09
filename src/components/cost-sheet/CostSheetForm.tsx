@@ -8,6 +8,7 @@ import FabricCostSection from "./FabricCostSection";
 import TrimsAccessoriesSection from "./TrimsAccessoriesSection";
 import SummarySection from "./SummarySection";
 import OthersSection from "./OthersSection";
+import { useCreateCostSheetMutation } from "@/redux/api/costSheetApi";
 
 interface CostSheetFormProps {
   onClose: () => void;
@@ -22,11 +23,11 @@ export interface CostSheetData {
   gsm: string;
   color: string;
   qty: string;
-  cadConsumption: any[];
+  cadConsumption: any; // changed from any[] to any
   fabricCost: any;
-  trimsAccessories: any[];
+  trimsAccessories: any; // changed from any[] to any
   summary: any;
-  others: any[];
+  others: any; // changed from any[] to any
 }
 
 const CostSheetForm = ({ onClose }: CostSheetFormProps) => {
@@ -34,6 +35,7 @@ const CostSheetForm = ({ onClose }: CostSheetFormProps) => {
   const [creatorName, setCreatorName] = useState("");
   const [showSections, setShowSections] = useState(false);
   const [isCheckingStyle, setIsCheckingStyle] = useState(false);
+  const [createCostSheet, { isLoading: isSaving }] = useCreateCostSheetMutation();
 
   const [cadData, setCadData] = useState<any[]>([]);
   const [fabricData, setFabricData] = useState<any>({});
@@ -88,34 +90,106 @@ const CostSheetForm = ({ onClose }: CostSheetFormProps) => {
 
   const handleSave = async () => {
     const formData = form.getValues();
-    
+
+    // Prepare CAD Consumption section
+    const cadConsumption = {
+      tableName: "CAD Consumption / Dz",
+      columns: ["Field Name", "Weight (kg)", "With %", "Fabric Consumption"],
+      rows: cadData.map(row => ({
+        fieldName: row.fieldName,
+        weight: row.weight,
+        percent: row.percent,
+        value: row.value,
+      })),
+      totalWeight: cadData.reduce((sum, row) => sum + (Number(row.weight) || 0), 0),
+      totalValue: cadData.reduce((sum, row) => sum + (row.value || 0), 0),
+    };
+
+    // Prepare Fabric Cost section
+    const fabricCost = {
+      tableName: "Fabric Cost",
+      columns: ["Type", "Field Name", "Unit", "Rate ($)", "Value ($)"],
+      yarnRows: (fabricData.yarnRows || []).map(row => ({
+        type: "yarn",
+        fieldName: row.fieldName,
+        unit: row.unit,
+        rate: row.rate,
+        value: row.value,
+      })),
+      knittingRows: (fabricData.knittingRows || []).map(row => ({
+        type: "knitting",
+        fieldName: row.fieldName,
+        unit: row.unit,
+        rate: row.rate,
+        value: row.value,
+      })),
+      dyeingRows: (fabricData.dyeingRows || []).map(row => ({
+        type: "dyeing",
+        fieldName: row.fieldName,
+        unit: row.unit,
+        rate: row.rate,
+        value: row.value,
+      })),
+      printEmbRows: (fabricData.printEmbRows || []).map(row => ({
+        type: "printEmb",
+        fieldName: row.fieldName,
+        unit: row.unit,
+        rate: row.rate,
+        value: row.value,
+      })),
+      totals: {
+        yarnTotal: fabricData.yarnTotal || 0,
+        knittingTotal: fabricData.knittingTotal || 0,
+        dyeingTotal: fabricData.dyeingTotal || 0,
+        printEmbTotal: fabricData.printEmbTotal || 0,
+        totalCost: fabricData.totalCost || 0,
+      }
+    };
+
+    // Prepare Trims & Accessories section
+    const trimsAccessories = {
+      tableName: "Trims & Accessories",
+      columns: ["Description", "Cost"],
+      rows: trimsData.map(row => ({
+        description: row.description,
+        cost: row.cost,
+      })),
+      subtotal: trimsData.reduce((sum, row) => sum + (Number(row.cost) || 0), 0),
+      adjustmentPercent: 8,
+      adjustment: trimsData.reduce((sum, row) => sum + (Number(row.cost) || 0), 0) * 0.08,
+      totalAccessoriesCost: trimsData.reduce((sum, row) => sum + (Number(row.cost) || 0), 0) * 1.08,
+    };
+
+    // Prepare Others section
+    const others = {
+      tableName: "Others",
+      columns: ["Label", "Value"],
+      rows: othersData.map(row => ({
+        label: row.label,
+        value: row.value,
+      })),
+      total: othersData.reduce((sum, row) => sum + (Number(row.value) || 0), 0),
+    };
+
+    // Prepare Summary section
+    const summary = calculateSummary();
+
+    // Final payload
     const costSheetData: CostSheetData = {
       ...formData,
-      cadConsumption: cadData,
-      fabricCost: fabricData,
-      trimsAccessories: trimsData,
-      summary: calculateSummary(),
-      others: othersData,
+      cadConsumption,
+      fabricCost,
+      trimsAccessories,
+      summary,
+      others,
     };
 
     try {
-      const response = await fetch("/api/cost-sheets/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(costSheetData),
-      });
-
-      if (response.ok) {
-        toast.success("Cost Sheet saved successfully!");
-        onClose();
-      } else {
-        toast.error("Failed to save Cost Sheet");
-      }
+      await createCostSheet(costSheetData).unwrap();
+      toast.success("Cost Sheet saved successfully!");
+      onClose();
     } catch (error) {
-      console.error("Error saving cost sheet:", error);
-      toast.error("Error saving Cost Sheet");
+      toast.error("Failed to save Cost Sheet");
     }
   };
 
@@ -177,7 +251,7 @@ const CostSheetForm = ({ onClose }: CostSheetFormProps) => {
             <Button variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button onClick={handleSave}>
+            <Button onClick={handleSave} disabled={isSaving}>
               Save Cost Sheet
             </Button>
           </div>
