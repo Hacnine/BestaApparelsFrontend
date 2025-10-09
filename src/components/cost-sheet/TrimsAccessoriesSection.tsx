@@ -7,7 +7,7 @@ import { Plus, Trash2 } from "lucide-react";
 interface TrimRow {
   id: string;
   description: string;
-  cost: number;
+  cost: string;
 }
 
 interface TrimsAccessoriesSectionProps {
@@ -44,7 +44,10 @@ const defaultTrims = [
   "Others",
 ];
 
-const TrimsAccessoriesSection = ({ data, onChange }: TrimsAccessoriesSectionProps) => {
+const TrimsAccessoriesSection = ({
+  data,
+  onChange,
+}: TrimsAccessoriesSectionProps) => {
   const [rows, setRows] = useState<TrimRow[]>([]);
   const [adjustmentPercent, setAdjustmentPercent] = useState(8);
 
@@ -53,7 +56,7 @@ const TrimsAccessoriesSection = ({ data, onChange }: TrimsAccessoriesSectionProp
       const initialRows = defaultTrims.map((trim, index) => ({
         id: `trim-${index}`,
         description: trim,
-        cost: undefined, // <-- remove default 0
+        cost: "",
       }));
       setRows(initialRows);
       onChange(initialRows);
@@ -62,15 +65,25 @@ const TrimsAccessoriesSection = ({ data, onChange }: TrimsAccessoriesSectionProp
     }
   }, []);
 
+  const handleDecimalChange = (
+    id: string,
+    field: keyof TrimRow,
+    value: string
+  ) => {
+    if (/^\d*\.?\d*$/.test(value)) {
+      updateRow(id, field, value);
+    }
+  };
+
   const updateRow = (id: string, field: keyof TrimRow, value: any) => {
     const updatedRows = rows.map((row) =>
       row.id === id
         ? {
             ...row,
-            [field]: field === "cost" ? Number(value) : value,
+            [field] : value,
           }
         : row
-    );
+    );console.log(updatedRows);
     setRows(updatedRows);
     onChange(updatedRows);
   };
@@ -79,7 +92,7 @@ const TrimsAccessoriesSection = ({ data, onChange }: TrimsAccessoriesSectionProp
     const newRow: TrimRow = {
       id: `trim-${Date.now()}`,
       description: "New Item",
-      cost: undefined, // <-- remove default 0
+      cost: "",
     };
     const updatedRows = [...rows, newRow];
     setRows(updatedRows);
@@ -113,19 +126,26 @@ const TrimsAccessoriesSection = ({ data, onChange }: TrimsAccessoriesSectionProp
             </thead>
             <tbody>
               {rows.map((row) => (
-                <tr key={row.id} className="border-b hover:bg-muted/30 transition-colors">
+                <tr
+                  key={row.id}
+                  className="border-b hover:bg-muted/30 transition-colors"
+                >
                   <td className="p-3">
                     <Input
                       value={row.description}
-                      onChange={(e) => updateRow(row.id, "description", e.target.value)}
+                      onChange={(e) =>
+                        updateRow(row.id, "description", e.target.value)
+                      }
                       className="max-w-md"
                     />
                   </td>
                   <td className="p-3">
                     <Input
-                      type="string"
-                      value={Number(row.cost) || ""}
-                      onChange={(e) => updateRow(row.id, "cost", e.target.value)}
+                      type="text"
+                      value={row.cost ?? ""}
+                      onChange={(e) =>
+                        handleDecimalChange(row.id, "cost", e.target.value)
+                      }
                       className="text-right"
                       placeholder="0.000"
                     />
@@ -157,14 +177,16 @@ const TrimsAccessoriesSection = ({ data, onChange }: TrimsAccessoriesSectionProp
               ${Number(subtotal) ? Number(subtotal).toFixed(3) : "0.000"}
             </span>
           </div>
-          
+
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
               <span className="font-medium">Add Adjustment</span>
               <Input
                 type="string"
                 value={adjustmentPercent}
-                onChange={(e) => setAdjustmentPercent(Number(e.target.value) || 0)}
+                onChange={(e) =>
+                  setAdjustmentPercent(Number(e.target.value) || 0)
+                }
                 className="w-20 h-8"
               />
               <span>%</span>
@@ -177,7 +199,11 @@ const TrimsAccessoriesSection = ({ data, onChange }: TrimsAccessoriesSectionProp
           <div className="flex justify-between items-center text-lg pt-3 border-t">
             <span className="font-bold">Total Accessories Cost</span>
             <span className="font-bold text-primary">
-              ${Number(totalAccessoriesCost) ? Number(totalAccessoriesCost).toFixed(3) : "0.000"} /Dzn
+              $
+              {Number(totalAccessoriesCost)
+                ? Number(totalAccessoriesCost).toFixed(3)
+                : "0.000"}{" "}
+              /Dzn
             </span>
           </div>
         </div>
