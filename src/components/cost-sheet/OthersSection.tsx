@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Pencil } from "lucide-react";
 
 interface OtherRow {
   id: string;
@@ -16,24 +16,41 @@ interface OthersSectionChange {
 }
 
 interface OthersSectionProps {
-  data: OtherRow[];
-  onChange: (data: OthersSectionChange) => void;
+  data: any;
+  onChange?: (data: OthersSectionChange) => void;
+  mode?: "create" | "edit" | "show";
 }
 
-const OthersSection = ({ data, onChange }: OthersSectionProps) => {
-  const [rows, setRows] = useState<OtherRow[]>(data);
+const OthersSection = ({ data, onChange, mode = "create" }: OthersSectionProps) => {
+  const [rows, setRows] = useState<OtherRow[]>(
+    Array.isArray(data?.rows)
+      ? data.rows
+      : []
+  );
+  const [editMode, setEditMode] = useState(mode === "edit" || mode === "create");
+
+  useEffect(() => {
+    if (Array.isArray(data?.rows)) {
+      setRows(data.rows);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data]);
+
+  const isEditable = editMode && (mode === "edit" || mode === "create");
 
   const handleRowsChange = (updatedRows: OtherRow[]) => {
     setRows(updatedRows);
-    onChange({
-      rows: updatedRows,
-      json: {
-        tableName: "Others",
-        columns: ["Label", "Value"],
+    if (onChange) {
+      onChange({
         rows: updatedRows,
-        total: updatedRows.reduce((sum, row) => sum + (Number(row.value) || 0), 0),
-      },
-    });
+        json: {
+          tableName: "Others",
+          columns: ["Label", "Value"],
+          rows: updatedRows,
+          total: updatedRows.reduce((sum, row) => sum + (Number(row.value) || 0), 0),
+        },
+      });
+    }
   };
 
   const updateRow = (id: string, field: keyof OtherRow, value: any) => {
@@ -69,6 +86,17 @@ const OthersSection = ({ data, onChange }: OthersSectionProps) => {
     <Card>
       <CardHeader>
         <CardTitle className="text-lg">Others (Custom Fields)</CardTitle>
+        {mode === "show" && !editMode && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="ml-2"
+            onClick={() => setEditMode(true)}
+          >
+            <Pencil className="h-4 w-4 mr-1" />
+            Edit
+          </Button>
+        )}
       </CardHeader>
       <CardContent>
         {rows.length === 0 ? (
@@ -83,7 +111,7 @@ const OthersSection = ({ data, onChange }: OthersSectionProps) => {
                 <tr className="border-b bg-muted/50">
                   <th className="text-left p-3 font-medium">Label</th>
                   <th className="text-right p-3 font-medium">Value ($)</th>
-                  <th className="w-12"></th>
+                  {isEditable && <th className="w-12"></th>}
                 </tr>
               </thead>
               <tbody>
@@ -92,28 +120,33 @@ const OthersSection = ({ data, onChange }: OthersSectionProps) => {
                     <td className="p-3">
                       <Input
                         value={row.label}
-                        onChange={(e) => updateRow(row.id, "label", e.target.value)}
+                        onChange={(e) => isEditable && updateRow(row.id, "label", e.target.value)}
                         className="max-w-md"
+                        disabled={!isEditable}
                       />
                     </td>
                     <td className="p-3">
                       <Input
                         type="string"
                         value={Number(row.value) || ""}
-                        onChange={(e) => updateRow(row.id, "value", e.target.value)}
+                        onChange={(e) => isEditable && updateRow(row.id, "value", e.target.value)}
                         className="text-right"
+                        disabled={!isEditable}
                       />
                     </td>
-                    <td className="p-3">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => deleteRow(row.id)}
-                        className="text-destructive hover:text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4  text-red-600" />
-                      </Button>
-                    </td>
+                    {isEditable && (
+                      <td className="p-3">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => deleteRow(row.id)}
+                          className="text-destructive hover:text-destructive"
+                          disabled={!isEditable}
+                        >
+                          <Trash2 className="h-4 w-4  text-red-600" />
+                        </Button>
+                      </td>
+                    )}
                   </tr>
                 ))}
                 {rows.length > 0 && (
@@ -122,17 +155,19 @@ const OthersSection = ({ data, onChange }: OthersSectionProps) => {
                     <td className="p-3 text-right">
                       ${Number(total) ? Number(total).toFixed(2) : "0.00"}
                     </td>
-                    <td></td>
+                    {isEditable && <td></td>}
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
         )}
-        <Button onClick={addRow} variant="outline" size="sm" className="mt-4">
-          <Plus className="h-4 w-4 mr-2" />
-          Add Field
-        </Button>
+        {isEditable && (
+          <Button onClick={addRow} variant="outline" size="sm" className="mt-4">
+            <Plus className="h-4 w-4 mr-2" />
+            Add Field
+          </Button>
+        )}
       </CardContent>
     </Card>
   );

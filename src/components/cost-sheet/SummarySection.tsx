@@ -13,20 +13,57 @@ interface SummarySectionProps {
   fabricData: any;
   trimsData: any[];
   onChange?: (data: SummarySectionChange) => void;
+  mode?: "create" | "edit" | "show";
 }
 
-const SummarySection = ({ summary, fabricData, trimsData, onChange }: SummarySectionProps) => {
-  const [factoryCM, setFactoryCM] = useState(14.0);
-  const [profitPercent, setProfitPercent] = useState(15);
+const SummarySection = ({
+  summary,
+  fabricData,
+  trimsData,
+  onChange,
+  mode = "create",
+}: SummarySectionProps) => {
+  // If in show mode, use summary directly, otherwise use state
+  const [factoryCM, setFactoryCM] = useState(
+    typeof summary?.factoryCM === "number" ? summary.factoryCM : 14.0
+  );
+  const [profitPercent, setProfitPercent] = useState(
+    typeof summary?.profitPercent === "number" ? summary.profitPercent : 15
+  );
+  const [editMode, setEditMode] = useState(mode === "edit" || mode === "create");
 
-  const fabricCost = fabricData.totalCost || 0;
-  const trimsSubtotal = trimsData.reduce((sum, item) => sum + (Number(item.cost) || 0), 0);
-  const trimsAdjustment = trimsSubtotal * 0.08;
-  const accessoriesCost = trimsSubtotal + trimsAdjustment;
-  const totalCost = fabricCost + accessoriesCost + factoryCM;
-  const commercialProfit = totalCost * (profitPercent / 100);
-  const fobPrice = totalCost + commercialProfit;
-  const pricePerPiece = fobPrice / 12;
+  // Use summary fields if in show mode, otherwise calculate
+  const fabricCost =
+    typeof summary?.fabricCost === "number"
+      ? summary.fabricCost
+      : fabricData.totalCost || 0;
+  const accessoriesCost =
+    typeof summary?.accessoriesCost === "number"
+      ? summary.accessoriesCost
+      : (() => {
+          const trimsSubtotal = trimsData.reduce(
+            (sum, item) => sum + (Number(item.cost) || 0),
+            0
+          );
+          const trimsAdjustment = trimsSubtotal * 0.08;
+          return trimsSubtotal + trimsAdjustment;
+        })();
+  const totalCost =
+    typeof summary?.totalCost === "number"
+      ? summary.totalCost
+      : fabricCost + accessoriesCost + factoryCM;
+  const commercialProfit =
+    typeof summary?.commercialProfit === "number"
+      ? summary.commercialProfit
+      : totalCost * (profitPercent / 100);
+  const fobPrice =
+    typeof summary?.fobPrice === "number"
+      ? summary.fobPrice
+      : totalCost + commercialProfit;
+  const pricePerPiece =
+    typeof summary?.pricePerPiece === "number"
+      ? summary.pricePerPiece
+      : fobPrice / 12;
 
   // Helper to send summary data to parent
   const notifyChange = (nextFactoryCM: number, nextProfitPercent: number) => {
@@ -75,6 +112,8 @@ const SummarySection = ({ summary, fabricData, trimsData, onChange }: SummarySec
     notifyChange(factoryCM, value);
   };
 
+  const isEditable = editMode && (mode === "edit" || mode === "create");
+
   return (
     <Card>
       <CardHeader>
@@ -91,6 +130,7 @@ const SummarySection = ({ summary, fabricData, trimsData, onChange }: SummarySec
                 value={factoryCM}
                 onChange={handleFactoryCMChange}
                 className="font-semibold"
+                disabled={!isEditable}
               />
             </div>
             
@@ -103,6 +143,7 @@ const SummarySection = ({ summary, fabricData, trimsData, onChange }: SummarySec
                   value={profitPercent}
                   onChange={handleProfitPercentChange}
                   className="font-semibold"
+                  disabled={!isEditable}
                 />
                 <span className="text-sm text-muted-foreground">%</span>
               </div>

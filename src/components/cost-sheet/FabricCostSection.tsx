@@ -15,11 +15,12 @@ interface FabricRow {
 
 interface FabricCostSectionProps {
   data: any;
-  onChange: (data: any) => void;
+  onChange?: (data: any) => void;
+  mode?: "create" | "edit" | "show";
 }
 
-const FabricCostSection = ({ data, onChange }: FabricCostSectionProps) => {
-  const [yarnRows, setYarnRows] = useState<FabricRow[]>([
+const FabricCostSection = ({ data, onChange, mode = "create" }: FabricCostSectionProps) => {
+  const [yarnRows, setYarnRows] = useState<FabricRow[]>(data?.yarnRows || [
     {
       id: "yarn-1",
       fieldName: "30/1, 100% Cotton",
@@ -36,7 +37,7 @@ const FabricCostSection = ({ data, onChange }: FabricCostSectionProps) => {
     },
   ]);
 
-  const [knittingRows, setKnittingRows] = useState<FabricRow[]>([
+  const [knittingRows, setKnittingRows] = useState<FabricRow[]>(data?.knittingRows || [
     {
       id: "knit-1",
       fieldName: "F. Terry",
@@ -60,7 +61,7 @@ const FabricCostSection = ({ data, onChange }: FabricCostSectionProps) => {
     },
   ]);
 
-  const [dyeingRows, setDyeingRows] = useState<FabricRow[]>([
+  const [dyeingRows, setDyeingRows] = useState<FabricRow[]>(data?.dyeingRows || [
     {
       id: "dye-1",
       fieldName: "Avarage Color shade",
@@ -98,6 +99,9 @@ const FabricCostSection = ({ data, onChange }: FabricCostSectionProps) => {
     },
   ]);
 
+  const [printEmbRows, setPrintEmbRows] = useState<FabricRow[]>([]);
+
+  const isEditable = mode === "edit" || mode === "create";
 
   const handleDecimalChange = (
     rows: FabricRow[],
@@ -160,15 +164,17 @@ const FabricCostSection = ({ data, onChange }: FabricCostSectionProps) => {
     const dyeingTotal = calculateTotal(dyeingRows);
     const totalCost = yarnTotal + knittingTotal + dyeingTotal;
 
-    onChange({
-      yarnRows,
-      knittingRows,
-      dyeingRows,
-      yarnTotal,
-      knittingTotal,
-      dyeingTotal,
-      totalCost,
-    });
+    if (onChange) {
+      onChange({
+        yarnRows,
+        knittingRows,
+        dyeingRows,
+        yarnTotal,
+        knittingTotal,
+        dyeingTotal,
+        totalCost,
+      });
+    }
   };
 
   const getFabricCostJson = () => {
@@ -185,14 +191,16 @@ const FabricCostSection = ({ data, onChange }: FabricCostSectionProps) => {
   };
 
   const handleRowsChange = () => {
-    onChange({
-      rows: {
-        yarnRows,
-        knittingRows,
-        dyeingRows,
-      },
-      json: getFabricCostJson(),
-    });
+    if (onChange) {
+      onChange({
+        rows: {
+          yarnRows,
+          knittingRows,
+          dyeingRows,
+        },
+        json: getFabricCostJson(),
+      });
+    }
   };
 
   useEffect(() => {
@@ -223,7 +231,7 @@ const FabricCostSection = ({ data, onChange }: FabricCostSectionProps) => {
                 <th className="text-right p-2 text-sm font-medium">
                   Value ($)
                 </th>
-                <th className="w-10"></th>
+                {isEditable && <th className="w-10"></th>}
               </tr>
             </thead>
             <tbody>
@@ -233,6 +241,7 @@ const FabricCostSection = ({ data, onChange }: FabricCostSectionProps) => {
                     <Input
                       value={row.fieldName}
                       onChange={(e) =>
+                        isEditable &&
                         updateRows(
                           rows,
                           setRows,
@@ -242,6 +251,7 @@ const FabricCostSection = ({ data, onChange }: FabricCostSectionProps) => {
                         )
                       }
                       className="h-8 text-sm"
+                      disabled={!isEditable}
                     />
                   </td>
                   <td className="p-2">
@@ -249,6 +259,7 @@ const FabricCostSection = ({ data, onChange }: FabricCostSectionProps) => {
                       type="text"
                       value={row.unit}
                       onChange={(e) =>
+                        isEditable &&
                         handleDecimalChange(
                           rows,
                           setRows,
@@ -258,6 +269,7 @@ const FabricCostSection = ({ data, onChange }: FabricCostSectionProps) => {
                         )
                       }
                       className="h-8 text-right text-sm"
+                      disabled={!isEditable}
                     />
                   </td>
                   <td className="p-2">
@@ -265,6 +277,7 @@ const FabricCostSection = ({ data, onChange }: FabricCostSectionProps) => {
                       type="text"
                       value={row.rate ?? ""}
                       onChange={(e) =>
+                        isEditable &&
                         handleDecimalChange(
                           rows,
                           setRows,
@@ -274,6 +287,7 @@ const FabricCostSection = ({ data, onChange }: FabricCostSectionProps) => {
                         )
                       }
                       className="h-8 text-right text-sm"
+                      disabled={!isEditable}
                     />
                   </td>
                   <td className="p-2">
@@ -284,16 +298,18 @@ const FabricCostSection = ({ data, onChange }: FabricCostSectionProps) => {
                       className="h-8 text-right bg-muted/50 text-sm"
                     />
                   </td>
-                  <td className="p-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7"
-                      onClick={() => deleteRow(rows, setRows, row.id)}
-                    >
-                      <Trash2 className="h-4 w-4  text-red-600" />
-                    </Button>
-                  </td>
+                  {isEditable && (
+                    <td className="p-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                        onClick={() => deleteRow(rows, setRows, row.id)}
+                      >
+                        <Trash2 className="h-4 w-4  text-red-600" />
+                      </Button>
+                    </td>
+                  )}
                 </tr>
               ))}
               <tr className="font-semibold bg-muted/10">
@@ -305,19 +321,21 @@ const FabricCostSection = ({ data, onChange }: FabricCostSectionProps) => {
                 <td className="p-2 text-right">
                   {totalValue ? totalValue.toFixed(2) : "0.00"}
                 </td>
-                <td></td>
+                {isEditable && <td></td>}
               </tr>
             </tbody>
           </table>
         </div>
-        <Button
-          onClick={() => addRow(rows, setRows, prefix)}
-          variant="outline"
-          size="sm"
-        >
-          <Plus className="h-3 w-3 mr-1" />
-          Add Field
-        </Button>
+        {isEditable && (
+          <Button
+            onClick={() => addRow(rows, setRows, prefix)}
+            variant="outline"
+            size="sm"
+          >
+            <Plus className="h-3 w-3 mr-1" />
+            Add Field
+          </Button>
+        )}
       </div>
     );
   };
@@ -338,8 +356,6 @@ const FabricCostSection = ({ data, onChange }: FabricCostSectionProps) => {
         <Separator />
         {renderSubsection("Dyeing", dyeingRows, setDyeingRows, "dye")}
         <Separator />
-       
-        <Separator />
         <div className="pt-4 border-t-2">
           <div className="flex justify-between items-center font-semibold text-lg">
             <span>Total Fabric Cost (USD / Dozen Garments)</span>
@@ -350,13 +366,15 @@ const FabricCostSection = ({ data, onChange }: FabricCostSectionProps) => {
                 : "0.00"}
             </span>
           </div>
-          <Button
-            className="mt-4"
-            variant="default"
-            // onClick={sendFabricCostToBackend}
-          >
-            Save Fabric Cost Data
-          </Button>
+          {isEditable && (
+            <Button
+              className="mt-4"
+              variant="default"
+              // onClick={sendFabricCostToBackend}
+            >
+              Save Fabric Cost Data
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>
@@ -364,3 +382,4 @@ const FabricCostSection = ({ data, onChange }: FabricCostSectionProps) => {
 };
 
 export default FabricCostSection;
+           

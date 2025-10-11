@@ -22,12 +22,12 @@ export interface CostSheetData {
   fabricType: string;
   gsm: string;
   color: string;
-  qty: string;
-  cadConsumption: any; // changed from any[] to any
+  qty: string; // will be sent as quantity (Int) to backend
+  cadConsumption: any;
   fabricCost: any;
-  trimsAccessories: any; // changed from any[] to any
+  trimsAccessories: any;
   summary: any;
-  others: any; // changed from any[] to any
+  others: any;
 }
 
 const CostSheetForm = ({ onClose }: CostSheetFormProps) => {
@@ -95,7 +95,14 @@ const CostSheetForm = ({ onClose }: CostSheetFormProps) => {
 
     // Ensure fallback for missing sections
     const costSheetData: CostSheetData = {
-      ...formData,
+      style: formData.style,
+      item: formData.item,
+      group: formData.group,
+      size: formData.size,
+      fabricType: formData.fabricType,
+      gsm: formData.gsm,
+      color: formData.color,
+      qty: formData.qty || "0",
       cadConsumption: cadData.json ?? {},
       fabricCost: fabricData.json ?? {},
       trimsAccessories: trimsData.json ?? {},

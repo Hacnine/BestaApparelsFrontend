@@ -2,10 +2,91 @@ import React, { useState } from "react";
 import { Card } from "../ui/card";
 import { useGetCostSheetsQuery } from "@/redux/api/costSheetApi";
 import { Button } from "@/components/ui/button";
+import CadConsumptionSection from "./CadConsumptionSection";
+import FabricCostSection from "./FabricCostSection";
+import TrimsAccessoriesSection from "./TrimsAccessoriesSection";
+import OthersSection from "./OthersSection";
+import SummarySection from "./SummarySection";
 
 const CostSheetTable = () => {
   const { data, isLoading, error } = useGetCostSheetsQuery();
   const [expandedId, setExpandedId] = useState<number | null>(null);
+
+  const renderDynamicTable = (section: any, sectionName: string) => {
+    if (!section) return null;
+    // If section has rows and columns
+    if (Array.isArray(section.rows) && Array.isArray(section.columns)) {
+      return (
+        <div>
+          <div className="font-semibold mb-2">
+            {section.tableName || sectionName}
+          </div>
+          <table className="w-full text-sm">
+            <thead>
+              <tr>
+                {section.columns.map((col: string, idx: number) => (
+                  <th key={idx}>{col}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {section.rows.map((row: any, idx: number) => (
+                <tr key={idx}>
+                  {section.columns.map((col: string, cidx: number) => (
+                    <td key={cidx}>
+                      {row[col.replace(/ \(.+\)/, "").replace(/[^a-zA-Z0-9_]/g, "")] ??
+                        row[col] ??
+                        row[Object.keys(row)[cidx]] ?? ""}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {/* Show totals if present */}
+          {section.total !== undefined && (
+            <div className="mt-2 text-right font-semibold">
+              Total: {section.total}
+            </div>
+          )}
+          {section.totalValue !== undefined && (
+            <div className="mt-2 text-right font-semibold">
+              Total Value: {section.totalValue}
+            </div>
+          )}
+          {section.totalWeight !== undefined && (
+            <div className="mt-2 text-right font-semibold">
+              Total Weight: {section.totalWeight}
+            </div>
+          )}
+          {section.subtotal !== undefined && (
+            <div className="mt-2 text-right font-semibold">
+              Subtotal: {section.subtotal}
+            </div>
+          )}
+          {section.totalAccessoriesCost !== undefined && (
+            <div className="mt-2 text-right font-semibold">
+              Total Accessories Cost: {section.totalAccessoriesCost}
+            </div>
+          )}
+          {section.totalFabricCost !== undefined && (
+            <div className="mt-2 text-right font-semibold">
+              Total Fabric Cost: {section.totalFabricCost}
+            </div>
+          )}
+        </div>
+      );
+    }
+    // If section is an object, show JSON
+    return (
+      <div>
+        <div className="font-semibold mb-2">{sectionName}</div>
+        <pre className="bg-muted/10 p-2 rounded">
+          {JSON.stringify(section, null, 2)}
+        </pre>
+      </div>
+    );
+  };
 
   if (isLoading) {
     return (
@@ -18,7 +99,9 @@ const CostSheetTable = () => {
   if (error) {
     return (
       <Card className="p-4 w-full ">
-        <div className="text-center text-destructive">Failed to load cost sheets.</div>
+        <div className="text-center text-destructive">
+          Failed to load cost sheets.
+        </div>
       </Card>
     );
   }
@@ -40,10 +123,15 @@ const CostSheetTable = () => {
           <thead>
             <tr className="border-b bg-muted/30">
               <th className="text-left p-2">Style</th>
+              <th className="text-left p-2">Item</th>
+              <th className="text-left p-2">Group</th>
+              <th className="text-left p-2">Size</th>
+              <th className="text-left p-2">Fabric Type</th>
+              <th className="text-left p-2">GSM</th>
+              <th className="text-left p-2">Color</th>
+              <th className="text-left p-2">Quantity</th>
               <th className="text-left p-2">Created By</th>
               <th className="text-left p-2">Created At</th>
-              <th className="text-left p-2">Total Cost</th>
-              <th className="text-left p-2">FOB Price</th>
               <th className="text-left p-2">Details</th>
             </tr>
           </thead>
@@ -52,17 +140,18 @@ const CostSheetTable = () => {
               <React.Fragment key={sheet.id}>
                 <tr className="border-b hover:bg-muted/20">
                   <td className="p-2">{sheet.style?.name || "-"}</td>
+                  <td className="p-2">{sheet.item || "-"}</td>
+                  <td className="p-2">{sheet.group || "-"}</td>
+                  <td className="p-2">{sheet.size || "-"}</td>
+                  <td className="p-2">{sheet.fabricType || "-"}</td>
+                  <td className="p-2">{sheet.gsm || "-"}</td>
+                  <td className="p-2">{sheet.color || "-"}</td>
+                  <td className="p-2">{sheet.quantity ?? "-"}</td>
                   <td className="p-2">{sheet.createdBy?.userName || "-"}</td>
                   <td className="p-2">
                     {sheet.createdAt
                       ? new Date(sheet.createdAt).toLocaleDateString()
                       : "-"}
-                  </td>
-                  <td className="p-2">
-                    ${sheet.totalCost ? Number(sheet.totalCost).toFixed(2) : "0.00"}
-                  </td>
-                  <td className="p-2">
-                    ${sheet.fobPrice ? Number(sheet.fobPrice).toFixed(2) : "0.00"}
                   </td>
                   <td className="p-2">
                     <Button
@@ -78,131 +167,30 @@ const CostSheetTable = () => {
                 </tr>
                 {expandedId === sheet.id && (
                   <tr>
-                    <td colSpan={6} className="bg-muted/10 p-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {/* CAD Consumption */}
-                        <div>
-                          <div className="font-semibold mb-2">CAD Consumption</div>
-                          <table className="w-full text-sm">
-                            <thead>
-                              <tr>
-                                <th>Field</th>
-                                <th>Weight</th>
-                                <th>%</th>
-                                <th>Value</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {(sheet.cadRows || []).map((row: any) => (
-                                <tr key={row.id}>
-                                  <td>{row.fieldName}</td>
-                                  <td>{row.weight ?? ""}</td>
-                                  <td>{row.percent ?? ""}</td>
-                                  <td>{row.value ?? 0}</td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                        {/* Fabric Cost */}
-                        <div>
-                          <div className="font-semibold mb-2">Fabric Cost</div>
-                          {sheet.fabricRows && (
-                            <table className="w-full text-sm">
-                              <thead>
-                                <tr>
-                                  <th>Type</th>
-                                  <th>Field</th>
-                                  <th>Unit</th>
-                                  <th>Rate</th>
-                                  <th>Value</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {/* Yarn */}
-                                {(sheet.fabricRows.yarnRows || []).map((row: any) => (
-                                  <tr key={row.id}>
-                                    <td>yarn</td>
-                                    <td>{row.fieldName}</td>
-                                    <td>{row.unit ?? ""}</td>
-                                    <td>{row.rate ?? ""}</td>
-                                    <td>{row.value ?? 0}</td>
-                                  </tr>
-                                ))}
-                                {/* Knitting */}
-                                {(sheet.fabricRows.knittingRows || []).map((row: any) => (
-                                  <tr key={row.id}>
-                                    <td>knitting</td>
-                                    <td>{row.fieldName}</td>
-                                    <td>{row.unit ?? ""}</td>
-                                    <td>{row.rate ?? ""}</td>
-                                    <td>{row.value ?? 0}</td>
-                                  </tr>
-                                ))}
-                                {/* Dyeing */}
-                                {(sheet.fabricRows.dyeingRows || []).map((row: any) => (
-                                  <tr key={row.id}>
-                                    <td>dyeing</td>
-                                    <td>{row.fieldName}</td>
-                                    <td>{row.unit ?? ""}</td>
-                                    <td>{row.rate ?? ""}</td>
-                                    <td>{row.value ?? 0}</td>
-                                  </tr>
-                                ))}
-                                {/* Print & Embellishment */}
-                                {(sheet.fabricRows.printEmbRows || []).map((row: any) => (
-                                  <tr key={row.id}>
-                                    <td>printEmb</td>
-                                    <td>{row.fieldName}</td>
-                                    <td>{row.unit ?? ""}</td>
-                                    <td>{row.rate ?? ""}</td>
-                                    <td>{row.value ?? 0}</td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          )}
-                        </div>
-                        {/* Trims & Accessories */}
-                        <div>
-                          <div className="font-semibold mb-2">Trims & Accessories</div>
-                          <table className="w-full text-sm">
-                            <thead>
-                              <tr>
-                                <th>Description</th>
-                                <th>Cost</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {(sheet.trimsRows || []).map((row: any) => (
-                                <tr key={row.id}>
-                                  <td>{row.description}</td>
-                                  <td>{row.cost ?? ""}</td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                        {/* Others */}
-                        <div>
-                          <div className="font-semibold mb-2">Others</div>
-                          <table className="w-full text-sm">
-                            <thead>
-                              <tr>
-                                <th>Label</th>
-                                <th>Value</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {(sheet.othersRows || []).map((row: any) => (
-                                <tr key={row.id}>
-                                  <td>{row.label}</td>
-                                  <td>{row.value ?? ""}</td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
+                    <td colSpan={11} className="bg-muted/10 p-4">
+                      <div className=" space-y-6">
+                        <CadConsumptionSection
+                          data={sheet.cadRows?.rows || []}
+                          mode="show"
+                        />
+                        <FabricCostSection
+                          data={sheet.fabricRows}
+                          mode="show"
+                        />
+                        <TrimsAccessoriesSection
+                          data={sheet.trimsRows}
+                          mode="show"
+                        />
+                        <OthersSection
+                          data={sheet.othersRows}
+                          mode="show"
+                        />
+                        <SummarySection
+                          summary={sheet.summaryRows}
+                          fabricData={sheet.fabricRows}
+                          trimsData={sheet.trimsRows?.rows || []}
+                          mode="show"
+                        />
                       </div>
                     </td>
                   </tr>

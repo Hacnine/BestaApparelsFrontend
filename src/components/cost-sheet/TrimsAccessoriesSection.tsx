@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Pencil } from "lucide-react";
 
 interface TrimRow {
   id: string;
@@ -16,8 +16,9 @@ interface TrimsAccessoriesSectionChange {
 }
 
 interface TrimsAccessoriesSectionProps {
-  data: TrimRow[];
-  onChange: (data: TrimsAccessoriesSectionChange) => void;
+  data: any;
+  onChange?: (data: TrimsAccessoriesSectionChange) => void;
+  mode?: "create" | "edit" | "show";
 }
 
 const defaultTrims = [
@@ -52,34 +53,44 @@ const defaultTrims = [
 const TrimsAccessoriesSection = ({
   data,
   onChange,
+  mode = "create",
 }: TrimsAccessoriesSectionProps) => {
-  const [rows, setRows] = useState<TrimRow[]>([]);
-  const [adjustmentPercent, setAdjustmentPercent] = useState(8);
+  // Use backend data if in show mode, otherwise use state
+  const [rows, setRows] = useState<TrimRow[]>(
+    Array.isArray(data?.rows)
+      ? data.rows
+      : defaultTrims.map((trim, index) => ({
+          id: `trim-${index}`,
+          description: trim,
+          cost: "",
+        }))
+  );
+  const [adjustmentPercent, setAdjustmentPercent] = useState(
+    typeof data?.adjustmentPercent === "number" ? data.adjustmentPercent : 8
+  );
+  const [editMode, setEditMode] = useState(mode === "edit" || mode === "create");
+
+  useEffect(() => {
+    if (Array.isArray(data?.rows)) {
+      setRows(data.rows);
+      if (typeof data.adjustmentPercent === "number") {
+        setAdjustmentPercent(data.adjustmentPercent);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data]);
+
+  const isEditable = editMode && (mode === "edit" || mode === "create");
 
   const handleRowsChange = (updatedRows: TrimRow[]) => {
     setRows(updatedRows);
-    onChange({
-      rows: updatedRows,
-      json: getTrimsAccessoriesJson(),
-    });
-  };
-
-  useEffect(() => {
-    if (data.length === 0) {
-      const initialRows = defaultTrims.map((trim, index) => ({
-        id: `trim-${index}`,
-        description: trim,
-        cost: "",
-      }));
-      setRows(initialRows);
+    if (onChange) {
       onChange({
-        rows: initialRows,
-        json: getTrimsAccessoriesJson(),
+        rows: updatedRows,
+        json: getTrimsAccessoriesJson(updatedRows),
       });
-    } else {
-      setRows(data);
     }
-  }, []);
+  };
 
   const handleDecimalChange = (
     id: string,
@@ -122,15 +133,15 @@ const TrimsAccessoriesSection = ({
   const adjustment = subtotal * (adjustmentPercent / 100);
   const totalAccessoriesCost = subtotal + adjustment;
 
-  const getTrimsAccessoriesJson = () => {
+  const getTrimsAccessoriesJson = (rowsArg: TrimRow[] = rows) => {
     return {
       tableName: "Trims & Accessories",
       columns: ["Item Description", "USD / Dozen"],
-      rows: rows.map((row) => ({
+      rows: rowsArg.map((row) => ({
         description: row.description,
         cost: row.cost,
       })),
-      subtotal,
+      subtotal: rowsArg.reduce((sum, row) => sum + (Number(row.cost) || 0), 0),
       adjustmentPercent,
       adjustment,
       totalAccessoriesCost,
@@ -155,6 +166,17 @@ const TrimsAccessoriesSection = ({
     <Card>
       <CardHeader>
         <CardTitle className="text-lg">Trims & Accessories</CardTitle>
+        {mode === "show" && !editMode && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="ml-2"
+            onClick={() => setEditMode(true)}
+          >
+            <Pencil className="h-4 w-4 mr-1" />
+            Edit
+          </Button>
+        )}
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
@@ -163,7 +185,7 @@ const TrimsAccessoriesSection = ({
               <tr className="border-b bg-muted/50">
                 <th className="text-left p-3 font-medium">Item Description</th>
                 <th className="text-right p-3 font-medium">USD / Dozen</th>
-                <th className="w-12"></th>
+                {isEditable && <th className="w-12"></th>}
               </tr>
             </thead>
             <tbody>
@@ -176,9 +198,10 @@ const TrimsAccessoriesSection = ({
                     <Input
                       value={row.description}
                       onChange={(e) =>
-                        updateRow(row.id, "description", e.target.value)
+                        isEditable && updateRow(row.id, "description", e.target.value)
                       }
                       className="max-w-md"
+                      disabled={!isEditable}
                     />
                   </td>
                   <td className="p-3">
@@ -186,34 +209,37 @@ const TrimsAccessoriesSection = ({
                       type="text"
                       value={row.cost ?? ""}
                       onChange={(e) =>
-                        handleDecimalChange(row.id, "cost", e.target.value)
+                        isEditable && handleDecimalChange(row.id, "cost", e.target.value)
                       }
                       className="text-right"
                       placeholder="0.000"
+                      disabled={!isEditable}
                     />
                   </td>
-                  <td className="p-3">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => deleteRow(row.id)}
-                      className="text-destructive hover:text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4  text-red-600" />
-                    </Button>
-                  </td>
+                  {isEditable && (
+                    <td className="p-3">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => deleteRow(row.id)}
+                        className="text-destructive hover:text-destructive"
+                        disabled={!isEditable}
+                      >
+                        <Trash2 className="h-4 w-4  text-red-600" />
+                      </Button>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-        <Button onClick={addRow} variant="outline" size="sm" className="mt-4">
-          <Plus className="h-4 w-4 mr-2" />
-          Add Field
-        </Button>
-        <Button onClick={sendTrimsAccessoriesToBackend} variant="default" size="sm" className="mt-4 ml-2">
-          Send Trims & Accessories Data
-        </Button>
+        {isEditable && (
+          <Button onClick={addRow} variant="outline" size="sm" className="mt-4">
+            <Plus className="h-4 w-4 mr-2" />
+            Add Field
+          </Button>
+        )}
 
         <div className="mt-6 space-y-3 pt-6 border-t-2">
           <div className="flex justify-between items-center">
@@ -230,11 +256,13 @@ const TrimsAccessoriesSection = ({
                 type="string"
                 value={adjustmentPercent}
                 onChange={(e) => {
-                  setAdjustmentPercent(Number(e.target.value) || 0);
-                  // Update parent with new adjustment value and JSON
-                  handleRowsChange(rows);
+                  if (isEditable) {
+                    setAdjustmentPercent(Number(e.target.value) || 0);
+                    handleRowsChange(rows);
+                  }
                 }}
                 className="w-20 h-8"
+                disabled={!isEditable}
               />
               <span>%</span>
             </div>
