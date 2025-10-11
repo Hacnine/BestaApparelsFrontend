@@ -10,9 +10,14 @@ interface TrimRow {
   cost: string;
 }
 
+interface TrimsAccessoriesSectionChange {
+  rows: TrimRow[];
+  json: any;
+}
+
 interface TrimsAccessoriesSectionProps {
-  data: any[];
-  onChange: (data: any[]) => void;
+  data: TrimRow[];
+  onChange: (data: TrimsAccessoriesSectionChange) => void;
 }
 
 const defaultTrims = [
@@ -51,6 +56,14 @@ const TrimsAccessoriesSection = ({
   const [rows, setRows] = useState<TrimRow[]>([]);
   const [adjustmentPercent, setAdjustmentPercent] = useState(8);
 
+  const handleRowsChange = (updatedRows: TrimRow[]) => {
+    setRows(updatedRows);
+    onChange({
+      rows: updatedRows,
+      json: getTrimsAccessoriesJson(),
+    });
+  };
+
   useEffect(() => {
     if (data.length === 0) {
       const initialRows = defaultTrims.map((trim, index) => ({
@@ -59,7 +72,10 @@ const TrimsAccessoriesSection = ({
         cost: "",
       }));
       setRows(initialRows);
-      onChange(initialRows);
+      onChange({
+        rows: initialRows,
+        json: getTrimsAccessoriesJson(),
+      });
     } else {
       setRows(data);
     }
@@ -80,12 +96,11 @@ const TrimsAccessoriesSection = ({
       row.id === id
         ? {
             ...row,
-            [field] : value,
+            [field]: value,
           }
         : row
-    );console.log(updatedRows);
-    setRows(updatedRows);
-    onChange(updatedRows);
+    );
+    handleRowsChange(updatedRows);
   };
 
   const addRow = () => {
@@ -95,19 +110,46 @@ const TrimsAccessoriesSection = ({
       cost: "",
     };
     const updatedRows = [...rows, newRow];
-    setRows(updatedRows);
-    onChange(updatedRows);
+    handleRowsChange(updatedRows);
   };
 
   const deleteRow = (id: string) => {
     const updatedRows = rows.filter((row) => row.id !== id);
-    setRows(updatedRows);
-    onChange(updatedRows);
+    handleRowsChange(updatedRows);
   };
 
   const subtotal = rows.reduce((sum, row) => sum + (Number(row.cost) || 0), 0);
   const adjustment = subtotal * (adjustmentPercent / 100);
   const totalAccessoriesCost = subtotal + adjustment;
+
+  const getTrimsAccessoriesJson = () => {
+    return {
+      tableName: "Trims & Accessories",
+      columns: ["Item Description", "USD / Dozen"],
+      rows: rows.map((row) => ({
+        description: row.description,
+        cost: row.cost,
+      })),
+      subtotal,
+      adjustmentPercent,
+      adjustment,
+      totalAccessoriesCost,
+    };
+  };
+
+  const sendTrimsAccessoriesToBackend = async () => {
+    const payload = getTrimsAccessoriesJson();
+    try {
+      await fetch("/api/trims-accessories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      // Optionally show success message
+    } catch (err) {
+      // Optionally handle error
+    }
+  };
 
   return (
     <Card>
@@ -169,6 +211,9 @@ const TrimsAccessoriesSection = ({
           <Plus className="h-4 w-4 mr-2" />
           Add Field
         </Button>
+        <Button onClick={sendTrimsAccessoriesToBackend} variant="default" size="sm" className="mt-4 ml-2">
+          Send Trims & Accessories Data
+        </Button>
 
         <div className="mt-6 space-y-3 pt-6 border-t-2">
           <div className="flex justify-between items-center">
@@ -184,9 +229,11 @@ const TrimsAccessoriesSection = ({
               <Input
                 type="string"
                 value={adjustmentPercent}
-                onChange={(e) =>
-                  setAdjustmentPercent(Number(e.target.value) || 0)
-                }
+                onChange={(e) => {
+                  setAdjustmentPercent(Number(e.target.value) || 0);
+                  // Update parent with new adjustment value and JSON
+                  handleRowsChange(rows);
+                }}
                 className="w-20 h-8"
               />
               <span>%</span>

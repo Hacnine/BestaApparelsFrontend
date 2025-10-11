@@ -98,36 +98,6 @@ const FabricCostSection = ({ data, onChange }: FabricCostSectionProps) => {
     },
   ]);
 
-  const [printEmbRows, setPrintEmbRows] = useState<FabricRow[]>([
-    {
-      id: "print-1",
-      fieldName: "AOP",
-      unit: "",
-      rate: "",
-      value: 0,
-    },
-    {
-      id: "print-2",
-      fieldName: "Screen print",
-      unit: "",
-      rate: "",
-      value: 0,
-    },
-    {
-      id: "print-3",
-      fieldName: "Emb (Chest + Back)",
-      unit: "",
-      rate: "",
-      value: 0,
-    },
-    {
-      id: "print-4",
-      fieldName: "Wash",
-      unit: "",
-      rate: "",
-      value: 0,
-    },
-  ]);
 
   const handleDecimalChange = (
     rows: FabricRow[],
@@ -188,25 +158,47 @@ const FabricCostSection = ({ data, onChange }: FabricCostSectionProps) => {
     const yarnTotal = calculateTotal(yarnRows);
     const knittingTotal = calculateTotal(knittingRows);
     const dyeingTotal = calculateTotal(dyeingRows);
-    const printEmbTotal = calculateTotal(printEmbRows);
-    const totalCost = yarnTotal + knittingTotal + dyeingTotal + printEmbTotal;
+    const totalCost = yarnTotal + knittingTotal + dyeingTotal;
 
     onChange({
       yarnRows,
       knittingRows,
       dyeingRows,
-      printEmbRows,
       yarnTotal,
       knittingTotal,
       dyeingTotal,
-      printEmbTotal,
       totalCost,
     });
   };
 
+  const getFabricCostJson = () => {
+    return {
+      tableName: "Fabric Cost",
+      yarnRows,
+      knittingRows,
+      dyeingRows,
+      yarnTotal: calculateTotal(yarnRows),
+      knittingTotal: calculateTotal(knittingRows),
+      dyeingTotal: calculateTotal(dyeingRows),
+      totalFabricCost,
+    };
+  };
+
+  const handleRowsChange = () => {
+    onChange({
+      rows: {
+        yarnRows,
+        knittingRows,
+        dyeingRows,
+      },
+      json: getFabricCostJson(),
+    });
+  };
+
   useEffect(() => {
-    updateTotalData();
-  }, [yarnRows, knittingRows, dyeingRows, printEmbRows]);
+    handleRowsChange();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [yarnRows, knittingRows, dyeingRows]);
 
   const renderSubsection = (
     title: string,
@@ -333,9 +325,7 @@ const FabricCostSection = ({ data, onChange }: FabricCostSectionProps) => {
   const totalFabricCost =
     (Number(calculateTotal(yarnRows)) || 0) +
     (Number(calculateTotal(knittingRows)) || 0) +
-    (Number(calculateTotal(dyeingRows)) || 0) +
-    (Number(calculateTotal(printEmbRows)) || 0);
-
+    (Number(calculateTotal(dyeingRows)) || 0) 
   return (
     <Card>
       <CardHeader>
@@ -348,12 +338,7 @@ const FabricCostSection = ({ data, onChange }: FabricCostSectionProps) => {
         <Separator />
         {renderSubsection("Dyeing", dyeingRows, setDyeingRows, "dye")}
         <Separator />
-        {renderSubsection(
-          "Printing & Embellishment",
-          printEmbRows,
-          setPrintEmbRows,
-          "printEmb"
-        )}
+       
         <Separator />
         <div className="pt-4 border-t-2">
           <div className="flex justify-between items-center font-semibold text-lg">
@@ -365,6 +350,13 @@ const FabricCostSection = ({ data, onChange }: FabricCostSectionProps) => {
                 : "0.00"}
             </span>
           </div>
+          <Button
+            className="mt-4"
+            variant="default"
+            // onClick={sendFabricCostToBackend}
+          >
+            Save Fabric Cost Data
+          </Button>
         </div>
       </CardContent>
     </Card>

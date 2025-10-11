@@ -10,13 +10,31 @@ interface OtherRow {
   value: number;
 }
 
+interface OthersSectionChange {
+  rows: OtherRow[];
+  json: any;
+}
+
 interface OthersSectionProps {
-  data: any[];
-  onChange: (data: any[]) => void;
+  data: OtherRow[];
+  onChange: (data: OthersSectionChange) => void;
 }
 
 const OthersSection = ({ data, onChange }: OthersSectionProps) => {
   const [rows, setRows] = useState<OtherRow[]>(data);
+
+  const handleRowsChange = (updatedRows: OtherRow[]) => {
+    setRows(updatedRows);
+    onChange({
+      rows: updatedRows,
+      json: {
+        tableName: "Others",
+        columns: ["Label", "Value"],
+        rows: updatedRows,
+        total: updatedRows.reduce((sum, row) => sum + (Number(row.value) || 0), 0),
+      },
+    });
+  };
 
   const updateRow = (id: string, field: keyof OtherRow, value: any) => {
     const updatedRows = rows.map((row) =>
@@ -27,25 +45,22 @@ const OthersSection = ({ data, onChange }: OthersSectionProps) => {
           }
         : row
     );
-    setRows(updatedRows);
-    onChange(updatedRows);
+    handleRowsChange(updatedRows);
   };
 
   const addRow = () => {
     const newRow: OtherRow = {
       id: `other-${Date.now()}`,
       label: "New Field",
-      value: undefined, // <-- remove default 0
+      value: 0,
     };
     const updatedRows = [...rows, newRow];
-    setRows(updatedRows);
-    onChange(updatedRows);
+    handleRowsChange(updatedRows);
   };
 
   const deleteRow = (id: string) => {
     const updatedRows = rows.filter((row) => row.id !== id);
-    setRows(updatedRows);
-    onChange(updatedRows);
+    handleRowsChange(updatedRows);
   };
 
   const total = rows.reduce((sum, row) => sum + (Number(row.value) || 0), 0);

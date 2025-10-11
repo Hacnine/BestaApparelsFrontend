@@ -3,13 +3,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+interface SummarySectionChange {
+  summary: any;
+  json: any;
+}
+
 interface SummarySectionProps {
   summary: any;
   fabricData: any;
   trimsData: any[];
+  onChange?: (data: SummarySectionChange) => void;
 }
 
-const SummarySection = ({ summary, fabricData, trimsData }: SummarySectionProps) => {
+const SummarySection = ({ summary, fabricData, trimsData, onChange }: SummarySectionProps) => {
   const [factoryCM, setFactoryCM] = useState(14.0);
   const [profitPercent, setProfitPercent] = useState(15);
 
@@ -17,11 +23,57 @@ const SummarySection = ({ summary, fabricData, trimsData }: SummarySectionProps)
   const trimsSubtotal = trimsData.reduce((sum, item) => sum + (Number(item.cost) || 0), 0);
   const trimsAdjustment = trimsSubtotal * 0.08;
   const accessoriesCost = trimsSubtotal + trimsAdjustment;
-  
   const totalCost = fabricCost + accessoriesCost + factoryCM;
   const commercialProfit = totalCost * (profitPercent / 100);
   const fobPrice = totalCost + commercialProfit;
   const pricePerPiece = fobPrice / 12;
+
+  // Helper to send summary data to parent
+  const notifyChange = (nextFactoryCM: number, nextProfitPercent: number) => {
+    if (onChange) {
+      const nextTotalCost = fabricCost + accessoriesCost + nextFactoryCM;
+      const nextCommercialProfit = nextTotalCost * (nextProfitPercent / 100);
+      const nextFobPrice = nextTotalCost + nextCommercialProfit;
+      const nextPricePerPiece = nextFobPrice / 12;
+      onChange({
+        summary: {
+          fabricCost,
+          accessoriesCost,
+          factoryCM: nextFactoryCM,
+          totalCost: nextTotalCost,
+          commercialProfit: nextCommercialProfit,
+          fobPrice: nextFobPrice,
+          pricePerPiece: nextPricePerPiece,
+          profitPercent: nextProfitPercent,
+        },
+        json: {
+          tableName: "Summary",
+          fields: [
+            { label: "Fabric Cost / Dzn Garments", value: fabricCost },
+            { label: "Accessories Cost / Dzn Garments", value: accessoriesCost },
+            { label: "Factory CM / Dzn Garments", value: nextFactoryCM },
+            { label: "Total Cost", value: nextTotalCost },
+            { label: `Commercial & Profit Cost (${nextProfitPercent}%)`, value: nextCommercialProfit },
+            { label: "FOB Price / Dzn", value: nextFobPrice },
+            { label: "Price / Pc Garments", value: nextPricePerPiece },
+          ],
+        }
+      });
+    }
+  };
+
+  // Only call notifyChange when user changes factoryCM or profitPercent
+  const handleFactoryCMChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = Number(e.target.value) || 0;
+    setFactoryCM(value);
+    notifyChange(value, profitPercent);
+  };
+
+  const handleProfitPercentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = Number(e.target.value) || 0;
+    setProfitPercent(value);
+    notifyChange(factoryCM, value);
+  };
 
   return (
     <Card>
@@ -37,7 +89,7 @@ const SummarySection = ({ summary, fabricData, trimsData }: SummarySectionProps)
                 id="factoryCM"
                 type="string"
                 value={factoryCM}
-                onChange={(e) => setFactoryCM(Number(e.target.value) || 0)}
+                onChange={handleFactoryCMChange}
                 className="font-semibold"
               />
             </div>
@@ -49,7 +101,7 @@ const SummarySection = ({ summary, fabricData, trimsData }: SummarySectionProps)
                   id="profitPercent"
                   type="string"
                   value={profitPercent}
-                  onChange={(e) => setProfitPercent(Number(e.target.value) || 0)}
+                  onChange={handleProfitPercentChange}
                   className="font-semibold"
                 />
                 <span className="text-sm text-muted-foreground">%</span>

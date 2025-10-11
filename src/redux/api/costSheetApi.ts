@@ -3,7 +3,11 @@ import url from "@/config/urls";
 
 export const costSheetApi = createApi({
   reducerPath: "costSheetApi",
-  baseQuery: fetchBaseQuery({ baseUrl: `${url.BASE_URL}/cost-sheets` }),
+  baseQuery: fetchBaseQuery({
+    baseUrl: `${url.BASE_URL}/cost-sheets`,
+    credentials: "include",
+  }),
+  
   tagTypes: ["CostSheet"],
   endpoints: (builder) => ({
     getCostSheets: builder.query<any[], void>({

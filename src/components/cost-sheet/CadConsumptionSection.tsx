@@ -12,9 +12,14 @@ interface CadRow {
   value?: number;
 }
 
+interface CadConsumptionSectionChange {
+  rows: CadRow[];
+  json: any;
+}
+
 interface CadConsumptionSectionProps {
-  data: any[];
-  onChange: (data: any[]) => void;
+  data: CadRow[];
+  onChange: (data: CadConsumptionSectionChange) => void;
 }
 
 const defaultFields = [
@@ -27,6 +32,14 @@ const defaultFields = [
 const CadConsumptionSection = ({ data, onChange }: CadConsumptionSectionProps) => {
   const [rows, setRows] = useState<CadRow[]>([]);
 
+  const handleRowsChange = (updatedRows: CadRow[]) => {
+    setRows(updatedRows);
+    onChange({
+      rows: updatedRows,
+      json: getCadConsumptionJson(),
+    });
+  };
+
   useEffect(() => {
     if (data.length === 0) {
       const initialRows = defaultFields.map((field, index) => ({
@@ -35,7 +48,10 @@ const CadConsumptionSection = ({ data, onChange }: CadConsumptionSectionProps) =
         value: 0,
       }));
       setRows(initialRows);
-      onChange(initialRows);
+      onChange({
+        rows: initialRows,
+        json: getCadConsumptionJson(),
+      });
     } else {
       setRows(data);
     }
@@ -51,7 +67,6 @@ const CadConsumptionSection = ({ data, onChange }: CadConsumptionSectionProps) =
     const updatedRows = rows.map((row) => {
       if (row.id === id) {
         const updatedRow = { ...row, [field]: value };
-        // Calculate value as: weight + (weight * percent / 100)
         const weightNum = Number(updatedRow.weight) || 0;
         const percentNum = Number(updatedRow.percent) || 0;
         updatedRow.value = weightNum + (weightNum * percentNum / 100);
@@ -59,8 +74,7 @@ const CadConsumptionSection = ({ data, onChange }: CadConsumptionSectionProps) =
       }
       return row;
     });
-    setRows(updatedRows);
-    onChange(updatedRows );
+    handleRowsChange(updatedRows);
   };
 
   const addRow = () => {
@@ -72,18 +86,45 @@ const CadConsumptionSection = ({ data, onChange }: CadConsumptionSectionProps) =
       value: 0,
     };
     const updatedRows = [...rows, newRow];
-    setRows(updatedRows);
-    onChange(updatedRows);
+    handleRowsChange(updatedRows);
   };
 
   const deleteRow = (id: string) => {
     const updatedRows = rows.filter((row) => row.id !== id);
-    setRows(updatedRows);
-    onChange(updatedRows);
+    handleRowsChange(updatedRows);
   };
 
   const totalWeight = rows.reduce((sum, row) => sum + (Number(row.weight) || 0), 0);
   const totalValue = rows.reduce((sum, row) => sum + (row.value || 0), 0);
+
+  const getCadConsumptionJson = () => {
+    return {
+      tableName: "CAD Consumption / Dz",
+      columns: ["Field Name", "Weight (kg)", "With %", "Fabric Consumption"],
+      rows: rows.map(row => ({
+        fieldName: row.fieldName,
+        weight: row.weight,
+        percent: row.percent,
+        value: row.value,
+      })),
+      totalWeight,
+      totalValue,
+    };
+  };
+
+  const sendCadConsumptionToBackend = async () => {
+    const payload = getCadConsumptionJson();
+    try {
+      await fetch("/api/cad-consumption", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      // Optionally show success message
+    } catch (err) {
+      // Optionally handle error
+    }
+  };
 
   return (
     <Card>
@@ -171,6 +212,12 @@ const CadConsumptionSection = ({ data, onChange }: CadConsumptionSectionProps) =
         <Button onClick={addRow} variant="outline" size="sm" className="mt-4">
           <Plus className="h-4 w-4 mr-2" />
           Add Field
+        </Button>
+        <Button 
+        // onClick={sendCadConsumptionToBackend} 
+        variant="default" size="sm"
+         className="mt-4 ml-2">
+          Save CAD Consumption Data
         </Button>
       </CardContent>
     </Card>
