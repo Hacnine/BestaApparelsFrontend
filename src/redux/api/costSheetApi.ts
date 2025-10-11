@@ -7,7 +7,7 @@ export const costSheetApi = createApi({
     baseUrl: `${url.BASE_URL}/cost-sheets`,
     credentials: "include",
   }),
-  
+
   tagTypes: ["CostSheet"],
   endpoints: (builder) => ({
     getCostSheets: builder.query<any[], void>({
@@ -41,6 +41,13 @@ export const costSheetApi = createApi({
       }),
       invalidatesTags: ["CostSheet"],
     }),
+    checkStyle: builder.query<
+      { exists: boolean; creatorName?: string },
+      string
+    >({
+      query: (style) => `/check-style?style=${style}`,
+      keepUnusedDataFor: 0, // Disable cache for this query
+    }),
   }),
 });
 
@@ -50,4 +57,5 @@ export const {
   useCreateCostSheetMutation,
   useUpdateCostSheetMutation,
   useDeleteCostSheetMutation,
+  useCheckStyleQuery,
 } = costSheetApi;

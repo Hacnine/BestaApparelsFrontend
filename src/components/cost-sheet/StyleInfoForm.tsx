@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { useState } from "react";
+import { useCheckStyleQuery } from "@/redux/api/costSheetApi";
 
 interface StyleInfoFormProps {
   form: UseFormReturn<any>;
@@ -22,8 +23,18 @@ const StyleInfoForm = ({
 }: StyleInfoFormProps) => {
   const { register, watch } = form;
   const isDisabled = styleExists === true;
-  const stylePattern = /^[A-Za-z]+-[A-Za-z0-9]+$/;
+  const stylePattern = /^[A-Za-z0-9-]+$/;
   const [styleError, setStyleError] = useState<string | null>(null);
+
+  const styleValue = watch("style");
+  const {
+    data: styleCheckData,
+    isFetching: isStyleChecking,
+    refetch,
+  } = useCheckStyleQuery(styleValue, {
+    skip: !styleValue || !stylePattern.test(styleValue),
+    refetchOnMountOrArgChange: true, // Always refetch when styleValue changes
+  });
 
   return (
     <div className="space-y-4">
@@ -36,20 +47,30 @@ const StyleInfoForm = ({
             <Input
               id="style"
               {...register("style")}
+              onChange={(e) => {
+                // Only allow letters, numbers, and dash
+                const filtered = e.target.value.replace(/[^A-Za-z0-9-]/g, "");
+                if (filtered !== e.target.value) {
+                  e.target.value = filtered;
+                }
+                form.setValue("style", filtered);
+              }}
               onBlur={(e) => {
-                onStyleCheck(e.target.value);
-                if (!stylePattern.test(e.target.value)) {
+                const value = e.target.value;
+                if (!stylePattern.test(value)) {
                   setStyleError(
-                    "Style format must be like HJ-90 (letters-dash-numbers/letters)"
+                    "Only letters, numbers, and dash (-) are allowed."
                   );
                 } else {
                   setStyleError(null);
+                  // Only check style if valid format
+                  // onStyleCheck(value); // No longer needed, handled by RTK Query
                 }
               }}
               disabled={isDisabled}
               placeholder="Enter style code"
             />
-            {isCheckingStyle && (
+            {(isStyleChecking || isCheckingStyle) && (
               <Loader2 className="absolute right-3 top-3 h-4 w-4 animate-spin text-muted-foreground" />
             )}
             {styleError && (
@@ -143,17 +164,18 @@ const StyleInfoForm = ({
         </div>
       </div>
 
-      {styleExists === true && (
+      {/* Show alerts based on RTK Query result */}
+      {styleCheckData?.exists === true && (
         <Alert className="border-warning bg-warning/10">
-          <AlertCircle className="h-4 w-4 text-warning" />
-          <AlertDescription className="text-warning-foreground">
+          <AlertCircle className="h-4 w-4 text-orange-700" />
+          <AlertDescription className="text-warning-foreground text-orange-700">
             This style already exists. Created by:{" "}
-            <strong>{creatorName}</strong>
+            <strong>{styleCheckData.creatorName}</strong>
           </AlertDescription>
         </Alert>
       )}
 
-      {styleExists === false && (
+      {styleCheckData?.exists === false && (
         <Alert className="border-success bg-success/10">
           <CheckCircle2 className="h-4 w-4 text-success" />
           <AlertDescription className="text-green-700">
