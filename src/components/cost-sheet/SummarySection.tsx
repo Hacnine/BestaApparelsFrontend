@@ -32,16 +32,23 @@ const SummarySection = ({
   );
   const [editMode, setEditMode] = useState(mode === "edit" || mode === "create");
 
+  // Defensive checks for fabricData and trimsData
+  const safeFabricData = fabricData ?? {};
+  const safeTrimsData = Array.isArray(trimsData) ? trimsData : [];
+
   // Use summary fields if in show mode, otherwise calculate
   const fabricCost =
     typeof summary?.fabricCost === "number"
       ? summary.fabricCost
-      : fabricData.totalCost || 0;
+      : typeof safeFabricData.totalCost === "number"
+        ? safeFabricData.totalCost
+        : 0;
+
   const accessoriesCost =
     typeof summary?.accessoriesCost === "number"
       ? summary.accessoriesCost
       : (() => {
-          const trimsSubtotal = trimsData.reduce(
+          const trimsSubtotal = safeTrimsData.reduce(
             (sum, item) => sum + (Number(item.cost) || 0),
             0
           );
@@ -114,93 +121,131 @@ const SummarySection = ({
 
   const isEditable = editMode && (mode === "edit" || mode === "create");
 
+  // Table rows for summary fields
+  const summaryRows = [
+    { label: "Fabric Cost / Dzn Garments", value: fabricCost },
+    { label: "Accessories Cost / Dzn Garments", value: accessoriesCost },
+    { label: "Factory CM / Dzn Garments", value: factoryCM },
+    { label: "Total Cost", value: totalCost },
+    { label: `Commercial & Profit Cost (${profitPercent}%)`, value: commercialProfit },
+    { label: "FOB Price / Dzn", value: fobPrice },
+    { label: "Price / Pc Garments", value: pricePerPiece },
+  ];
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">Summary</CardTitle>
+    <Card className="print:p-0 print:shadow-none print:border-none print:bg-white">
+      <CardHeader className="print:p-0 print:mb-0 print:border-none print:bg-white">
+        <CardTitle className="text-lg print:text-base print:mb-0">Summary</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4 pb-4 border-b">
-            <div className="space-y-2">
-              <Label htmlFor="factoryCM">Factory CM / Dzn Garments</Label>
-              <Input
-                id="factoryCM"
-                type="string"
-                value={factoryCM}
-                onChange={handleFactoryCMChange}
-                className="font-semibold"
-                readOnly={!isEditable}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="profitPercent">Commercial & Profit %</Label>
-              <div className="flex items-center gap-2">
+      <CardContent className="print:p-0 print:space-y-0 print:bg-white">
+        {mode === "show" && !isEditable ? (
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-sm">
+              <thead>
+                <tr>
+                  <th className="border p-2 bg-muted/30">Label</th>
+                  <th className="border p-2 bg-muted/30">Value ($)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {summaryRows.map((row, idx) => (
+                  <tr key={idx}>
+                    <td className="border p-2">{row.label}</td>
+                    <td className="border p-2 text-right">
+                      {typeof row.value === "number"
+                        ? row.label === "Price / Pc Garments"
+                          ? `$${row.value.toFixed(2)}`
+                          : `$${row.value.toFixed(2)}`
+                        : row.value}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4 pb-4 border-b">
+              <div className="space-y-2">
+                <Label htmlFor="factoryCM">Factory CM / Dzn Garments</Label>
                 <Input
-                  id="profitPercent"
+                  id="factoryCM"
                   type="string"
-                  value={profitPercent}
-                  onChange={handleProfitPercentChange}
+                  value={factoryCM}
+                  onChange={handleFactoryCMChange}
                   className="font-semibold"
                   readOnly={!isEditable}
                 />
-                <span className="text-sm text-muted-foreground">%</span>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="profitPercent">Commercial & Profit %</Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    id="profitPercent"
+                    type="string"
+                    value={profitPercent}
+                    onChange={handleProfitPercentChange}
+                    className="font-semibold"
+                    readOnly={!isEditable}
+                  />
+                  <span className="text-sm text-muted-foreground">%</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex justify-between items-center p-3 bg-muted/30 rounded">
+                <span className="font-medium">Fabric Cost / Dzn Garments</span>
+                <span className="font-semibold">
+                  ${Number(fabricCost) ? Number(fabricCost).toFixed(2) : "0.00"}
+                </span>
+              </div>
+
+              <div className="flex justify-between items-center p-3 bg-muted/30 rounded">
+                <span className="font-medium">Accessories Cost / Dzn Garments</span>
+                <span className="font-semibold">
+                  ${Number(accessoriesCost) ? Number(accessoriesCost).toFixed(2) : "0.00"}
+                </span>
+              </div>
+
+              <div className="flex justify-between items-center p-3 bg-muted/30 rounded">
+                <span className="font-medium">Factory CM / Dzn Garments</span>
+                <span className="font-semibold">
+                  ${Number(factoryCM) ? Number(factoryCM).toFixed(2) : "0.00"}
+                </span>
+              </div>
+
+              <div className="flex justify-between items-center p-3 bg-primary/10 rounded border border-primary/20">
+                <span className="font-bold">Total Cost</span>
+                <span className="font-bold text-lg">
+                  ${Number(totalCost) ? Number(totalCost).toFixed(2) : "0.00"}
+                </span>
+              </div>
+
+              <div className="flex justify-between items-center p-3 bg-muted/30 rounded">
+                <span className="font-medium">Commercial & Profit Cost ({profitPercent}%)</span>
+                <span className="font-semibold">
+                  ${Number(commercialProfit) ? Number(commercialProfit).toFixed(2) : "0.00"}
+                </span>
+              </div>
+
+              <div className="flex justify-between items-center p-3 bg-accent/10 rounded border border-accent/20">
+                <span className="font-bold text-lg">FOB Price / Dzn</span>
+                <span className="font-bold text-xl text-accent">
+                  ${Number(fobPrice) ? Number(fobPrice).toFixed(2) : "0.00"}
+                </span>
+              </div>
+
+              <div className="flex justify-between items-center p-4 bg-primary/20 rounded-lg border-2 border-primary">
+                <span className="font-bold text-lg">Price / Pc Garments</span>
+                <span className="font-bold text-2xl text-primary">
+                  ${Number(pricePerPiece) ? Number(pricePerPiece).toFixed(2) : "0.00"}
+                </span>
               </div>
             </div>
           </div>
-
-          <div className="space-y-3">
-            <div className="flex justify-between items-center p-3 bg-muted/30 rounded">
-              <span className="font-medium">Fabric Cost / Dzn Garments</span>
-              <span className="font-semibold">
-                ${Number(fabricCost) ? Number(fabricCost).toFixed(2) : "0.00"}
-              </span>
-            </div>
-
-            <div className="flex justify-between items-center p-3 bg-muted/30 rounded">
-              <span className="font-medium">Accessories Cost / Dzn Garments</span>
-              <span className="font-semibold">
-                ${Number(accessoriesCost) ? Number(accessoriesCost).toFixed(2) : "0.00"}
-              </span>
-            </div>
-
-            <div className="flex justify-between items-center p-3 bg-muted/30 rounded">
-              <span className="font-medium">Factory CM / Dzn Garments</span>
-              <span className="font-semibold">
-                ${Number(factoryCM) ? Number(factoryCM).toFixed(2) : "0.00"}
-              </span>
-            </div>
-
-            <div className="flex justify-between items-center p-3 bg-primary/10 rounded border border-primary/20">
-              <span className="font-bold">Total Cost</span>
-              <span className="font-bold text-lg">
-                ${Number(totalCost) ? Number(totalCost).toFixed(2) : "0.00"}
-              </span>
-            </div>
-
-            <div className="flex justify-between items-center p-3 bg-muted/30 rounded">
-              <span className="font-medium">Commercial & Profit Cost ({profitPercent}%)</span>
-              <span className="font-semibold">
-                ${Number(commercialProfit) ? Number(commercialProfit).toFixed(2) : "0.00"}
-              </span>
-            </div>
-
-            <div className="flex justify-between items-center p-3 bg-accent/10 rounded border border-accent/20">
-              <span className="font-bold text-lg">FOB Price / Dzn</span>
-              <span className="font-bold text-xl text-accent">
-                ${Number(fobPrice) ? Number(fobPrice).toFixed(2) : "0.00"}
-              </span>
-            </div>
-
-            <div className="flex justify-between items-center p-4 bg-primary/20 rounded-lg border-2 border-primary">
-              <span className="font-bold text-lg">Price / Pc Garments</span>
-              <span className="font-bold text-2xl text-primary">
-                ${Number(pricePerPiece) ? Number(pricePerPiece).toFixed(2) : "0.00"}
-              </span>
-            </div>
-          </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );

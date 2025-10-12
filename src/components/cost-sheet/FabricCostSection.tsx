@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Plus, Trash2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
 
 interface FabricRow {
   id: string;
@@ -208,153 +208,129 @@ const FabricCostSection = ({ data, onChange, mode = "create" }: FabricCostSectio
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [yarnRows, knittingRows, dyeingRows]);
 
-  const renderSubsection = (
+  // Table rendering similar to OthersSection
+  const renderTableSection = (
     title: string,
     rows: FabricRow[],
-    setRows: any,
-    prefix: string
-  ) => {
-    const totalUnit = calculateTotalUnit(rows);
-    const totalValue = calculateTotal(rows);
-    return (
-      <div className="space-y-2">
-        <h4 className="font-semibold text-sm">{title}</h4>
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="border-b bg-muted/30">
-                <th className="text-left p-2 text-sm font-medium">
-                  Field Name
-                </th>
-                <th className="text-right p-2 text-sm font-medium">Unit</th>
-                <th className="text-right p-2 text-sm font-medium">Rate ($)</th>
-                <th className="text-right p-2 text-sm font-medium">
-                  Value ($)
-                </th>
-                {isEditable && <th className="w-10"></th>}
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row) => (
-                <tr key={row.id} className="border-b hover:bg-muted/20">
-                  <td className="p-2">
+    setRows: any, // <-- add setRows as argument
+    totalUnit: number,
+    totalValue: number
+  ) => (
+    <div className="mb-6">
+      <h4 className="font-semibold text-sm mb-2">{title}</h4>
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse text-sm">
+          <thead>
+            <tr className="border-b bg-muted/50">
+              <th className="text-left p-3 font-medium">Field Name</th>
+              <th className="text-right p-3 font-medium">Unit</th>
+              <th className="text-right p-3 font-medium">Rate ($)</th>
+              <th className="text-right p-3 font-medium">Value ($)</th>
+              {isEditable && <th className="w-12"></th>}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr key={row.id} className="border-b hover:bg-muted/30 transition-colors">
+                <td className="p-3">
+                  {isEditable ? (
                     <Input
                       value={row.fieldName}
-                      onChange={(e) =>
-                        isEditable &&
-                        updateRows(
-                          rows,
-                          setRows,
-                          row.id,
-                          "fieldName",
-                          e.target.value
-                        )
-                      }
-                      className="h-8 text-sm"
-                      readOnly={!isEditable}
+                      onChange={e => updateRows(rows, setRows, row.id, "fieldName", e.target.value)}
+                      className="h-8 text-sm border-none"
                     />
-                  </td>
-                  <td className="p-2">
+                  ) : (
+                    row.fieldName
+                  )}
+                </td>
+                <td className="p-3 text-right">
+                  {isEditable ? (
                     <Input
                       type="text"
                       value={row.unit}
-                      onChange={(e) =>
-                        isEditable &&
-                        handleDecimalChange(
-                          rows,
-                          setRows,
-                          row.id,
-                          "unit",
-                          e.target.value
-                        )
-                      }
-                      className="h-8 text-right text-sm"
-                      readOnly={!isEditable}
+                      onChange={e => handleDecimalChange(rows, setRows, row.id, "unit", e.target.value)}
+                      className="h-8 text-right text-sm border-none"
                     />
-                  </td>
-                  <td className="p-2">
+                  ) : (
+                    row.unit ? Number(row.unit).toFixed(2) : "0.00"
+                  )}
+                </td>
+                <td className="p-3 text-right">
+                  {isEditable ? (
                     <Input
                       type="text"
                       value={row.rate ?? ""}
-                      onChange={(e) =>
-                        isEditable &&
-                        handleDecimalChange(
-                          rows,
-                          setRows,
-                          row.id,
-                          "rate",
-                          e.target.value
-                        )
-                      }
-                      className="h-8 text-right text-sm"
-                      readOnly={!isEditable}
+                      onChange={e => handleDecimalChange(rows, setRows, row.id, "rate", e.target.value)}
+                      className="h-8 text-right text-sm border-none"
                     />
-                  </td>
-                  <td className="p-2">
-                    <Input
-                      type="text"
-                      value={row.value ? row.value.toFixed(2) : "0.00"}
-                      readOnly
-                      className="h-8 text-right bg-muted/50 text-sm"
-                    />
-                  </td>
-                  {isEditable && (
-                    <td className="p-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7"
-                        onClick={() => deleteRow(rows, setRows, row.id)}
-                      >
-                        <Trash2 className="h-4 w-4  text-red-600" />
-                      </Button>
-                    </td>
+                  ) : (
+                    row.rate ? Number(row.rate).toFixed(2) : "0.00"
                   )}
-                </tr>
-              ))}
-              <tr className="font-semibold bg-muted/10">
-                <td className="p-2 text-left">Total</td>
-                <td className="p-2 text-right">
-                  {totalUnit ? totalUnit.toFixed(2) : "0.00"}
                 </td>
-                <td className="p-2"></td>
-                <td className="p-2 text-right">
-                  {totalValue ? totalValue.toFixed(2) : "0.00"}
+                <td className="p-3 text-right">
+                  {row.value ? Number(row.value).toFixed(2) : "0.00"}
                 </td>
-                {isEditable && <td></td>}
+                {isEditable && (
+                  <td className="p-3">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7"
+                      onClick={() => deleteRow(rows, setRows, row.id)}
+                    >
+                      <Trash2 className="h-4 w-4  text-red-600" />
+                    </Button>
+                  </td>
+                )}
               </tr>
-            </tbody>
-          </table>
-        </div>
-        {isEditable && (
-          <Button
-            onClick={() => addRow(rows, setRows, prefix)}
-            variant="outline"
-            size="sm"
-          >
-            <Plus className="h-3 w-3 mr-1" />
-            Add Field
-          </Button>
-        )}
+            ))}
+            <tr className="font-semibold bg-muted/10">
+              <td className="p-3 text-left">Total</td>
+              <td className="p-3 text-right">{totalUnit ? totalUnit.toFixed(2) : "0.00"}</td>
+              <td className="p-3"></td>
+              <td className="p-3 text-right">{totalValue ? totalValue.toFixed(2) : "0.00"}</td>
+              {isEditable && <td></td>}
+            </tr>
+          </tbody>
+        </table>
       </div>
-    );
-  };
+    </div>
+  );
 
   const totalFabricCost =
     (Number(calculateTotal(yarnRows)) || 0) +
     (Number(calculateTotal(knittingRows)) || 0) +
-    (Number(calculateTotal(dyeingRows)) || 0) 
+    (Number(calculateTotal(dyeingRows)) || 0);
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">Fabric Cost</CardTitle>
+    <Card className="print:p-0 print:shadow-none print:border-none print:bg-white">
+      <CardHeader className="print:p-0 print:mb-0 print:border-none print:bg-white">
+        <CardTitle className="text-lg print:text-base print:mb-0">Fabric Cost</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
-        {renderSubsection("Yarn Price", yarnRows, setYarnRows, "yarn")}
+      <CardContent className="space-y-6 print:p-0 print:space-y-0 print:bg-white">
+        {renderTableSection(
+          "Yarn Price",
+          yarnRows,
+          setYarnRows,
+          calculateTotalUnit(yarnRows),
+          calculateTotal(yarnRows)
+        )}
         <Separator />
-        {renderSubsection("Knitting", knittingRows, setKnittingRows, "knit")}
+        {renderTableSection(
+          "Knitting",
+          knittingRows,
+          setKnittingRows,
+          calculateTotalUnit(knittingRows),
+          calculateTotal(knittingRows)
+        )}
         <Separator />
-        {renderSubsection("Dyeing", dyeingRows, setDyeingRows, "dye")}
+        {renderTableSection(
+          "Dyeing",
+          dyeingRows,
+          setDyeingRows,
+          calculateTotalUnit(dyeingRows),
+          calculateTotal(dyeingRows)
+        )}
         <Separator />
         <div className="pt-4 border-t-2">
           <div className="flex justify-between items-center font-semibold text-lg">
@@ -366,15 +342,6 @@ const FabricCostSection = ({ data, onChange, mode = "create" }: FabricCostSectio
                 : "0.00"}
             </span>
           </div>
-          {isEditable && (
-            <Button
-              className="mt-4"
-              variant="default"
-              // onClick={sendFabricCostToBackend}
-            >
-              Save Fabric Cost Data
-            </Button>
-          )}
         </div>
       </CardContent>
     </Card>
@@ -382,4 +349,15 @@ const FabricCostSection = ({ data, onChange, mode = "create" }: FabricCostSectio
 };
 
 export default FabricCostSection;
-           
+
+// In your handlePrint function (in CostSheetTable.tsx), add this to the print CSS:
+    let styles = "";
+    styles += `
+      @media print {
+        // ...existing print styles...
+        input, .border-none {
+          border: none !important;
+          box-shadow: none !important;
+        }
+      }
+    `;

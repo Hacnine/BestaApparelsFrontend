@@ -83,10 +83,10 @@ const OthersSection = ({ data, onChange, mode = "create" }: OthersSectionProps) 
   const total = rows.reduce((sum, row) => sum + (Number(row.value) || 0), 0);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">Others (Custom Fields)</CardTitle>
-        {mode === "show" && !editMode && (
+    <Card className="print:p-0 print:shadow-none print:border-none print:bg-white print:mt-20">
+      <CardHeader className="print:p-0 print:mb-0 print:border-none print:bg-white">
+        <CardTitle className="text-lg print:text-base print:mb-0">Others (Custom Fields)</CardTitle>
+        {/* {mode === "show" && !editMode && (
           <Button
             variant="outline"
             size="sm"
@@ -96,9 +96,9 @@ const OthersSection = ({ data, onChange, mode = "create" }: OthersSectionProps) 
             <Pencil className="h-4 w-4 mr-1" />
             Edit
           </Button>
-        )}
+        )} */}
       </CardHeader>
-      <CardContent>
+      <CardContent className="print:p-0 print:space-y-0 print:bg-white">
         {rows.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <p>No custom fields added yet.</p>
@@ -106,7 +106,7 @@ const OthersSection = ({ data, onChange, mode = "create" }: OthersSectionProps) 
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
+            <table className="w-full border-collapse text-sm">
               <thead>
                 <tr className="border-b bg-muted/50">
                   <th className="text-left p-3 font-medium">Label</th>
@@ -118,21 +118,27 @@ const OthersSection = ({ data, onChange, mode = "create" }: OthersSectionProps) 
                 {rows.map((row) => (
                   <tr key={row.id} className="border-b hover:bg-muted/30 transition-colors">
                     <td className="p-3">
-                      <Input
-                        value={row.label}
-                        onChange={(e) => isEditable && updateRow(row.id, "label", e.target.value)}
-                        className="max-w-md"
-                        readOnly={!isEditable}
-                      />
+                      {isEditable ? (
+                        <Input
+                          value={row.label}
+                          onChange={e => updateRow(row.id, "label", e.target.value)}
+                          className="max-w-md"
+                        />
+                      ) : (
+                        row.label
+                      )}
                     </td>
-                    <td className="p-3">
-                      <Input
-                        type="string"
-                        value={Number(row.value) || ""}
-                        onChange={(e) => isEditable && updateRow(row.id, "value", e.target.value)}
-                        className="text-right"
-                        readOnly={!isEditable}
-                      />
+                    <td className="p-3 text-right">
+                      {isEditable ? (
+                        <Input
+                          type="text"
+                          value={row.value}
+                          onChange={e => updateRow(row.id, "value", e.target.value)}
+                          className="text-right"
+                        />
+                      ) : (
+                        Number(row.value).toFixed(2)
+                      )}
                     </td>
                     {isEditable && (
                       <td className="p-3">
@@ -141,7 +147,6 @@ const OthersSection = ({ data, onChange, mode = "create" }: OthersSectionProps) 
                           size="icon"
                           onClick={() => deleteRow(row.id)}
                           className="text-destructive hover:text-destructive"
-                          readOnly={!isEditable}
                         >
                           <Trash2 className="h-4 w-4  text-red-600" />
                         </Button>

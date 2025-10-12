@@ -130,26 +130,15 @@ const CadConsumptionSection = ({
   const isEditable = editMode && (mode === "edit" || mode === "create");
 
   return (
-    <Card>
-      <CardHeader >
-       <div className="flex items-center justify-between">
-         <CardTitle className="text-lg">CAD Consumption / Dz</CardTitle>
-        {mode === "show" && !editMode && (
-          <Button
-            variant="outline"
-            size="sm"
-            className="ml-2"
-            onClick={() => setEditMode(true)}
-          >
-            <Pencil className="h-4 w-4 mr-1" />
-            Edit
-          </Button>
-        )}
-       </div>
+    <Card className="print:p-0 print:shadow-none print:border-none print:bg-white">
+      <CardHeader className="print:p-0 print:mb-0 print:border-none print:bg-white">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg print:text-base print:mb-0">CAD Consumption / Dz</CardTitle>
+        </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="print:p-0 print:space-y-0 print:bg-white">
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
+          <table className="w-full border-collapse text-sm">
             <thead>
               <tr className="border-b bg-muted/50">
                 <th className="text-left p-3 font-medium">Field Name</th>
@@ -163,48 +152,46 @@ const CadConsumptionSection = ({
               {rows.map((row) => (
                 <tr key={row.id} className="border-b hover:bg-muted/30 transition-colors">
                   <td className="p-3">
-                    <Input
-                      value={row.fieldName}
-                      onChange={(e) =>
-                        isEditable && updateRow(row.id, "fieldName", e.target.value)
-                      }
-                      className="max-w-xs"
-                      readOnly={!isEditable}
-                    />
+                    {isEditable ? (
+                      <Input
+                        value={row.fieldName}
+                        onChange={e => updateRow(row.id, "fieldName", e.target.value)}
+                        className="max-w-xs"
+                      />
+                    ) : (
+                      row.fieldName
+                    )}
                   </td>
-                  <td className="p-3">
-                    <Input
-                      type="text"
-                      inputMode="decimal"
-                      value={row.weight ?? ""}
-                      onChange={(e) =>
-                        isEditable && handleDecimalChange(row.id, "weight", e.target.value)
-                      }
-                      className="text-right no-arrows"
-                      placeholder="0.00"
-                      readOnly={!isEditable}
-                    />
+                  <td className="p-3 text-right">
+                    {isEditable ? (
+                      <Input
+                        type="text"
+                        inputMode="decimal"
+                        value={row.weight ?? ""}
+                        onChange={e => handleDecimalChange(row.id, "weight", e.target.value)}
+                        className="text-right no-arrows"
+                        placeholder="0.00"
+                      />
+                    ) : (
+                      row.weight ?? ""
+                    )}
                   </td>
-                  <td className="p-3">
-                    <Input
-                      type="text"
-                      inputMode="decimal"
-                      value={row.percent ?? ""}
-                      onChange={(e) =>
-                        isEditable && handleDecimalChange(row.id, "percent", e.target.value)
-                      }
-                      className="text-right no-arrows"
-                      placeholder="0.00"
-                      readOnly={!isEditable}
-                    />
+                  <td className="p-3 text-right">
+                    {isEditable ? (
+                      <Input
+                        type="text"
+                        inputMode="decimal"
+                        value={row.percent ?? ""}
+                        onChange={e => handleDecimalChange(row.id, "percent", e.target.value)}
+                        className="text-right no-arrows"
+                        placeholder="0.00"
+                      />
+                    ) : (
+                      row.percent ?? ""
+                    )}
                   </td>
-                  <td className="p-3">
-                    <Input
-                      type="text"
-                      value={row.value ? row.value.toFixed(2) : "0.00"}
-                      readOnly
-                      className="text-right bg-muted/50"
-                    />
+                  <td className="p-3 text-right">
+                    {row.value ? row.value.toFixed(2) : "0.00"}
                   </td>
                   {isEditable && (
                     <td className="p-3">
@@ -213,7 +200,6 @@ const CadConsumptionSection = ({
                         size="icon"
                         onClick={() => deleteRow(row.id)}
                         className="text-destructive hover:text-destructive"
-                        disabled={!isEditable}
                       >
                         <Trash2 className="h-4 w-4 text-red-600" />
                       </Button>
@@ -223,13 +209,9 @@ const CadConsumptionSection = ({
               ))}
               <tr className="border-b-2 font-semibold bg-muted/50">
                 <td className="p-3">Total</td>
-                <td className="p-3 text-right">
-                  {totalWeight ? totalWeight.toFixed(2) : "0.00"}
-                </td>
+                <td className="p-3 text-right">{totalWeight ? totalWeight.toFixed(2) : "0.00"}</td>
                 <td className="p-3 text-right"></td>
-                <td className="p-3 text-right">
-                 {totalValue ? totalValue.toFixed(2) : "0.00"}
-                </td>
+                <td className="p-3 text-right">{totalValue ? totalValue.toFixed(2) : "0.00"}</td>
                 {isEditable && <td></td>}
               </tr>
             </tbody>

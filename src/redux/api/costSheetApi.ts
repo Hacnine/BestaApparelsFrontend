@@ -26,13 +26,16 @@ export const costSheetApi = createApi({
       }),
       invalidatesTags: ["CostSheet"],
     }),
-    updateCostSheet: builder.mutation<any, { id: number; data: Partial<any> }>({
+    updateCostSheet: builder.mutation<any, { id: number; data: any }>({
       query: ({ id, data }) => ({
         url: `/${id}`,
         method: "PUT",
         body: data,
       }),
-      invalidatesTags: (result, error, { id }) => [{ type: "CostSheet", id }],
+      invalidatesTags: (result, error, { id }) => [
+        { type: "CostSheet", id },
+        "CostSheet",
+      ],
     }),
     deleteCostSheet: builder.mutation<any, number>({
       query: (id) => ({

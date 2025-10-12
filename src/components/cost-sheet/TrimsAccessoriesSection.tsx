@@ -55,10 +55,13 @@ const TrimsAccessoriesSection = ({
   onChange,
   mode = "create",
 }: TrimsAccessoriesSectionProps) => {
-  // Use backend data if in show mode, otherwise use state
+  // Defensive copy to avoid reference issues
   const [rows, setRows] = useState<TrimRow[]>(
     Array.isArray(data?.rows)
-      ? data.rows
+      ? data.rows.map((row: any, idx: number) => ({
+          ...row,
+          id: row.id ?? `trim-${idx}-${Date.now()}`, // Ensure unique id
+        }))
       : defaultTrims.map((trim, index) => ({
           id: `trim-${index}`,
           description: trim,
@@ -72,7 +75,12 @@ const TrimsAccessoriesSection = ({
 
   useEffect(() => {
     if (Array.isArray(data?.rows)) {
-      setRows(data.rows);
+      setRows(
+        data.rows.map((row: any, idx: number) => ({
+          ...row,
+          id: row.id ?? `trim-${idx}-${Date.now()}`, // Ensure unique id
+        }))
+      );
       if (typeof data.adjustmentPercent === "number") {
         setAdjustmentPercent(data.adjustmentPercent);
       }
@@ -102,16 +110,26 @@ const TrimsAccessoriesSection = ({
     }
   };
 
+  // Fix: Only update the changed field for the correct row
   const updateRow = (id: string, field: keyof TrimRow, value: any) => {
-    const updatedRows = rows.map((row) =>
-      row.id === id
-        ? {
-            ...row,
-            [field]: value,
-          }
-        : row
+    setRows(prevRows =>
+      prevRows.map((row) =>
+        row.id === id
+          ? { ...row, [field]: value }
+          : row
+      )
     );
-    handleRowsChange(updatedRows);
+    if (onChange) {
+      const updatedRows = rows.map((row) =>
+        row.id === id
+          ? { ...row, [field]: value }
+          : row
+      );
+      onChange({
+        rows: updatedRows,
+        json: getTrimsAccessoriesJson(updatedRows),
+      });
+    }
   };
 
   const addRow = () => {
@@ -163,10 +181,10 @@ const TrimsAccessoriesSection = ({
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">Trims & Accessories</CardTitle>
-        {mode === "show" && !editMode && (
+    <Card className="print:p-0 print:shadow-none print:border-none print:bg-white">
+      <CardHeader className="print:p-0 print:mb-0 print:border-none print:bg-white">
+        <CardTitle className="text-lg print:text-base print:mb-0">Trims & Accessories</CardTitle>
+        {/* {mode === "show" && !editMode && (
           <Button
             variant="outline"
             size="sm"
@@ -176,11 +194,11 @@ const TrimsAccessoriesSection = ({
             <Pencil className="h-4 w-4 mr-1" />
             Edit
           </Button>
-        )}
+        )} */}
       </CardHeader>
-      <CardContent>
+      <CardContent className="print:p-0 print:space-y-0 print:bg-white">
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
+          <table className="w-full border-collapse text-sm">
             <thead>
               <tr className="border-b bg-muted/50">
                 <th className="text-left p-3 font-medium">Item Description</th>
@@ -190,31 +208,30 @@ const TrimsAccessoriesSection = ({
             </thead>
             <tbody>
               {rows.map((row) => (
-                <tr
-                  key={row.id}
-                  className="border-b hover:bg-muted/30 transition-colors"
-                >
+                <tr key={row.id} className="border-b hover:bg-muted/30 transition-colors">
                   <td className="p-3">
-                    <Input
-                      value={row.description}
-                      onChange={(e) =>
-                        isEditable && updateRow(row.id, "description", e.target.value)
-                      }
-                      className="max-w-md"
-                      readOnly={!isEditable}
-                    />
+                    {isEditable ? (
+                      <Input
+                        value={row.description}
+                        onChange={e => updateRow(row.id, "description", e.target.value)}
+                        className="max-w-md"
+                      />
+                    ) : (
+                      row.description
+                    )}
                   </td>
-                  <td className="p-3">
-                    <Input
-                      type="text"
-                      value={row.cost ?? ""}
-                      onChange={(e) =>
-                        isEditable && handleDecimalChange(row.id, "cost", e.target.value)
-                      }
-                      className="text-right"
-                      placeholder="0.000"
-                      readOnly={!isEditable}
-                    />
+                  <td className="p-3 text-right">
+                    {isEditable ? (
+                      <Input
+                        type="text"
+                        value={row.cost ?? ""}
+                        onChange={e => handleDecimalChange(row.id, "cost", e.target.value)}
+                        className="text-right"
+                        placeholder="0.000"
+                      />
+                    ) : (
+                      Number(row.cost).toFixed(3)
+                    )}
                   </td>
                   {isEditable && (
                     <td className="p-3">
@@ -223,7 +240,6 @@ const TrimsAccessoriesSection = ({
                         size="icon"
                         onClick={() => deleteRow(row.id)}
                         className="text-destructive hover:text-destructive"
-                        readOnly={!isEditable}
                       >
                         <Trash2 className="h-4 w-4  text-red-600" />
                       </Button>
@@ -234,13 +250,6 @@ const TrimsAccessoriesSection = ({
             </tbody>
           </table>
         </div>
-        {isEditable && (
-          <Button onClick={addRow} variant="outline" size="sm" className="mt-4">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Field
-          </Button>
-        )}
-
         <div className="mt-6 space-y-3 pt-6 border-t-2">
           <div className="flex justify-between items-center">
             <span className="font-medium">Accessories Cost</span>
@@ -248,40 +257,28 @@ const TrimsAccessoriesSection = ({
               ${Number(subtotal) ? Number(subtotal).toFixed(3) : "0.000"}
             </span>
           </div>
-
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
               <span className="font-medium">Add Adjustment</span>
-              <Input
-                type="string"
-                value={adjustmentPercent}
-                onChange={(e) => {
-                  if (isEditable) {
-                    setAdjustmentPercent(Number(e.target.value) || 0);
-                    handleRowsChange(rows);
-                  }
-                }}
-                className="w-20 h-8"
-                readOnly={!isEditable}
-              />
-              <span>%</span>
+              <span className="w-20 h-8">{adjustmentPercent}%</span>
             </div>
             <span className="font-semibold">
               ${Number(adjustment) ? Number(adjustment).toFixed(3) : "0.000"}
             </span>
           </div>
-
           <div className="flex justify-between items-center text-lg pt-3 border-t">
             <span className="font-bold">Total Accessories Cost</span>
             <span className="font-bold text-primary">
-              $
-              {Number(totalAccessoriesCost)
-                ? Number(totalAccessoriesCost).toFixed(3)
-                : "0.000"}{" "}
-              /Dzn
+              ${Number(totalAccessoriesCost) ? Number(totalAccessoriesCost).toFixed(3) : "0.000"} /Dzn
             </span>
           </div>
         </div>
+        {isEditable && (
+          <Button onClick={addRow} variant="outline" size="sm" className="mt-4">
+            <Plus className="h-4 w-4 mr-2" />
+            Add Field
+          </Button>
+        )}
       </CardContent>
     </Card>
   );
