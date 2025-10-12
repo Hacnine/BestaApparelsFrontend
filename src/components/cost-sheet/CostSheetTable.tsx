@@ -7,10 +7,21 @@ import FabricCostSection from "./FabricCostSection";
 import TrimsAccessoriesSection from "./TrimsAccessoriesSection";
 import OthersSection from "./OthersSection";
 import SummarySection from "./SummarySection";
+import {
+  exportCompleteRowData,
+  exportMultipleSheets,
+} from "@/utils/exportUtils";
+import StyleInfoForm from "./StyleInfoForm";
+import { Copy, Edit } from "lucide-react";
 
 const CostSheetTable = () => {
   const { data, isLoading, error } = useGetCostSheetsQuery();
   const [expandedId, setExpandedId] = useState<number | null>(null);
+
+  // Replace the existing handleExportRow function with this comprehensive version
+  const handleExportRow = (sheet: any) => {
+    exportCompleteRowData(sheet);
+  };
 
   const renderDynamicTable = (section: any, sectionName: string) => {
     if (!section) return null;
@@ -34,9 +45,12 @@ const CostSheetTable = () => {
                 <tr key={idx}>
                   {section.columns.map((col: string, cidx: number) => (
                     <td key={cidx}>
-                      {row[col.replace(/ \(.+\)/, "").replace(/[^a-zA-Z0-9_]/g, "")] ??
+                      {row[
+                        col.replace(/ \(.+\)/, "").replace(/[^a-zA-Z0-9_]/g, "")
+                      ] ??
                         row[col] ??
-                        row[Object.keys(row)[cidx]] ?? ""}
+                        row[Object.keys(row)[cidx]] ??
+                        ""}
                     </td>
                   ))}
                 </tr>
@@ -133,6 +147,9 @@ const CostSheetTable = () => {
               <th className="text-left p-2">Created By</th>
               <th className="text-left p-2">Created At</th>
               <th className="text-left p-2">Details</th>
+              <th className="text-left p-2">Actions</th>
+
+              {/* <th className="text-left p-2">Download</th> */}
             </tr>
           </thead>
           <tbody>
@@ -164,27 +181,77 @@ const CostSheetTable = () => {
                       {expandedId === sheet.id ? "Hide" : "Show"}
                     </Button>
                   </td>
+                  <td className="p-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      // onClick={() => handleExportRow(sheet)}
+                      title="Edit Cost Sheet"
+                      className=" text-blue-600 hover:text-white"
+                    >
+                      <Edit />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      // onClick={() => handleExportRow(sheet)}
+                      title="Copy Cost Sheet"
+                      className="-ml-3  text-yellow-600 hover:text-white"
+                    >
+                      <Copy />
+                    </Button>
+                  </td>
+                  {/* <td className="p-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleExportRow(sheet)}
+                      title="Download all data as separate Excel sheets"
+                    >
+                      Download
+                    </Button>
+                  </td> */}
                 </tr>
                 {expandedId === sheet.id && (
                   <tr>
-                    <td colSpan={11} className="bg-muted/10 p-4">
-                      <div className=" space-y-6">
-                        <CadConsumptionSection
-                          data={sheet.cadRows?.rows || []}
+                    <td colSpan={12} className="bg-muted/10 p-4">
+                      <div className=" space-y-5">
+                        {/* Show style info at the top */}
+                        <StyleInfoForm
                           mode="show"
+                          data={{
+                            style: sheet.style?.name || sheet.style || "-",
+                            item: sheet.item,
+                            group: sheet.group,
+                            size: sheet.size,
+                            fabricType: sheet.fabricType,
+                            gsm: sheet.gsm,
+                            color: sheet.color,
+                            qty: sheet.quantity ?? "-",
+                          }}
                         />
-                        <FabricCostSection
-                          data={sheet.fabricRows}
-                          mode="show"
-                        />
-                        <TrimsAccessoriesSection
-                          data={sheet.trimsRows}
-                          mode="show"
-                        />
-                        <OthersSection
-                          data={sheet.othersRows}
-                          mode="show"
-                        />
+                        <div className="flex gap-6 ">
+                          <div className="w-1/2 space-y-6 ">
+                            <CadConsumptionSection
+                              data={sheet.cadRows?.rows || []}
+                              mode="show"
+                            />
+                            <FabricCostSection
+                              data={sheet.fabricRows}
+                              mode="show"
+                            />
+                            <OthersSection
+                              data={sheet.othersRows}
+                              mode="show"
+                            />
+                          </div>
+                          <div className="w-1/2 space-y-5">
+                            <TrimsAccessoriesSection
+                              data={sheet.trimsRows}
+                              mode="show"
+                            />
+                          </div>
+                        </div>
                         <SummarySection
                           summary={sheet.summaryRows}
                           fabricData={sheet.fabricRows}
