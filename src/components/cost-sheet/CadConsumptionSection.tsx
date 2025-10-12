@@ -169,7 +169,7 @@ const CadConsumptionSection = ({
                         isEditable && updateRow(row.id, "fieldName", e.target.value)
                       }
                       className="max-w-xs"
-                      disabled={!isEditable}
+                      readOnly={!isEditable}
                     />
                   </td>
                   <td className="p-3">
@@ -182,7 +182,7 @@ const CadConsumptionSection = ({
                       }
                       className="text-right no-arrows"
                       placeholder="0.00"
-                      disabled={!isEditable}
+                      readOnly={!isEditable}
                     />
                   </td>
                   <td className="p-3">
@@ -195,7 +195,7 @@ const CadConsumptionSection = ({
                       }
                       className="text-right no-arrows"
                       placeholder="0.00"
-                      disabled={!isEditable}
+                      readOnly={!isEditable}
                     />
                   </td>
                   <td className="p-3">

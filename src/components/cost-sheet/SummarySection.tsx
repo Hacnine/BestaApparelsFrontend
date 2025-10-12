@@ -130,7 +130,7 @@ const SummarySection = ({
                 value={factoryCM}
                 onChange={handleFactoryCMChange}
                 className="font-semibold"
-                disabled={!isEditable}
+                readOnly={!isEditable}
               />
             </div>
             
@@ -143,7 +143,7 @@ const SummarySection = ({
                   value={profitPercent}
                   onChange={handleProfitPercentChange}
                   className="font-semibold"
-                  disabled={!isEditable}
+                  readOnly={!isEditable}
                 />
                 <span className="text-sm text-muted-foreground">%</span>
               </div>

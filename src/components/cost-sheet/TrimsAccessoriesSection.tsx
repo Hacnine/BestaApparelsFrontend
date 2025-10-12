@@ -201,7 +201,7 @@ const TrimsAccessoriesSection = ({
                         isEditable && updateRow(row.id, "description", e.target.value)
                       }
                       className="max-w-md"
-                      disabled={!isEditable}
+                      readOnly={!isEditable}
                     />
                   </td>
                   <td className="p-3">
@@ -213,7 +213,7 @@ const TrimsAccessoriesSection = ({
                       }
                       className="text-right"
                       placeholder="0.000"
-                      disabled={!isEditable}
+                      readOnly={!isEditable}
                     />
                   </td>
                   {isEditable && (
@@ -223,7 +223,7 @@ const TrimsAccessoriesSection = ({
                         size="icon"
                         onClick={() => deleteRow(row.id)}
                         className="text-destructive hover:text-destructive"
-                        disabled={!isEditable}
+                        readOnly={!isEditable}
                       >
                         <Trash2 className="h-4 w-4  text-red-600" />
                       </Button>
@@ -262,7 +262,7 @@ const TrimsAccessoriesSection = ({
                   }
                 }}
                 className="w-20 h-8"
-                disabled={!isEditable}
+                readOnly={!isEditable}
               />
               <span>%</span>
             </div>

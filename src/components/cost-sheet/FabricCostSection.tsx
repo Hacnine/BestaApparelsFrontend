@@ -251,7 +251,7 @@ const FabricCostSection = ({ data, onChange, mode = "create" }: FabricCostSectio
                         )
                       }
                       className="h-8 text-sm"
-                      disabled={!isEditable}
+                      readOnly={!isEditable}
                     />
                   </td>
                   <td className="p-2">
@@ -269,7 +269,7 @@ const FabricCostSection = ({ data, onChange, mode = "create" }: FabricCostSectio
                         )
                       }
                       className="h-8 text-right text-sm"
-                      disabled={!isEditable}
+                      readOnly={!isEditable}
                     />
                   </td>
                   <td className="p-2">
@@ -287,7 +287,7 @@ const FabricCostSection = ({ data, onChange, mode = "create" }: FabricCostSectio
                         )
                       }
                       className="h-8 text-right text-sm"
-                      disabled={!isEditable}
+                      readOnly={!isEditable}
                     />
                   </td>
                   <td className="p-2">

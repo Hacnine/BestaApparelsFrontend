@@ -67,7 +67,7 @@ const StyleInfoForm = ({
                   // onStyleCheck(value); // No longer needed, handled by RTK Query
                 }
               }}
-              disabled={isDisabled}
+              readOnly={isDisabled}
               placeholder="Enter style code"
             />
             {(isStyleChecking || isCheckingStyle) && (
@@ -88,7 +88,7 @@ const StyleInfoForm = ({
           <Input
             id="item"
             {...register("item")}
-            disabled={isDisabled}
+            readOnly={isDisabled}
             placeholder="e.g., Baby Jogging Tops"
           />
         </div>
@@ -100,7 +100,7 @@ const StyleInfoForm = ({
           <Input
             id="group"
             {...register("group")}
-            disabled={isDisabled}
+            readOnly={isDisabled}
             placeholder="e.g., Boys"
           />
         </div>
@@ -112,7 +112,7 @@ const StyleInfoForm = ({
           <Input
             id="size"
             {...register("size")}
-            disabled={isDisabled}
+            readOnly={isDisabled}
             placeholder="e.g., 03/SS26"
           />
         </div>
@@ -124,7 +124,7 @@ const StyleInfoForm = ({
           <Input
             id="fabricType"
             {...register("fabricType")}
-            disabled={isDisabled}
+            readOnly={isDisabled}
             placeholder="e.g., Fleece, 85% Cotton"
           />
         </div>
@@ -136,7 +136,7 @@ const StyleInfoForm = ({
           <Input
             id="gsm"
             {...register("gsm")}
-            disabled={isDisabled}
+            readOnly={isDisabled}
             placeholder="e.g., 320"
           />
         </div>
@@ -148,7 +148,7 @@ const StyleInfoForm = ({
           <Input
             id="color"
             {...register("color")}
-            disabled={isDisabled}
+            readOnly={isDisabled}
             placeholder="e.g., 01X"
           />
         </div>
@@ -158,7 +158,7 @@ const StyleInfoForm = ({
           <Input
             id="qty"
             {...register("qty")}
-            disabled={isDisabled}
+            readOnly={isDisabled}
             placeholder="Enter quantity"
           />
         </div>

@@ -122,7 +122,7 @@ const OthersSection = ({ data, onChange, mode = "create" }: OthersSectionProps) 
                         value={row.label}
                         onChange={(e) => isEditable && updateRow(row.id, "label", e.target.value)}
                         className="max-w-md"
-                        disabled={!isEditable}
+                        readOnly={!isEditable}
                       />
                     </td>
                     <td className="p-3">
@@ -131,7 +131,7 @@ const OthersSection = ({ data, onChange, mode = "create" }: OthersSectionProps) 
                         value={Number(row.value) || ""}
                         onChange={(e) => isEditable && updateRow(row.id, "value", e.target.value)}
                         className="text-right"
-                        disabled={!isEditable}
+                        readOnly={!isEditable}
                       />
                     </td>
                     {isEditable && (
@@ -141,7 +141,7 @@ const OthersSection = ({ data, onChange, mode = "create" }: OthersSectionProps) 
                           size="icon"
                           onClick={() => deleteRow(row.id)}
                           className="text-destructive hover:text-destructive"
-                          disabled={!isEditable}
+                          readOnly={!isEditable}
                         >
                           <Trash2 className="h-4 w-4  text-red-600" />
                         </Button>
