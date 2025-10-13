@@ -23,28 +23,28 @@ interface TrimsAccessoriesSectionProps {
 
 const defaultTrims = [
   "RFID",
-  "Main Label ($0.15)",
-  "Price Hangtag ($0.15)",
-  "License Hangtag (.192)",
-  "Hangtag String (.060)",
-  "Care Label ($0.15)",
+  "Main Label",
+  "Price Hangtag",
+  "License Hangtag",
+  "Hangtag String",
+  "Care Label",
   "Canvas label",
-  "Sewing Thread ($0.50)",
-  "single pc poly sticker ($0.15)",
-  "Blister poly sticker ($0.11)",
-  "Carton Sticker ($0.011)",
-  "Size sticker ($0.10)",
-  "Snap Button ($0.45)",
+  "Sewing Thread",
+  "single pc poly sticker",
+  "Blister poly sticker",
+  "Carton Sticker",
+  "Size sticker",
+  "Snap Button",
   "Wood Button",
-  "Ring Eyelet ($0.45)",
-  "Twill tape (0.5 & 1 cm)",
+  "Ring Eyelet",
+  "Twill tape",
   "Tube Tape",
   "Hanger Loop",
   "Zipper Long",
   "woven Fabric",
   "CMIA Hang Tag",
-  "Poly ($0.30)",
-  "Carton ($0.35)",
+  "Poly",
+  "Carton",
   "Mobilon tape",
   "Elastic",
   "Others",
@@ -68,9 +68,6 @@ const TrimsAccessoriesSection = ({
           cost: "",
         }))
   );
-  const [adjustmentPercent, setAdjustmentPercent] = useState(
-    typeof data?.adjustmentPercent === "number" ? data.adjustmentPercent : 8
-  );
   const [editMode, setEditMode] = useState(mode === "edit" || mode === "create");
 
   useEffect(() => {
@@ -81,9 +78,6 @@ const TrimsAccessoriesSection = ({
           id: row.id ?? `trim-${idx}-${Date.now()}`, // Ensure unique id
         }))
       );
-      if (typeof data.adjustmentPercent === "number") {
-        setAdjustmentPercent(data.adjustmentPercent);
-      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
@@ -148,8 +142,7 @@ const TrimsAccessoriesSection = ({
   };
 
   const subtotal = rows.reduce((sum, row) => sum + (Number(row.cost) || 0), 0);
-  const adjustment = subtotal * (adjustmentPercent / 100);
-  const totalAccessoriesCost = subtotal + adjustment;
+  const totalAccessoriesCost = subtotal;
 
   const getTrimsAccessoriesJson = (rowsArg: TrimRow[] = rows) => {
     return {
@@ -160,8 +153,6 @@ const TrimsAccessoriesSection = ({
         cost: row.cost,
       })),
       subtotal: rowsArg.reduce((sum, row) => sum + (Number(row.cost) || 0), 0),
-      adjustmentPercent,
-      adjustment,
       totalAccessoriesCost,
     };
   };
@@ -255,15 +246,6 @@ const TrimsAccessoriesSection = ({
             <span className="font-medium">Accessories Cost</span>
             <span className="font-semibold">
               ${Number(subtotal) ? Number(subtotal).toFixed(3) : "0.000"}
-            </span>
-          </div>
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <span className="font-medium">Add Adjustment</span>
-              <span className="w-20 h-8">{adjustmentPercent}%</span>
-            </div>
-            <span className="font-semibold">
-              ${Number(adjustment) ? Number(adjustment).toFixed(3) : "0.000"}
             </span>
           </div>
           <div className="flex justify-between items-center text-lg pt-3 border-t">

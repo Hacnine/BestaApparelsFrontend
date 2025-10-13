@@ -33,17 +33,13 @@ const SummarySection = ({
   const [editMode, setEditMode] = useState(mode === "edit" || mode === "create");
 
   // Defensive checks for fabricData and trimsData
+  // Defensive checks for fabricData and trimsData
   const safeFabricData = fabricData ?? {};
   const safeTrimsData = Array.isArray(trimsData) ? trimsData : [];
 
   // Use summary fields if in show mode, otherwise calculate
-  const fabricCost =
-    typeof summary?.fabricCost === "number"
-      ? summary.fabricCost
-      : typeof safeFabricData.totalCost === "number"
-        ? safeFabricData.totalCost
-        : 0;
-
+  const fabricCost = safeFabricData?.dyeingTotal + safeFabricData?.knittingTotal + safeFabricData?.yarnTotal;
+  
   const accessoriesCost =
     typeof summary?.accessoriesCost === "number"
       ? summary.accessoriesCost
