@@ -349,7 +349,7 @@ const CostSheetTable = () => {
                         }}
                         title="Edit Cost Sheet"
                         className=" text-blue-600 hover:text-white"
-                      >{sheet.id}
+                      >
                         <Edit />
                       </Button>
                       <Button
