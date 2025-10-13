@@ -7,7 +7,7 @@ import { Plus, Trash2, Pencil } from "lucide-react";
 interface OtherRow {
   id: string;
   label: string;
-  value: number;
+  value: string; // <-- change to string
 }
 
 interface OthersSectionChange {
@@ -21,11 +21,18 @@ interface OthersSectionProps {
   mode?: "create" | "edit" | "show";
 }
 
+const defaultOthers: OtherRow[] = [
+  { id: "other-1", label: "AOP", value: "" },
+  { id: "other-2", label: "Screen print", value: "" },
+  { id: "other-3", label: "Emb (Chest + Back)", value: "" },
+  { id: "other-4", label: "Wash", value: "" },
+];
+
 const OthersSection = ({ data, onChange, mode = "create" }: OthersSectionProps) => {
   const [rows, setRows] = useState<OtherRow[]>(
     Array.isArray(data?.rows)
       ? data.rows
-      : []
+      : defaultOthers // Use default fields if no data
   );
   const [editMode, setEditMode] = useState(mode === "edit" || mode === "create");
 
@@ -47,18 +54,35 @@ const OthersSection = ({ data, onChange, mode = "create" }: OthersSectionProps) 
           tableName: "Others",
           columns: ["Label", "Value"],
           rows: updatedRows,
-          total: updatedRows.reduce((sum, row) => sum + (Number(row.value) || 0), 0),
+          total: updatedRows.reduce(
+            (sum, row) => sum + (Number(row.value) || 0),
+            0
+          ),
         },
       });
     }
   };
 
-  const updateRow = (id: string, field: keyof OtherRow, value: any) => {
+  const handleValueChange = (
+    id: string,
+    value: string
+  ) => {
+    // Allow only valid decimal numbers or empty string
+    if (/^-?\d*\.?\d*$/.test(value)) {
+      updateRow(id, "value", value);
+    }
+  };
+
+  const updateRow = (
+    id: string,
+    field: keyof OtherRow,
+    value: any
+  ) => {
     const updatedRows = rows.map((row) =>
       row.id === id
         ? {
             ...row,
-            [field]: field === "value" ? Number(value) : value,
+            [field]: value,
           }
         : row
     );
@@ -69,7 +93,7 @@ const OthersSection = ({ data, onChange, mode = "create" }: OthersSectionProps) 
     const newRow: OtherRow = {
       id: `other-${Date.now()}`,
       label: "New Field",
-      value: 0,
+      value: "",
     };
     const updatedRows = [...rows, newRow];
     handleRowsChange(updatedRows);
@@ -80,7 +104,10 @@ const OthersSection = ({ data, onChange, mode = "create" }: OthersSectionProps) 
     handleRowsChange(updatedRows);
   };
 
-  const total = rows.reduce((sum, row) => sum + (Number(row.value) || 0), 0);
+  const total = rows.reduce(
+    (sum, row) => sum + (Number(row.value) || 0),
+    0
+  );
 
   return (
     <Card className="print:p-0 print:shadow-none print:border-none print:bg-white print:mt-20">
@@ -132,12 +159,14 @@ const OthersSection = ({ data, onChange, mode = "create" }: OthersSectionProps) 
                       {isEditable ? (
                         <Input
                           type="text"
-                          value={row.value}
-                          onChange={e => updateRow(row.id, "value", e.target.value)}
+                          value={row.value ?? ""}
+                          onChange={e => handleValueChange(row.id, e.target.value)}
                           className="text-right"
                         />
                       ) : (
-                        Number(row.value).toFixed(2)
+                        row.value && !isNaN(Number(row.value))
+                          ? Number(row.value).toFixed(2)
+                          : "0.00"
                       )}
                     </td>
                     {isEditable && (

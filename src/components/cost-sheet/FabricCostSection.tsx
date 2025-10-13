@@ -212,9 +212,10 @@ const FabricCostSection = ({ data, onChange, mode = "create" }: FabricCostSectio
   const renderTableSection = (
     title: string,
     rows: FabricRow[],
-    setRows: any, // <-- add setRows as argument
+    setRows: any,
     totalUnit: number,
-    totalValue: number
+    totalValue: number,
+    prefix: string // <-- add prefix argument
   ) => (
     <div className="mb-6">
       <h4 className="font-semibold text-sm mb-2">{title}</h4>
@@ -294,6 +295,17 @@ const FabricCostSection = ({ data, onChange, mode = "create" }: FabricCostSectio
           </tbody>
         </table>
       </div>
+      {isEditable && (
+        <Button
+          onClick={() => addRow(rows, setRows, prefix)}
+          variant="outline"
+          size="sm"
+          className="mt-2"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Add Field
+        </Button>
+      )}
     </div>
   );
 
@@ -313,7 +325,8 @@ const FabricCostSection = ({ data, onChange, mode = "create" }: FabricCostSectio
           yarnRows,
           setYarnRows,
           calculateTotalUnit(yarnRows),
-          calculateTotal(yarnRows)
+          calculateTotal(yarnRows),
+          "yarn"
         )}
         <Separator />
         {renderTableSection(
@@ -321,7 +334,8 @@ const FabricCostSection = ({ data, onChange, mode = "create" }: FabricCostSectio
           knittingRows,
           setKnittingRows,
           calculateTotalUnit(knittingRows),
-          calculateTotal(knittingRows)
+          calculateTotal(knittingRows),
+          "knit"
         )}
         <Separator />
         {renderTableSection(
@@ -329,7 +343,8 @@ const FabricCostSection = ({ data, onChange, mode = "create" }: FabricCostSectio
           dyeingRows,
           setDyeingRows,
           calculateTotalUnit(dyeingRows),
-          calculateTotal(dyeingRows)
+          calculateTotal(dyeingRows),
+          "dye"
         )}
         <Separator />
         <div className="pt-4 border-t-2">
