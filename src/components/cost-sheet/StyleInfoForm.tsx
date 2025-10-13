@@ -12,7 +12,7 @@ interface StyleInfoFormProps {
   isCheckingStyle?: boolean;
   styleExists?: boolean | null;
   creatorName?: string;
-  mode?: "form" | "show";
+  mode?: "show" | "create" | "edit";
   data?: any; // for show mode
 }
 
@@ -22,7 +22,7 @@ const StyleInfoForm = ({
   isCheckingStyle,
   styleExists,
   creatorName,
-  mode = "form",
+  mode = "edit",
   data = {},
 }: StyleInfoFormProps) => {
   const isDisabled = styleExists === true;
