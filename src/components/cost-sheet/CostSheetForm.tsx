@@ -149,6 +149,7 @@ const CostSheetForm = ({ onClose }: CostSheetFormProps) => {
               summary={summaryData.summary}
               fabricData={fabricData.json || {}}
               trimsData={trimsData.rows}
+              othersData={othersData.json}
               onChange={handleSummaryChange}
             />
           </div>

@@ -221,7 +221,7 @@ const StyleInfoForm = ({
 
           {styleCheckData?.exists === false && (
             <Alert className="border-success bg-success/10">
-              <CheckCircle2 className="h-4 w-4 text-success" />
+              <CheckCircle2 className="h-4 w-4 text-green-700" />
               <AlertDescription className="text-green-700">
                 Style is available. You can proceed with creating the cost
                 sheet.

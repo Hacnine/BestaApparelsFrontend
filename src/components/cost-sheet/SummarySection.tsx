@@ -12,6 +12,7 @@ interface SummarySectionProps {
   summary: any;
   fabricData: any;
   trimsData: any[];
+  othersData: any;
   onChange?: (data: SummarySectionChange) => void;
   mode?: "create" | "edit" | "show";
 }
@@ -20,6 +21,7 @@ const SummarySection = ({
   summary,
   fabricData,
   trimsData,
+  othersData,
   onChange,
   mode = "create",
 }: SummarySectionProps) => {
@@ -39,7 +41,7 @@ const SummarySection = ({
 
   // Use summary fields if in show mode, otherwise calculate
   const fabricCost = safeFabricData?.dyeingTotal + safeFabricData?.knittingTotal + safeFabricData?.yarnTotal;
-  
+ 
   const accessoriesCost =
     typeof summary?.accessoriesCost === "number"
       ? summary.accessoriesCost
@@ -51,10 +53,13 @@ const SummarySection = ({
           const trimsAdjustment = trimsSubtotal * 0.08;
           return trimsSubtotal + trimsAdjustment;
         })();
-  const totalCost =
+  const othersTotal = typeof othersData?.total === "number" ? othersData.total : 0;
+
+    const totalCost =
     typeof summary?.totalCost === "number"
       ? summary.totalCost
-      : fabricCost + accessoriesCost + factoryCM;
+      : (typeof fabricCost === "number" ? fabricCost : 0) + accessoriesCost + factoryCM + othersTotal;
+
   const commercialProfit =
     typeof summary?.commercialProfit === "number"
       ? summary.commercialProfit
@@ -71,7 +76,9 @@ const SummarySection = ({
   // Helper to send summary data to parent
   const notifyChange = (nextFactoryCM: number, nextProfitPercent: number) => {
     if (onChange) {
-      const nextTotalCost = fabricCost + accessoriesCost + nextFactoryCM;
+      const nextOthersTotal = typeof othersData?.total === "number" ? othersData.total : 0;
+      // FIX: Add nextOthersTotal to nextTotalCost calculation
+      const nextTotalCost = fabricCost + accessoriesCost + nextFactoryCM + nextOthersTotal;
       const nextCommercialProfit = nextTotalCost * (nextProfitPercent / 100);
       const nextFobPrice = nextTotalCost + nextCommercialProfit;
       const nextPricePerPiece = nextFobPrice / 12;
@@ -92,6 +99,7 @@ const SummarySection = ({
             { label: "Fabric Cost / Dzn Garments", value: fabricCost },
             { label: "Accessories Cost / Dzn Garments", value: accessoriesCost },
             { label: "Factory CM / Dzn Garments", value: nextFactoryCM },
+            { label: "Others Cost / Dzn Garments", value: nextOthersTotal },
             { label: "Total Cost", value: nextTotalCost },
             { label: `Commercial & Profit Cost (${nextProfitPercent}%)`, value: nextCommercialProfit },
             { label: "FOB Price / Dzn", value: nextFobPrice },
@@ -122,6 +130,7 @@ const SummarySection = ({
     { label: "Fabric Cost / Dzn Garments", value: fabricCost },
     { label: "Accessories Cost / Dzn Garments", value: accessoriesCost },
     { label: "Factory CM / Dzn Garments", value: factoryCM },
+    { label: "Others Cost", value: typeof othersData?.total === "number" ? othersData.total : 0 },
     { label: "Total Cost", value: totalCost },
     { label: `Commercial & Profit Cost (${profitPercent}%)`, value: commercialProfit },
     { label: "FOB Price / Dzn", value: fobPrice },
@@ -149,10 +158,8 @@ const SummarySection = ({
                     <td className="border p-2">{row.label}</td>
                     <td className="border p-2 text-right">
                       {typeof row.value === "number"
-                        ? row.label === "Price / Pc Garments"
-                          ? `$${row.value.toFixed(2)}`
-                          : `$${row.value.toFixed(2)}`
-                        : row.value}
+                        ? `$${row.value.toFixed(2)}`
+                        : row.value ?? "$0.00"}
                     </td>
                   </tr>
                 ))}
@@ -209,6 +216,13 @@ const SummarySection = ({
                 <span className="font-medium">Factory CM / Dzn Garments</span>
                 <span className="font-semibold">
                   ${Number(factoryCM) ? Number(factoryCM).toFixed(2) : "0.00"}
+                </span>
+              </div>
+
+              <div className="flex justify-between items-center p-3 bg-muted/30 rounded">
+                <span className="font-medium">Others Cost</span>
+                <span className="font-semibold">
+                  ${typeof othersData?.total === "number" ? othersData.total.toFixed(2) : "0.00"}
                 </span>
               </div>
 

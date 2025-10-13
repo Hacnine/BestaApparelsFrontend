@@ -489,7 +489,8 @@ const CostSheetTable = () => {
               <SummarySection
                 summary={editedSummaryRows}
                 fabricData={editedFabricRows}
-                trimsData={editedTrimsRows?.rows || []}
+                trimsData={editedTrimsRows?.json || []}
+                othersData={editedOthersRows?.json || []}
                 mode={isEditMode ? "edit" : "show"}
                 onChange={isEditMode ? (d) => setEditedSummaryRows(d) : undefined}
               />
