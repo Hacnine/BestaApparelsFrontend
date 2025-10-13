@@ -3,7 +3,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useCheckStyleQuery } from "@/redux/api/costSheetApi";
 
 interface StyleInfoFormProps {
@@ -31,30 +31,6 @@ const StyleInfoForm = ({
 
   // If mode is "show", use data prop for values
   const isShowMode = mode === "show";
-
-  // For edit mode, auto-fill form fields from data prop if present
-  useEffect(() => {
-    if (!isShowMode && data && form && form.setValue) {
-      // Only set if values are different
-      if (form.getValues("style") !== (data.style ?? ""))
-        form.setValue("style", data.style ?? "");
-      if (form.getValues("item") !== (data.item ?? ""))
-        form.setValue("item", data.item ?? "");
-      if (form.getValues("group") !== (data.group ?? ""))
-        form.setValue("group", data.group ?? "");
-      if (form.getValues("size") !== (data.size ?? ""))
-        form.setValue("size", data.size ?? "");
-      if (form.getValues("fabricType") !== (data.fabricType ?? ""))
-        form.setValue("fabricType", data.fabricType ?? "");
-      if (form.getValues("gsm") !== (data.gsm ?? ""))
-        form.setValue("gsm", data.gsm ?? "");
-      if (form.getValues("color") !== (data.color ?? ""))
-        form.setValue("color", data.color ?? "");
-      if (form.getValues("qty") !== (data.qty ?? data.quantity ?? ""))
-        form.setValue("qty", data.qty ?? data.quantity ?? "");
-    }
-    // Only run when data or isShowMode changes
-  }, [data, isShowMode]);
 
   const values = isShowMode
     ? {
@@ -127,7 +103,7 @@ const StyleInfoForm = ({
               onChange={(e) =>
                 form?.setValue && form.setValue("style", e.target.value)
               }
-              readOnly={isDisabled}
+              
               placeholder="Enter style code"
             />
           </div>
@@ -141,7 +117,7 @@ const StyleInfoForm = ({
               onChange={(e) =>
                 form?.setValue && form.setValue("item", e.target.value)
               }
-              readOnly={isDisabled}
+              
               placeholder="e.g., Baby Jogging Tops"
             />
           </div>
@@ -155,7 +131,7 @@ const StyleInfoForm = ({
               onChange={(e) =>
                 form?.setValue && form.setValue("group", e.target.value)
               }
-              readOnly={isDisabled}
+              
               placeholder="e.g., Boys"
             />
           </div>
@@ -169,7 +145,7 @@ const StyleInfoForm = ({
               onChange={(e) =>
                 form?.setValue && form.setValue("size", e.target.value)
               }
-              readOnly={isDisabled}
+              
               placeholder="e.g., 03/SS26"
             />
           </div>
@@ -183,7 +159,7 @@ const StyleInfoForm = ({
               onChange={(e) =>
                 form?.setValue && form.setValue("fabricType", e.target.value)
               }
-              readOnly={isDisabled}
+              
               placeholder="e.g., Fleece, 85% Cotton"
             />
           </div>
@@ -197,7 +173,7 @@ const StyleInfoForm = ({
               onChange={(e) =>
                 form?.setValue && form.setValue("gsm", e.target.value)
               }
-              readOnly={isDisabled}
+              
               placeholder="e.g., 320"
             />
           </div>
@@ -211,7 +187,7 @@ const StyleInfoForm = ({
               onChange={(e) =>
                 form?.setValue && form.setValue("color", e.target.value)
               }
-              readOnly={isDisabled}
+              
               placeholder="e.g., 01X"
             />
           </div>
@@ -223,7 +199,7 @@ const StyleInfoForm = ({
               onChange={(e) =>
                 form?.setValue && form.setValue("qty", e.target.value)
               }
-              readOnly={isDisabled}
+              
               placeholder="Enter quantity"
             />
           </div>

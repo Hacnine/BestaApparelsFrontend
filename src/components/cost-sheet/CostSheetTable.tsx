@@ -263,6 +263,22 @@ const CostSheetTable = () => {
   const sheet = expandedId !== null ? data?.find((s: any) => s.id === expandedId) : null;
   const isEditMode = sheet && editModalId === sheet.id;
 
+  // Set form values when entering edit mode
+  React.useEffect(() => {
+    if (isEditMode && sheet && editForm) {
+      editForm.reset({
+        style: sheet.style?.name || sheet.style || "",
+        item: sheet.item || "",
+        group: sheet.group || "",
+        size: sheet.size || "",
+        fabricType: sheet.fabricType || "",
+        gsm: sheet.gsm || "",
+        color: sheet.color || "",
+        qty: sheet.quantity ?? "",
+      });
+    }
+  }, [isEditMode, sheet, editForm]);
+
   // Render logic
   let content;
   if (isLoading) {
