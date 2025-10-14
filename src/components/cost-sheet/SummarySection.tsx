@@ -39,19 +39,44 @@ const SummarySection = ({
   const safeFabricData = fabricData ?? {};
   const safeTrimsData = Array.isArray(trimsData) ? trimsData : [];
 
-  // Use summary fields if in show mode, otherwise calculate
-  const fabricCost = safeFabricData?.dyeingTotal + safeFabricData?.knittingTotal + safeFabricData?.yarnTotal;
- 
+  // In SummarySection, update fabricCost calculation for edit mode:
+  const getFabricCost = () => {
+    if (mode === "show" && summary?.fields) {
+      // Use backend value in show mode
+      const field = summary.fields.find((f: any) => f.label === "Fabric Cost / Dzn Garments");
+      return field ? field.value : 0;
+    }
+    // Use totalFabricCost from fabricData if available
+    if (fabricData?.totalFabricCost !== undefined) {
+      return fabricData.totalFabricCost;
+    }
+    // Fallback to json if present
+    if (fabricData?.json?.totalFabricCost !== undefined) {
+      return fabricData.json.totalFabricCost;
+    }
+    // As a last fallback, sum all possible rows
+    let total = 0;
+    if (fabricData?.yarnRows && Array.isArray(fabricData.yarnRows)) {
+      total += fabricData.yarnRows.reduce((sum: number, row: any) => sum + (Number(row.value) || 0), 0);
+    }
+    if (fabricData?.knittingRows && Array.isArray(fabricData.knittingRows)) {
+      total += fabricData.knittingRows.reduce((sum: number, row: any) => sum + (Number(row.value) || 0), 0);
+    }
+    if (fabricData?.dyeingRows && Array.isArray(fabricData.dyeingRows)) {
+      total += fabricData.dyeingRows.reduce((sum: number, row: any) => sum + (Number(row.value) || 0), 0);
+    }
+    return total;
+  };
+  const fabricCost = getFabricCost();
+
   const accessoriesCost =
     typeof summary?.accessoriesCost === "number"
       ? summary.accessoriesCost
       : (() => {
-          const trimsSubtotal = safeTrimsData.reduce(
+          return safeTrimsData.reduce(
             (sum, item) => sum + (Number(item.cost) || 0),
             0
           );
-          const trimsAdjustment = trimsSubtotal * 0.08;
-          return trimsSubtotal + trimsAdjustment;
         })();
   const othersTotal = typeof othersData?.total === "number" ? othersData.total : 0;
 
@@ -126,16 +151,21 @@ const SummarySection = ({
   const isEditable = editMode && (mode === "edit" || mode === "create");
 
   // Table rows for summary fields
-  const summaryRows = [
-    { label: "Fabric Cost / Dzn Garments", value: fabricCost },
-    { label: "Accessories Cost / Dzn Garments", value: accessoriesCost },
-    { label: "Factory CM / Dzn Garments", value: factoryCM },
-    { label: "Others Cost", value: typeof othersData?.total === "number" ? othersData.total : 0 },
-    { label: "Total Cost", value: totalCost },
-    { label: `Commercial & Profit Cost (${profitPercent}%)`, value: commercialProfit },
-    { label: "FOB Price / Dzn", value: fobPrice },
-    { label: "Price / Pc Garments", value: pricePerPiece },
-  ];
+  let summaryRows: { label: string; value: any }[] = [];
+  if (mode === "show" && summary?.fields && Array.isArray(summary.fields)) {
+    summaryRows = summary.fields;
+  } else {
+    summaryRows = [
+      { label: "Fabric Cost / Dzn Garments", value: fabricCost },
+      { label: "Accessories Cost / Dzn Garments", value: accessoriesCost },
+      { label: "Factory CM / Dzn Garments", value: factoryCM },
+      { label: "Others Cost / Dzn Garments", value: typeof othersData?.total === "number" ? othersData.total : 0 },
+      { label: "Total Cost", value: totalCost },
+      { label: `Commercial & Profit Cost (${profitPercent}%)`, value: commercialProfit },
+      { label: "FOB Price / Dzn", value: fobPrice },
+      { label: "Price / Pc Garments", value: pricePerPiece },
+    ];
+  }
 
   return (
     <Card className="print:p-0 print:shadow-none print:border-none print:bg-white">
