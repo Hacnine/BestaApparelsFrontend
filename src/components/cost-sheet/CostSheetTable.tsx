@@ -107,6 +107,7 @@ const CostSheetTable = () => {
       setEditedTrimsRows(sheet?.trimsRows);
       setEditedOthersRows(sheet?.othersRows);
       setEditedSummaryRows(sheet?.summaryRows);
+      
     }
   }, [expandedId, data]);
 
@@ -513,8 +514,8 @@ const CostSheetTable = () => {
               <SummarySection
                 summary={editedSummaryRows}
                 fabricData={editedFabricRows}
-                trimsData={editedTrimsRows?.json || []}
-                othersData={editedOthersRows?.json || []}
+                trimsData={editedTrimsRows?.rows || []}
+                othersData={editedOthersRows?.rows || []}
                 mode={isEditMode ? "edit" : "show"}
                 onChange={
                   isEditMode ? (d) => setEditedSummaryRows(d) : undefined

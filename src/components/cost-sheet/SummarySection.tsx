@@ -27,11 +27,10 @@ const SummarySection = ({
   // Only use frontend-calculated values
   const [factoryCM, setFactoryCM] = useState(14.0);
   const [profitPercent, setProfitPercent] = useState(15);
-  const [editMode, setEditMode] = useState(mode === "edit" || mode === "create");
-
-  // Defensive checks for fabricData and trimsData
-  const safeFabricData = fabricData ?? {};
-  const safeTrimsData = Array.isArray(trimsData) ? trimsData : [];
+  const [editMode, setEditMode] = useState(
+    mode === "edit" || mode === "create"
+  );
+  console.log("othersData:", othersData);
 
   // Calculate fabric cost
   const getFabricCost = () => {
@@ -43,13 +42,22 @@ const SummarySection = ({
     }
     let total = 0;
     if (fabricData?.yarnRows && Array.isArray(fabricData.yarnRows)) {
-      total += fabricData.yarnRows.reduce((sum: number, row: any) => sum + (Number(row.value) || 0), 0);
+      total += fabricData.yarnRows.reduce(
+        (sum: number, row: any) => sum + (Number(row.value) || 0),
+        0
+      );
     }
     if (fabricData?.knittingRows && Array.isArray(fabricData.knittingRows)) {
-      total += fabricData.knittingRows.reduce((sum: number, row: any) => sum + (Number(row.value) || 0), 0);
+      total += fabricData.knittingRows.reduce(
+        (sum: number, row: any) => sum + (Number(row.value) || 0),
+        0
+      );
     }
     if (fabricData?.dyeingRows && Array.isArray(fabricData.dyeingRows)) {
-      total += fabricData.dyeingRows.reduce((sum: number, row: any) => sum + (Number(row.value) || 0), 0);
+      total += fabricData.dyeingRows.reduce(
+        (sum: number, row: any) => sum + (Number(row.value) || 0),
+        0
+      );
     }
     return total;
   };
@@ -59,15 +67,23 @@ const SummarySection = ({
   const accessoriesCost =
     typeof trimsData?.subtotal === "number"
       ? trimsData.subtotal
-      : (typeof trimsData?.totalAccessoriesCost === "number"
-          ? trimsData.totalAccessoriesCost
-          : (Array.isArray(trimsData)
-              ? trimsData.reduce((sum, item) => sum + (Number(item.cost) || 0), 0)
-              : 0));
-  const othersTotal =
-    typeof othersData?.total === "number"
-      ? othersData.total
-      : (typeof othersData?.json?.total === "number" ? othersData.json.total : 0);
+      : typeof trimsData?.totalAccessoriesCost === "number"
+      ? trimsData.totalAccessoriesCost
+      : Array.isArray(trimsData)
+      ? trimsData.reduce((sum, item) => sum + (Number(item.cost) || 0), 0)
+      : 0;
+  // Dynamically calculate total for 'othersData' if it's an array
+  let othersTotal = 0;
+  if (Array.isArray(othersData)) {
+    othersTotal = othersData.reduce((sum, item) => {
+      const val = parseFloat(item.value);
+      return sum + (isNaN(val) ? 0 : val);
+    }, 0);
+  } else if (typeof othersData?.total === "number") {
+    othersTotal = othersData.total;
+  } else if (typeof othersData?.json?.total === "number") {
+    othersTotal = othersData.json.total;
+  }
 
   const totalCost = fabricCost + accessoriesCost + factoryCM + othersTotal;
   const commercialProfit = totalCost * (profitPercent / 100);
@@ -116,7 +132,9 @@ const SummarySection = ({
     notifyChange(value, profitPercent);
   };
 
-  const handleProfitPercentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleProfitPercentChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const value = Number(e.target.value) || 0;
     setProfitPercent(value);
     notifyChange(factoryCM, value);
@@ -131,7 +149,10 @@ const SummarySection = ({
     { label: "Factory CM / Dzn Garments", value: factoryCM },
     { label: "Others Cost / Dzn Garments", value: othersTotal },
     { label: "Total Cost", value: totalCost },
-    { label: `Commercial & Profit Cost (${profitPercent}%)`, value: commercialProfit },
+    {
+      label: `Commercial & Profit Cost (${profitPercent}%)`,
+      value: commercialProfit,
+    },
     { label: "FOB Price / Dzn", value: fobPrice },
     { label: "Price / Pc Garments", value: pricePerPiece },
   ];
@@ -139,7 +160,9 @@ const SummarySection = ({
   return (
     <Card className="print:p-0 print:shadow-none print:border-none print:bg-white">
       <CardHeader className="print:p-0 print:mb-0 print:border-none print:bg-white">
-        <CardTitle className="text-lg print:text-base print:mb-0">Summary</CardTitle>
+        <CardTitle className="text-lg print:text-base print:mb-0">
+          Summary
+        </CardTitle>
       </CardHeader>
       <CardContent className="print:p-0 print:space-y-0 print:bg-white">
         {mode === "show" && !isEditable ? (
@@ -179,7 +202,7 @@ const SummarySection = ({
                   readOnly={!isEditable}
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="profitPercent">Commercial & Profit %</Label>
                 <div className="flex items-center gap-2">
@@ -200,14 +223,20 @@ const SummarySection = ({
               <div className="flex justify-between items-center p-3 bg-muted/30 rounded">
                 <span className="font-medium">Fabric Cost / Dzn Garments</span>
                 <span className="font-semibold">
-                  ${Number(fabricCost) ? Number(fabricCost).toFixed(3) : "0.000"}
+                  $
+                  {Number(fabricCost) ? Number(fabricCost).toFixed(3) : "0.000"}
                 </span>
               </div>
 
               <div className="flex justify-between items-center p-3 bg-muted/30 rounded">
-                <span className="font-medium">Accessories Cost / Dzn Garments</span>
+                <span className="font-medium">
+                  Accessories Cost / Dzn Garments
+                </span>
                 <span className="font-semibold">
-                  ${Number(accessoriesCost) ? Number(accessoriesCost).toFixed(3) : "0.000"}
+                  $
+                  {Number(accessoriesCost)
+                    ? Number(accessoriesCost).toFixed(3)
+                    : "0.000"}
                 </span>
               </div>
 
@@ -221,7 +250,10 @@ const SummarySection = ({
               <div className="flex justify-between items-center p-3 bg-muted/30 rounded">
                 <span className="font-medium">Others Cost</span>
                 <span className="font-semibold">
-                  ${typeof othersData?.total === "number" ? othersData.total.toFixed(3) : "0.000"}
+                  $
+                  {typeof othersData?.total === "number"
+                    ? othersData.total.toFixed(3)
+                    : "0.000"}
                 </span>
               </div>
 
@@ -233,9 +265,14 @@ const SummarySection = ({
               </div>
 
               <div className="flex justify-between items-center p-3 bg-muted/30 rounded">
-                <span className="font-medium">Commercial & Profit Cost ({profitPercent}%)</span>
+                <span className="font-medium">
+                  Commercial & Profit Cost ({profitPercent}%)
+                </span>
                 <span className="font-semibold">
-                  ${Number(commercialProfit) ? Number(commercialProfit).toFixed(3) : "0.000"}
+                  $
+                  {Number(commercialProfit)
+                    ? Number(commercialProfit).toFixed(3)
+                    : "0.000"}
                 </span>
               </div>
 
@@ -249,7 +286,10 @@ const SummarySection = ({
               <div className="flex justify-between items-center p-4 bg-primary/20 rounded-lg border-2 border-primary">
                 <span className="font-bold text-lg">Price / Pc Garments</span>
                 <span className="font-bold text-2xl text-primary">
-                  ${Number(pricePerPiece) ? Number(pricePerPiece).toFixed(3) : "0.000"}
+                  $
+                  {Number(pricePerPiece)
+                    ? Number(pricePerPiece).toFixed(3)
+                    : "0.000"}
                 </span>
               </div>
             </div>
