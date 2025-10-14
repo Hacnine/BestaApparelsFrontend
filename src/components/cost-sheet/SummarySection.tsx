@@ -18,43 +18,29 @@ interface SummarySectionProps {
 }
 
 const SummarySection = ({
-  summary,
   fabricData,
   trimsData,
   othersData,
   onChange,
   mode = "create",
 }: SummarySectionProps) => {
-  // If in show mode, use summary directly, otherwise use state
-  const [factoryCM, setFactoryCM] = useState(
-    typeof summary?.factoryCM === "number" ? summary.factoryCM : 14.0
-  );
-  const [profitPercent, setProfitPercent] = useState(
-    typeof summary?.profitPercent === "number" ? summary.profitPercent : 15
-  );
+  // Only use frontend-calculated values
+  const [factoryCM, setFactoryCM] = useState(14.0);
+  const [profitPercent, setProfitPercent] = useState(15);
   const [editMode, setEditMode] = useState(mode === "edit" || mode === "create");
 
-  // Defensive checks for fabricData and trimsData
   // Defensive checks for fabricData and trimsData
   const safeFabricData = fabricData ?? {};
   const safeTrimsData = Array.isArray(trimsData) ? trimsData : [];
 
-  // In SummarySection, update fabricCost calculation for edit mode:
+  // Calculate fabric cost
   const getFabricCost = () => {
-    if (mode === "show" && summary?.fields) {
-      // Use backend value in show mode
-      const field = summary.fields.find((f: any) => f.label === "Fabric Cost / Dzn Garments");
-      return field ? field.value : 0;
-    }
-    // Use totalFabricCost from fabricData if available
     if (fabricData?.totalFabricCost !== undefined) {
       return fabricData.totalFabricCost;
     }
-    // Fallback to json if present
     if (fabricData?.json?.totalFabricCost !== undefined) {
       return fabricData.json.totalFabricCost;
     }
-    // As a last fallback, sum all possible rows
     let total = 0;
     if (fabricData?.yarnRows && Array.isArray(fabricData.yarnRows)) {
       total += fabricData.yarnRows.reduce((sum: number, row: any) => sum + (Number(row.value) || 0), 0);
@@ -69,69 +55,57 @@ const SummarySection = ({
   };
   const fabricCost = getFabricCost();
 
+  // Calculate accessories cost
   const accessoriesCost =
-    typeof summary?.accessoriesCost === "number"
-      ? summary.accessoriesCost
-      : (() => {
-          return safeTrimsData.reduce(
-            (sum, item) => sum + (Number(item.cost) || 0),
-            0
-          );
-        })();
-  const othersTotal = typeof othersData?.total === "number" ? othersData.total : 0;
+    typeof trimsData?.subtotal === "number"
+      ? trimsData.subtotal
+      : (typeof trimsData?.totalAccessoriesCost === "number"
+          ? trimsData.totalAccessoriesCost
+          : (Array.isArray(trimsData)
+              ? trimsData.reduce((sum, item) => sum + (Number(item.cost) || 0), 0)
+              : 0));
+  const othersTotal =
+    typeof othersData?.total === "number"
+      ? othersData.total
+      : (typeof othersData?.json?.total === "number" ? othersData.json.total : 0);
 
-    const totalCost =
-    typeof summary?.totalCost === "number"
-      ? summary.totalCost
-      : (typeof fabricCost === "number" ? fabricCost : 0) + accessoriesCost + factoryCM + othersTotal;
-
-  const commercialProfit =
-    typeof summary?.commercialProfit === "number"
-      ? summary.commercialProfit
-      : totalCost * (profitPercent / 100);
-  const fobPrice =
-    typeof summary?.fobPrice === "number"
-      ? summary.fobPrice
-      : totalCost + commercialProfit;
-  const pricePerPiece =
-    typeof summary?.pricePerPiece === "number"
-      ? summary.pricePerPiece
-      : fobPrice / 12;
+  const totalCost = fabricCost + accessoriesCost + factoryCM + othersTotal;
+  const commercialProfit = totalCost * (profitPercent / 100);
+  const fobPrice = totalCost + commercialProfit;
+  const pricePerPiece = fobPrice / 12;
 
   // Helper to send summary data to parent
   const notifyChange = (nextFactoryCM: number, nextProfitPercent: number) => {
     if (onChange) {
-      const nextOthersTotal = typeof othersData?.total === "number" ? othersData.total : 0;
-      // FIX: Add nextOthersTotal to nextTotalCost calculation
-      const nextTotalCost = fabricCost + accessoriesCost + nextFactoryCM + nextOthersTotal;
-      const nextCommercialProfit = nextTotalCost * (nextProfitPercent / 100);
-      const nextFobPrice = nextTotalCost + nextCommercialProfit;
-      const nextPricePerPiece = nextFobPrice / 12;
-      onChange({
-        summary: {
-          fabricCost,
-          accessoriesCost,
-          factoryCM: nextFactoryCM,
-          totalCost: nextTotalCost,
-          commercialProfit: nextCommercialProfit,
-          fobPrice: nextFobPrice,
-          pricePerPiece: nextPricePerPiece,
-          profitPercent: nextProfitPercent,
-        },
-        json: {
-          tableName: "Summary",
-          fields: [
-            { label: "Fabric Cost / Dzn Garments", value: fabricCost },
-            { label: "Accessories Cost / Dzn Garments", value: accessoriesCost },
-            { label: "Factory CM / Dzn Garments", value: nextFactoryCM },
-            { label: "Others Cost / Dzn Garments", value: nextOthersTotal },
-            { label: "Total Cost", value: nextTotalCost },
-            { label: `Commercial & Profit Cost (${nextProfitPercent}%)`, value: nextCommercialProfit },
-            { label: "FOB Price / Dzn", value: nextFobPrice },
-            { label: "Price / Pc Garments", value: nextPricePerPiece },
-          ],
-        }
-      });
+      // const nextTotalCost = fabricCost + accessoriesCost + nextFactoryCM + othersTotal;
+      // const nextCommercialProfit = nextTotalCost * (nextProfitPercent / 100);
+      // const nextFobPrice = nextTotalCost + nextCommercialProfit;
+      // const nextPricePerPiece = nextFobPrice / 12;
+      // onChange({
+      //   summary: {
+      //     fabricCost,
+      //     accessoriesCost,
+      //     factoryCM: nextFactoryCM,
+      //     totalCost: nextTotalCost,
+      //     commercialProfit: nextCommercialProfit,
+      //     fobPrice: nextFobPrice,
+      //     pricePerPiece: nextPricePerPiece,
+      //     profitPercent: nextProfitPercent,
+      //   },
+      //   json: {
+      //     tableName: "Summary",
+      //     fields: [
+      //       { label: "Fabric Cost / Dzn Garments", value: fabricCost },
+      //       { label: "Accessories Cost / Dzn Garments", value: accessoriesCost },
+      //       { label: "Factory CM / Dzn Garments", value: nextFactoryCM },
+      //       { label: "Others Cost / Dzn Garments", value: othersTotal },
+      //       { label: "Total Cost", value: nextTotalCost },
+      //       { label: `Commercial & Profit Cost (${nextProfitPercent}%)`, value: nextCommercialProfit },
+      //       { label: "FOB Price / Dzn", value: nextFobPrice },
+      //       { label: "Price / Pc Garments", value: nextPricePerPiece },
+      //     ],
+      //   }
+      // });
     }
   };
 
@@ -151,21 +125,16 @@ const SummarySection = ({
   const isEditable = editMode && (mode === "edit" || mode === "create");
 
   // Table rows for summary fields
-  let summaryRows: { label: string; value: any }[] = [];
-  if (mode === "show" && summary?.fields && Array.isArray(summary.fields)) {
-    summaryRows = summary.fields;
-  } else {
-    summaryRows = [
-      { label: "Fabric Cost / Dzn Garments", value: fabricCost },
-      { label: "Accessories Cost / Dzn Garments", value: accessoriesCost },
-      { label: "Factory CM / Dzn Garments", value: factoryCM },
-      { label: "Others Cost / Dzn Garments", value: typeof othersData?.total === "number" ? othersData.total : 0 },
-      { label: "Total Cost", value: totalCost },
-      { label: `Commercial & Profit Cost (${profitPercent}%)`, value: commercialProfit },
-      { label: "FOB Price / Dzn", value: fobPrice },
-      { label: "Price / Pc Garments", value: pricePerPiece },
-    ];
-  }
+  const summaryRows: { label: string; value: any }[] = [
+    { label: "Fabric Cost / Dzn Garments", value: fabricCost },
+    { label: "Accessories Cost / Dzn Garments", value: accessoriesCost },
+    { label: "Factory CM / Dzn Garments", value: factoryCM },
+    { label: "Others Cost / Dzn Garments", value: othersTotal },
+    { label: "Total Cost", value: totalCost },
+    { label: `Commercial & Profit Cost (${profitPercent}%)`, value: commercialProfit },
+    { label: "FOB Price / Dzn", value: fobPrice },
+    { label: "Price / Pc Garments", value: pricePerPiece },
+  ];
 
   return (
     <Card className="print:p-0 print:shadow-none print:border-none print:bg-white">
@@ -188,8 +157,8 @@ const SummarySection = ({
                     <td className="border p-2">{row.label}</td>
                     <td className="border p-2 text-right">
                       {typeof row.value === "number"
-                        ? `$${row.value.toFixed(2)}`
-                        : row.value ?? "$0.00"}
+                        ? `$${row.value.toFixed(3)}`
+                        : row.value ?? "$0.000"}
                     </td>
                   </tr>
                 ))}
@@ -231,56 +200,56 @@ const SummarySection = ({
               <div className="flex justify-between items-center p-3 bg-muted/30 rounded">
                 <span className="font-medium">Fabric Cost / Dzn Garments</span>
                 <span className="font-semibold">
-                  ${Number(fabricCost) ? Number(fabricCost).toFixed(2) : "0.00"}
+                  ${Number(fabricCost) ? Number(fabricCost).toFixed(3) : "0.000"}
                 </span>
               </div>
 
               <div className="flex justify-between items-center p-3 bg-muted/30 rounded">
                 <span className="font-medium">Accessories Cost / Dzn Garments</span>
                 <span className="font-semibold">
-                  ${Number(accessoriesCost) ? Number(accessoriesCost).toFixed(2) : "0.00"}
+                  ${Number(accessoriesCost) ? Number(accessoriesCost).toFixed(3) : "0.000"}
                 </span>
               </div>
 
               <div className="flex justify-between items-center p-3 bg-muted/30 rounded">
                 <span className="font-medium">Factory CM / Dzn Garments</span>
                 <span className="font-semibold">
-                  ${Number(factoryCM) ? Number(factoryCM).toFixed(2) : "0.00"}
+                  ${Number(factoryCM) ? Number(factoryCM).toFixed(3) : "0.000"}
                 </span>
               </div>
 
               <div className="flex justify-between items-center p-3 bg-muted/30 rounded">
                 <span className="font-medium">Others Cost</span>
                 <span className="font-semibold">
-                  ${typeof othersData?.total === "number" ? othersData.total.toFixed(2) : "0.00"}
+                  ${typeof othersData?.total === "number" ? othersData.total.toFixed(3) : "0.000"}
                 </span>
               </div>
 
               <div className="flex justify-between items-center p-3 bg-primary/10 rounded border border-primary/20">
                 <span className="font-bold">Total Cost</span>
                 <span className="font-bold text-lg">
-                  ${Number(totalCost) ? Number(totalCost).toFixed(2) : "0.00"}
+                  ${Number(totalCost) ? Number(totalCost).toFixed(3) : "0.000"}
                 </span>
               </div>
 
               <div className="flex justify-between items-center p-3 bg-muted/30 rounded">
                 <span className="font-medium">Commercial & Profit Cost ({profitPercent}%)</span>
                 <span className="font-semibold">
-                  ${Number(commercialProfit) ? Number(commercialProfit).toFixed(2) : "0.00"}
+                  ${Number(commercialProfit) ? Number(commercialProfit).toFixed(3) : "0.000"}
                 </span>
               </div>
 
               <div className="flex justify-between items-center p-3 bg-accent/10 rounded border border-accent/20">
                 <span className="font-bold text-lg">FOB Price / Dzn</span>
                 <span className="font-bold text-xl text-accent">
-                  ${Number(fobPrice) ? Number(fobPrice).toFixed(2) : "0.00"}
+                  ${Number(fobPrice) ? Number(fobPrice).toFixed(3) : "0.000"}
                 </span>
               </div>
 
               <div className="flex justify-between items-center p-4 bg-primary/20 rounded-lg border-2 border-primary">
                 <span className="font-bold text-lg">Price / Pc Garments</span>
                 <span className="font-bold text-2xl text-primary">
-                  ${Number(pricePerPiece) ? Number(pricePerPiece).toFixed(2) : "0.00"}
+                  ${Number(pricePerPiece) ? Number(pricePerPiece).toFixed(3) : "0.000"}
                 </span>
               </div>
             </div>
