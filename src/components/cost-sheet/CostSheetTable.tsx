@@ -1,6 +1,9 @@
 import React, { useState, useRef } from "react";
 import { Card } from "../ui/card";
-import { useGetCostSheetsQuery, useUpdateCostSheetMutation } from "@/redux/api/costSheetApi";
+import {
+  useGetCostSheetsQuery,
+  useUpdateCostSheetMutation,
+} from "@/redux/api/costSheetApi";
 import { Button } from "@/components/ui/button";
 import CadConsumptionSection from "./CadConsumptionSection";
 import FabricCostSection from "./FabricCostSection";
@@ -52,7 +55,10 @@ const FullScreenModal = ({
               <CircleX className=" size-4" />
             </button>
           </div>
-          <div className="flex-1 overflow-y-auto print:overflow-visible print:p-0" id="costsheet-print-area">
+          <div
+            className="flex-1 overflow-y-auto print:overflow-visible print:p-0"
+            id="costsheet-print-area"
+          >
             {children}
           </div>
         </div>
@@ -65,7 +71,8 @@ const CostSheetTable = () => {
   const { data, isLoading, error } = useGetCostSheetsQuery();
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [editModalId, setEditModalId] = useState<number | null>(null);
-  const [updateCostSheet, { isLoading: isUpdating }] = useUpdateCostSheetMutation();
+  const [updateCostSheet, { isLoading: isUpdating }] =
+    useUpdateCostSheetMutation();
 
   // Add a form instance for edit mode
   const editForm = useForm({
@@ -260,7 +267,8 @@ const CostSheetTable = () => {
   };
 
   // Find the sheet and edit mode before rendering
-  const sheet = expandedId !== null ? data?.find((s: any) => s.id === expandedId) : null;
+  const sheet =
+    expandedId !== null ? data?.find((s: any) => s.id === expandedId) : null;
   const isEditMode = sheet && editModalId === sheet.id;
 
   // Set form values when entering edit mode
@@ -330,7 +338,9 @@ const CostSheetTable = () => {
               {data.map((sheet: any) => (
                 <React.Fragment key={sheet.id}>
                   <tr className="border-b hover:bg-muted/20">
-                    <td className="p-2">{sheet.style?.name || "-"}</td>
+                    <td className="p-2 uppercase">
+                      {sheet.style?.name || "-"}
+                    </td>
                     <td className="p-2">{sheet.item || "-"}</td>
                     <td className="p-2">{sheet.group || "-"}</td>
                     <td className="p-2">{sheet.size || "-"}</td>
@@ -349,7 +359,9 @@ const CostSheetTable = () => {
                         variant="outline"
                         size="sm"
                         onClick={() =>
-                          setExpandedId(expandedId === sheet.id ? null : sheet.id)
+                          setExpandedId(
+                            expandedId === sheet.id ? null : sheet.id
+                          )
                         }
                       >
                         {expandedId === sheet.id ? "Hide" : "Show"}
@@ -465,24 +477,36 @@ const CostSheetTable = () => {
                   <CadConsumptionSection
                     data={editedCadRows?.rows || []}
                     mode={isEditMode ? "edit" : "show"}
-                    onChange={isEditMode ? (d) => setEditedCadRows(d) : undefined}
+                    onChange={
+                      isEditMode ? (d) => setEditedCadRows(d) : undefined
+                    }
                   />
                   <FabricCostSection
-                    data={editedFabricRows}
+                    data={
+                      isEditMode
+                        ? editedFabricRows
+                        : sheet.fabricRows?.json || sheet.fabricRows
+                    }
                     mode={isEditMode ? "edit" : "show"}
-                    onChange={isEditMode ? (d) => setEditedFabricRows(d) : undefined}
+                    onChange={
+                      isEditMode ? (d) => setEditedFabricRows(d) : undefined
+                    }
                   />
                   <OthersSection
                     data={editedOthersRows}
                     mode={isEditMode ? "edit" : "show"}
-                    onChange={isEditMode ? (d) => setEditedOthersRows(d) : undefined}
+                    onChange={
+                      isEditMode ? (d) => setEditedOthersRows(d) : undefined
+                    }
                   />
                 </div>
                 <div className="w-1/2 space-y-5">
                   <TrimsAccessoriesSection
                     data={editedTrimsRows}
                     mode={isEditMode ? "edit" : "show"}
-                    onChange={isEditMode ? (d) => setEditedTrimsRows(d) : undefined}
+                    onChange={
+                      isEditMode ? (d) => setEditedTrimsRows(d) : undefined
+                    }
                   />
                 </div>
               </div>
@@ -492,7 +516,9 @@ const CostSheetTable = () => {
                 trimsData={editedTrimsRows?.json || []}
                 othersData={editedOthersRows?.json || []}
                 mode={isEditMode ? "edit" : "show"}
-                onChange={isEditMode ? (d) => setEditedSummaryRows(d) : undefined}
+                onChange={
+                  isEditMode ? (d) => setEditedSummaryRows(d) : undefined
+                }
               />
             </div>
           )}
