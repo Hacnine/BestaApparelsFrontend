@@ -79,7 +79,7 @@ const StyleInfoForm = ({
             </thead>
             <tbody>
               <tr>
-                <td className="border p-2">{values?.style ?? ""}</td>
+                <td className="border p-2 uppercase">{values?.style}</td>
                 <td className="border p-2">{values?.item ?? ""}</td>
                 <td className="border p-2">{values?.group ?? ""}</td>
                 <td className="border p-2">{values?.size ?? ""}</td>
@@ -103,7 +103,7 @@ const StyleInfoForm = ({
               onChange={(e) =>
                 form?.setValue && form.setValue("style", e.target.value)
               }
-              
+              className="uppercase"
               placeholder="Enter style code"
             />
           </div>
@@ -117,7 +117,6 @@ const StyleInfoForm = ({
               onChange={(e) =>
                 form?.setValue && form.setValue("item", e.target.value)
               }
-              
               placeholder="e.g., Baby Jogging Tops"
             />
           </div>
@@ -131,7 +130,6 @@ const StyleInfoForm = ({
               onChange={(e) =>
                 form?.setValue && form.setValue("group", e.target.value)
               }
-              
               placeholder="e.g., Boys"
             />
           </div>
@@ -145,7 +143,6 @@ const StyleInfoForm = ({
               onChange={(e) =>
                 form?.setValue && form.setValue("size", e.target.value)
               }
-              
               placeholder="e.g., 03/SS26"
             />
           </div>
@@ -159,7 +156,6 @@ const StyleInfoForm = ({
               onChange={(e) =>
                 form?.setValue && form.setValue("fabricType", e.target.value)
               }
-              
               placeholder="e.g., Fleece, 85% Cotton"
             />
           </div>
@@ -173,7 +169,6 @@ const StyleInfoForm = ({
               onChange={(e) =>
                 form?.setValue && form.setValue("gsm", e.target.value)
               }
-              
               placeholder="e.g., 320"
             />
           </div>
@@ -187,7 +182,6 @@ const StyleInfoForm = ({
               onChange={(e) =>
                 form?.setValue && form.setValue("color", e.target.value)
               }
-              
               placeholder="e.g., 01X"
             />
           </div>
@@ -199,7 +193,6 @@ const StyleInfoForm = ({
               onChange={(e) =>
                 form?.setValue && form.setValue("qty", e.target.value)
               }
-              
               placeholder="Enter quantity"
             />
           </div>
