@@ -20,7 +20,8 @@ interface FabricCostSectionProps {
 }
 
 const FabricCostSection = ({ data, onChange, mode = "create" }: FabricCostSectionProps) => {
-  const [yarnRows, setYarnRows] = useState<FabricRow[]>(data?.yarnRows || [
+  // Use backend data for initial state
+  const initialYarnRows = data?.yarnRows || data?.json?.yarnRows || [
     {
       id: "yarn-1",
       fieldName: "30/1, 100% Cotton",
@@ -35,9 +36,8 @@ const FabricCostSection = ({ data, onChange, mode = "create" }: FabricCostSectio
       rate: "",
       value: 0,
     },
-  ]);
-
-  const [knittingRows, setKnittingRows] = useState<FabricRow[]>(data?.knittingRows || [
+  ];
+  const initialKnittingRows = data?.knittingRows || data?.json?.knittingRows || [
     {
       id: "knit-1",
       fieldName: "F. Terry",
@@ -59,9 +59,8 @@ const FabricCostSection = ({ data, onChange, mode = "create" }: FabricCostSectio
       rate: "",
       value: 0,
     },
-  ]);
-
-  const [dyeingRows, setDyeingRows] = useState<FabricRow[]>(data?.dyeingRows || [
+  ];
+  const initialDyeingRows = data?.dyeingRows || data?.json?.dyeingRows || [
     {
       id: "dye-1",
       fieldName: "Avarage Color shade",
@@ -97,8 +96,11 @@ const FabricCostSection = ({ data, onChange, mode = "create" }: FabricCostSectio
       rate: "",
       value: 0,
     },
-  ]);
+  ];
 
+  const [yarnRows, setYarnRows] = useState<FabricRow[]>(data?.yarnRows || initialYarnRows);
+  const [knittingRows, setKnittingRows] = useState<FabricRow[]>(data?.knittingRows || initialKnittingRows);
+  const [dyeingRows, setDyeingRows] = useState<FabricRow[]>(data?.dyeingRows || initialDyeingRows);
   const [printEmbRows, setPrintEmbRows] = useState<FabricRow[]>([]);
 
   const isEditable = mode === "edit" || mode === "create";
@@ -166,13 +168,21 @@ const FabricCostSection = ({ data, onChange, mode = "create" }: FabricCostSectio
 
     if (onChange) {
       onChange({
-        yarnRows,
-        knittingRows,
-        dyeingRows,
-        yarnTotal,
-        knittingTotal,
-        dyeingTotal,
-        totalCost,
+        rows: {
+          yarnRows,
+          knittingRows,
+          dyeingRows,
+        },
+        json: {
+          tableName: "Fabric Cost",
+          yarnRows,
+          knittingRows,
+          dyeingRows,
+          yarnTotal,
+          knittingTotal,
+          dyeingTotal,
+          totalFabricCost: totalCost,
+        }
       });
     }
   };
@@ -309,10 +319,12 @@ const FabricCostSection = ({ data, onChange, mode = "create" }: FabricCostSectio
     </div>
   );
 
-  const totalFabricCost =
-    (Number(calculateTotal(yarnRows)) || 0) +
-    (Number(calculateTotal(knittingRows)) || 0) +
-    (Number(calculateTotal(dyeingRows)) || 0);
+  // For show mode, use backend value for totalFabricCost
+  const totalFabricCost = mode === "show"
+    ? (data?.totalFabricCost || data?.json?.totalFabricCost || 0)
+    : (Number(calculateTotal(yarnRows)) || 0) +
+      (Number(calculateTotal(knittingRows)) || 0) +
+      (Number(calculateTotal(dyeingRows)) || 0);
 
   return (
     <Card className="print:p-0 print:shadow-none print:border-none print:bg-white">
