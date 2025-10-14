@@ -319,12 +319,10 @@ const FabricCostSection = ({ data, onChange, mode = "create" }: FabricCostSectio
     </div>
   );
 
-  // For show mode, use backend value for totalFabricCost
-  const totalFabricCost = mode === "show"
-    ? (data?.totalFabricCost || data?.json?.totalFabricCost || 0)
-    : (Number(calculateTotal(yarnRows)) || 0) +
-      (Number(calculateTotal(knittingRows)) || 0) +
-      (Number(calculateTotal(dyeingRows)) || 0);
+  // Always calculate totalFabricCost from fields
+  const totalFabricCost = (Number(calculateTotal(yarnRows)) || 0) +
+    (Number(calculateTotal(knittingRows)) || 0) +
+    (Number(calculateTotal(dyeingRows)) || 0);
 
   return (
     <Card className="print:p-0 print:shadow-none print:border-none print:bg-white">
