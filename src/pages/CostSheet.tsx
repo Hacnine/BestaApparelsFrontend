@@ -24,7 +24,7 @@ const CostSheet = () => {
               </p>
             </div>
             <Button
-              onClick={() => setOpenCostSheet(true)}
+              onClick={() => setOpenCostSheet(!openCostSheet)}
               className="text-base "
             >
               <Plus className="h-4 w-4 mr-2" />
