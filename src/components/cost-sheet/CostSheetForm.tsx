@@ -8,7 +8,10 @@ import FabricCostSection from "./FabricCostSection";
 import TrimsAccessoriesSection from "./TrimsAccessoriesSection";
 import SummarySection from "./SummarySection";
 import OthersSection from "./OthersSection";
-import { useCreateCostSheetMutation, useCheckStyleQuery } from "@/redux/api/costSheetApi";
+import {
+  useCreateCostSheetMutation,
+  useCheckStyleQuery,
+} from "@/redux/api/costSheetApi";
 
 interface CostSheetFormProps {
   onClose: () => void;
@@ -31,17 +34,29 @@ export interface CostSheetData {
 }
 
 const CostSheetForm = ({ onClose }: CostSheetFormProps) => {
-  const [styleExists, setStyleExists] = useState<boolean | null>(null);
-  const [creatorName, setCreatorName] = useState("");
-  const [isCheckingStyle, setIsCheckingStyle] = useState(false);
-  const [createCostSheet, { isLoading: isSaving }] = useCreateCostSheetMutation();
+  const [createCostSheet, { isLoading: isSaving }] =
+    useCreateCostSheetMutation();
 
   // Unified state for each section
-  const [cadData, setCadDataRaw] = useState<{ rows: any[]; json: any }>({ rows: [], json: {} });
-  const [fabricData, setFabricDataRaw] = useState<{ rows?: any[]; json?: any }>({ rows: [], json: {} });
-  const [trimsData, setTrimsDataRaw] = useState<{ rows: any[]; json: any }>({ rows: [], json: {} });
-  const [othersData, setOthersDataRaw] = useState<{ rows: any[]; json?: any }>({ rows: [], json: {} });
-  const [summaryData, setSummaryData] = useState<{ summary: any; json: any }>({ summary: {}, json: {} });
+  const [cadData, setCadDataRaw] = useState<{ rows: any[]; json: any }>({
+    rows: [],
+    json: {},
+  });
+  const [fabricData, setFabricDataRaw] = useState<{ rows?: any[]; json?: any }>(
+    { rows: [], json: {} }
+  );
+  const [trimsData, setTrimsDataRaw] = useState<{ rows: any[]; json: any }>({
+    rows: [],
+    json: {},
+  });
+  const [othersData, setOthersDataRaw] = useState<{ rows: any[]; json?: any }>({
+    rows: [],
+    json: {},
+  });
+  const [summaryData, setSummaryData] = useState<{ summary: any; json: any }>({
+    summary: {},
+    json: {},
+  });
 
   const form = useForm<CostSheetData>({
     defaultValues: {
@@ -59,16 +74,92 @@ const CostSheetForm = ({ onClose }: CostSheetFormProps) => {
   // Watch style field and check style existence
   const styleValue = form.watch("style");
   const stylePattern = /^[A-Za-z0-9-]+$/;
-  const {
-    data: styleCheckData,
-    isFetching: isStyleChecking,
-  } = useCheckStyleQuery(styleValue, {
-    skip: !styleValue || !stylePattern.test(styleValue),
-    refetchOnMountOrArgChange: true,
-  });
+  const { data: styleCheckData, isFetching: isStyleChecking } =
+    useCheckStyleQuery(styleValue, {
+      skip: !styleValue || !stylePattern.test(styleValue),
+      refetchOnMountOrArgChange: true,
+    });
+
+  const calculateSummary = () => {
+    // Use totalFabricCost from fabricData.json
+    const fabricCost = fabricData.json?.totalFabricCost || 0;
+    // Use correct accessories cost from trimsData.json
+    const accessoriesCost =
+      trimsData.json?.totalAccessoriesCost !== undefined
+        ? Number(trimsData.json.totalAccessoriesCost)
+        : trimsData.rows.reduce(
+            (sum, item) => sum + (parseFloat(item.cost) || 0),
+            0
+          );
+    // Use Others cost from othersData.json
+    const othersCost =
+      othersData.json?.total !== undefined ? Number(othersData.json.total) : 0;
+
+    const factoryCM = 14.0;
+    const totalCost = fabricCost + accessoriesCost + factoryCM + othersCost;
+    const profitPercentage = 0.15;
+    const commercialProfit = totalCost * profitPercentage;
+    const fobPrice = totalCost + commercialProfit;
+    const pricePerPiece = fobPrice / 12;
+
+    return {
+      fabricCost,
+      accessoriesCost,
+      factoryCM,
+      othersCost,
+      totalCost,
+      commercialProfit,
+      fobPrice,
+      pricePerPiece,
+      profitPercentage,
+    };
+  };
+
+  const calculatedSummary = calculateSummary();
+  console.log(calculatedSummary.othersCost);
 
   const handleSave = async () => {
     const formData = form.getValues();
+
+    // Calculate summary if not set by user interaction
+    const calculatedSummary = calculateSummary();
+
+    const summaryJsonToSend =
+      Object.keys(summaryData.json).length > 0
+        ? summaryData.json
+        : {
+            tableName: "Summary",
+            fields: [
+              {
+                label: "Fabric Cost / Dzn Garments",
+                value: calculatedSummary.fabricCost,
+              },
+              {
+                label: "Accessories Cost / Dzn Garments",
+                value: calculatedSummary.accessoriesCost,
+              },
+              {
+                label: "Factory CM / Dzn Garments",
+                value: calculatedSummary.factoryCM,
+              },
+              {
+                label: "Others Cost / Dzn Garments",
+                value: calculatedSummary.othersCost,
+              },
+              { label: "Total Cost", value: calculatedSummary.totalCost },
+              {
+                label: `Commercial & Profit Cost (${
+                  calculatedSummary.profitPercentage * 100
+                }%)`,
+                value: calculatedSummary.commercialProfit,
+              },
+              { label: "FOB Price / Dzn", value: calculatedSummary.fobPrice },
+              {
+                label: "Price / Pc Garments",
+                value: calculatedSummary.pricePerPiece,
+              },
+            ],
+          };
 
     // Ensure fallback for missing sections
     const costSheetData: CostSheetData = {
@@ -83,7 +174,7 @@ const CostSheetForm = ({ onClose }: CostSheetFormProps) => {
       cadConsumption: cadData.json ?? {},
       fabricCost: fabricData.json ?? {},
       trimsAccessories: trimsData.json ?? {},
-      summary: summaryData.json ?? {},
+      summary: summaryJsonToSend,
       others: othersData.json ?? {},
     };
 
@@ -95,37 +186,17 @@ const CostSheetForm = ({ onClose }: CostSheetFormProps) => {
       toast.error("Failed to save Cost Sheet");
     }
   };
-
-  const calculateSummary = () => {
-    // Use totalFabricCost from fabricData.json
-    const fabricCost = fabricData.json?.totalFabricCost || 0;
-    // Use trimsData.rows for reduce
-    const accessoriesCost = trimsData.rows.reduce((sum, item) => sum + (parseFloat(item.cost) || 0), 0);
-    const factoryCM = 14.0;
-    const totalCost = fabricCost + accessoriesCost + factoryCM;
-    const profitPercentage = 0.15;
-    const commercialProfit = totalCost * profitPercentage;
-    const fobPrice = totalCost + commercialProfit;
-    const pricePerPiece = fobPrice / 12;
-
-    return {
-      fabricCost,
-      accessoriesCost,
-      factoryCM,
-      totalCost,
-      commercialProfit,
-      fobPrice,
-      pricePerPiece,
-      profitPercentage,
-    };
-  };
-
   // Helper setters to extract both rows and json
-  const setCadData = (data: any) => setCadDataRaw(data || { rows: [], json: {} });
-  const setTrimsData = (data: any) => setTrimsDataRaw(data || { rows: [], json: {} });
-  const setOthersData = (data: any) => setOthersDataRaw(data || { rows: [], json: {} });
-  const setFabricData = (data: any) => setFabricDataRaw(data || { rows: [], json: {} });
-  const handleSummaryChange = (data: any) => setSummaryData(data || { summary: {}, json: {} });
+  const setCadData = (data: any) =>
+    setCadDataRaw(data || { rows: [], json: {} });
+  const setTrimsData = (data: any) =>
+    setTrimsDataRaw(data || { rows: [], json: {} });
+  const setOthersData = (data: any) =>
+    setOthersDataRaw(data || { rows: [], json: {} });
+  const setFabricData = (data: any) =>
+    setFabricDataRaw(data || { rows: [], json: {} });
+  const handleSummaryChange = (data: any) =>
+    setSummaryData(data || { summary: {}, json: {} });
 
   return (
     <div className="space-y-6">
@@ -142,8 +213,14 @@ const CostSheetForm = ({ onClose }: CostSheetFormProps) => {
         <div className="space-y-4">
           <div className="space-y-6">
             <CadConsumptionSection data={cadData.rows} onChange={setCadData} />
-            <FabricCostSection data={fabricData.rows || []} onChange={setFabricData} />
-            <TrimsAccessoriesSection data={trimsData.rows} onChange={setTrimsData} />
+            <FabricCostSection
+              data={fabricData}
+              onChange={setFabricData}
+            />
+            <TrimsAccessoriesSection
+              data={trimsData.rows}
+              onChange={setTrimsData}
+            />
             <OthersSection data={othersData.rows} onChange={setOthersData} />
             <SummarySection
               summary={summaryData.summary}
@@ -168,5 +245,3 @@ const CostSheetForm = ({ onClose }: CostSheetFormProps) => {
 };
 
 export default CostSheetForm;
-
-
