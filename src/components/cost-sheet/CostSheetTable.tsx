@@ -107,7 +107,6 @@ const CostSheetTable = () => {
       setEditedTrimsRows(sheet?.trimsRows);
       setEditedOthersRows(sheet?.othersRows);
       setEditedSummaryRows(sheet?.summaryRows);
-      
     }
   }, [expandedId, data]);
 
@@ -349,7 +348,9 @@ const CostSheetTable = () => {
                     <td className="p-2 text-sm">{sheet.gsm || "-"}</td>
                     <td className="p-2 text-sm">{sheet.color || "-"}</td>
                     <td className="p-2 text-sm">{sheet.quantity ?? "-"}</td>
-                    <td className="p-2 text-sm">{sheet.createdBy?.userName || "-"}</td>
+                    <td className="p-2 text-sm">
+                      {sheet.createdBy?.userName || "-"}
+                    </td>
                     <td className="p-2 text-sm">
                       {sheet.createdAt
                         ? new Date(sheet.createdAt).toLocaleDateString()
@@ -509,18 +510,19 @@ const CostSheetTable = () => {
                       isEditMode ? (d) => setEditedTrimsRows(d) : undefined
                     }
                   />
+
+                  <SummarySection
+                    summary={editedSummaryRows}
+                    fabricData={editedFabricRows}
+                    trimsData={editedTrimsRows?.rows || []}
+                    othersData={editedOthersRows?.rows || []}
+                    mode={isEditMode ? "edit" : "show"}
+                    onChange={
+                      isEditMode ? (d) => setEditedSummaryRows(d) : undefined
+                    }
+                  />
                 </div>
               </div>
-              <SummarySection
-                summary={editedSummaryRows}
-                fabricData={editedFabricRows}
-                trimsData={editedTrimsRows?.rows || []}
-                othersData={editedOthersRows?.rows || []}
-                mode={isEditMode ? "edit" : "show"}
-                onChange={
-                  isEditMode ? (d) => setEditedSummaryRows(d) : undefined
-                }
-              />
             </div>
           )}
         </FullScreenModal>
