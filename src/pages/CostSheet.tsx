@@ -33,16 +33,16 @@ const CostSheet = () => {
           </div>
 
           {/* Search Input - match table width */}
-          <Card className="p-4 mb-4 w-full">
+          {/* <Card className="p-4 mb-4 w-full">
             <div className="flex items-center gap-2 w-full">
               <input
                 type="text"
                 placeholder="Search by style, item, buyer, etc."
-                // value={search}
-                // onChange={e => {
-                //   setSearch(e.target.value);
-                //   setPage(1); // Reset to first page on new search
-                // }}
+                value={search}
+                onChange={e => {
+                  setSearch(e.target.value);
+                  setPage(1); // Reset to first page on new search
+                }}
                 className="border rounded px-2 py-1 w-full max-w-[400px]"
                 disabled
               />
@@ -55,7 +55,7 @@ const CostSheet = () => {
                 Clear
               </Button>
             </div>
-          </Card>
+          </Card> */}
 
           {/* Cost Sheet Form */}
           {openCostSheet && (
