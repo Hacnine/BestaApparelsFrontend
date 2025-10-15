@@ -164,7 +164,7 @@ const SummarySection = ({
       value: commercialCost,
     },
     {
-      label: `Profit Cost (${profitPercent}%)`,
+      label: `Profit (${profitPercent}%)`,
       value: profitCost,
     },
     { label: "FOB Price / Dzn", value: fobPrice },
@@ -307,7 +307,7 @@ const SummarySection = ({
 
               <div className="flex justify-between items-center p-3 bg-muted/30 rounded">
                 <span className="font-medium">
-                  Profit Cost ({profitPercent}%)
+                  Profit ({profitPercent}%)
                 </span>
                 <span className="font-semibold">
                   $
