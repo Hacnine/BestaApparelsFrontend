@@ -3,6 +3,5 @@ FROM node:20
 WORKDIR /app
 COPY . .
 RUN npm install
-RUN npm run build
 EXPOSE 8081
-CMD ["npm", "run", "preview", "--", "--port=8081"]
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "8081"]
