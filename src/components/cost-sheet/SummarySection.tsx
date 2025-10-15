@@ -27,6 +27,7 @@ const SummarySection = ({
   // Only use frontend-calculated values
   const [factoryCM, setFactoryCM] = useState(14.0);
   const [profitPercent, setProfitPercent] = useState(15);
+  const [commercialPercent, setCommercialPercent] = useState(5);
   const [editMode, setEditMode] = useState(
     mode === "edit" || mode === "create"
   );
@@ -86,8 +87,9 @@ const SummarySection = ({
   }
 
   const totalCost = fabricCost + accessoriesCost + factoryCM + othersTotal;
-  const commercialProfit = totalCost * (profitPercent / 100);
-  const fobPrice = totalCost + commercialProfit;
+  const commercialCost = totalCost * (commercialPercent / 100);
+  const profitCost = totalCost * (profitPercent / 100);
+  const fobPrice = totalCost + commercialCost + profitCost;
   const pricePerPiece = fobPrice / 12;
 
   // Helper to send summary data to parent
@@ -140,6 +142,14 @@ const SummarySection = ({
     notifyChange(factoryCM, value);
   };
 
+  const handleCommercialPercentChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const value = Number(e.target.value) || 0;
+    setCommercialPercent(value);
+    notifyChange(factoryCM, profitPercent);
+  };
+
   const isEditable = editMode && (mode === "edit" || mode === "create");
 
   // Table rows for summary fields
@@ -150,8 +160,12 @@ const SummarySection = ({
     { label: "Others Cost / Dzn Garments", value: othersTotal },
     { label: "Total Cost", value: totalCost },
     {
-      label: `Commercial & Profit Cost (${profitPercent}%)`,
-      value: commercialProfit,
+      label: `Commercial Cost (${commercialPercent}%)`,
+      value: commercialCost,
+    },
+    {
+      label: `Profit Cost (${profitPercent}%)`,
+      value: profitCost,
     },
     { label: "FOB Price / Dzn", value: fobPrice },
     { label: "Price / Pc Garments", value: pricePerPiece },
@@ -190,7 +204,7 @@ const SummarySection = ({
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4 pb-4 border-b">
+            <div className="grid grid-cols-3 gap-4 pb-4 border-b">
               <div className="space-y-2">
                 <Label htmlFor="factoryCM">Factory CM / Dzn Garments</Label>
                 <Input
@@ -204,7 +218,22 @@ const SummarySection = ({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="profitPercent">Commercial & Profit %</Label>
+                <Label htmlFor="commercialPercent">Commercial %</Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    id="commercialPercent"
+                    type="string"
+                    value={commercialPercent}
+                    onChange={handleCommercialPercentChange}
+                    className="font-semibold"
+                    readOnly={!isEditable}
+                  />
+                  <span className="text-sm text-muted-foreground">${commercialPercent}%</span>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="profitPercent">Profit %</Label>
                 <div className="flex items-center gap-2">
                   <Input
                     id="profitPercent"
@@ -214,7 +243,7 @@ const SummarySection = ({
                     className="font-semibold"
                     readOnly={!isEditable}
                   />
-                  <span className="text-sm text-muted-foreground">%</span>
+                  <span className="text-sm text-muted-foreground">${profitPercent}%</span>
                 </div>
               </div>
             </div>
@@ -266,12 +295,24 @@ const SummarySection = ({
 
               <div className="flex justify-between items-center p-3 bg-muted/30 rounded">
                 <span className="font-medium">
-                  Commercial & Profit Cost ({profitPercent}%)
+                  Commercial Cost ({commercialPercent}%)
                 </span>
                 <span className="font-semibold">
                   $
-                  {Number(commercialProfit)
-                    ? Number(commercialProfit).toFixed(3)
+                  {Number(commercialCost)
+                    ? Number(commercialCost).toFixed(3)
+                    : "0.000"}
+                </span>
+              </div>
+
+              <div className="flex justify-between items-center p-3 bg-muted/30 rounded">
+                <span className="font-medium">
+                  Profit Cost ({profitPercent}%)
+                </span>
+                <span className="font-semibold">
+                  $
+                  {Number(profitCost)
+                    ? Number(profitCost).toFixed(3)
                     : "0.000"}
                 </span>
               </div>
