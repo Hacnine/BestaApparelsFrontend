@@ -339,18 +339,18 @@ const CostSheetTable = () => {
               {data.map((sheet: any) => (
                 <React.Fragment key={sheet.id}>
                   <tr className="border-b hover:bg-muted/20">
-                    <td className="p-2 uppercase">
+                    <td className="p-2 uppercase text-xs">
                       {sheet.style?.name || "-"}
                     </td>
-                    <td className="p-2">{sheet.item || "-"}</td>
-                    <td className="p-2">{sheet.group || "-"}</td>
-                    <td className="p-2">{sheet.size || "-"}</td>
-                    <td className="p-2">{sheet.fabricType || "-"}</td>
-                    <td className="p-2">{sheet.gsm || "-"}</td>
-                    <td className="p-2">{sheet.color || "-"}</td>
-                    <td className="p-2">{sheet.quantity ?? "-"}</td>
-                    <td className="p-2">{sheet.createdBy?.userName || "-"}</td>
-                    <td className="p-2">
+                    <td className="p-2 text-sm">{sheet.item || "-"}</td>
+                    <td className="p-2 text-sm">{sheet.group || "-"}</td>
+                    <td className="p-2 text-sm">{sheet.size || "-"}</td>
+                    <td className="p-2 text-sm">{sheet.fabricType || "-"}</td>
+                    <td className="p-2 text-sm">{sheet.gsm || "-"}</td>
+                    <td className="p-2 text-sm">{sheet.color || "-"}</td>
+                    <td className="p-2 text-sm">{sheet.quantity ?? "-"}</td>
+                    <td className="p-2 text-sm">{sheet.createdBy?.userName || "-"}</td>
+                    <td className="p-2 text-sm">
                       {sheet.createdAt
                         ? new Date(sheet.createdAt).toLocaleDateString()
                         : "-"}
