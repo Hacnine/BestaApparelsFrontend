@@ -26,8 +26,8 @@ const SummarySection = ({
 }: SummarySectionProps) => {
   // Only use frontend-calculated values
   const [factoryCM, setFactoryCM] = useState(14.0);
-  const [profitPercent, setProfitPercent] = useState(15);
-  const [commercialPercent, setCommercialPercent] = useState(5);
+  const [profitPercent, setProfitPercent] = useState(0);
+  const [commercialPercent, setCommercialPercent] = useState(15);
   const [editMode, setEditMode] = useState(
     mode === "edit" || mode === "create"
   );
