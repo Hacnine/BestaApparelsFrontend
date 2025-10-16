@@ -98,7 +98,7 @@ const SummarySection = ({
   } else if (typeof othersData?.json?.total === "number") {
     othersTotal = othersData.json.total;
   }
-
+console.log("othersTotal:", othersTotal);
   const totalCost = fabricCost + accessoriesCost + factoryCM + othersTotal;
   const commercialCost = totalCost * (commercialPercent / 100);
   const profitCost = totalCost * (profitPercent / 100);
@@ -188,13 +188,12 @@ const SummarySection = ({
   const displayProfitCost = getDisplayValue('profitCost', profitCost);
   const displayFobPrice = getDisplayValue('fobPrice', fobPrice);
   const displayPricePerPiece = getDisplayValue('pricePerPiece', pricePerPiece);
-
   // Table rows for summary fields
   const summaryRows: { label: string; value: any }[] = [
     { label: "Fabric Cost / Dzn Garments", value: displayFabricCost },
     { label: "Accessories Cost / Dzn Garments", value: displayAccessoriesCost },
     { label: "Factory CM / Dzn Garments", value: displayFactoryCM },
-    { label: "Others Cost / Dzn Garments", value: displayOthersTotal },
+    { label: "Others Cost / Dzn Garments", value: othersTotal },
     { label: "Total Cost", value: displayTotalCost },
     {
       label: `Commercial Cost (${commercialPercent}%)`,
@@ -326,10 +325,10 @@ const SummarySection = ({
               <div className="flex justify-between items-center p-3 bg-muted/30 rounded">
                 <span className="font-medium">Others Cost</span>
                 <span className="font-semibold">
-                  $
-                  {typeof othersData?.total === "number"
-                    ? othersData.total.toFixed(3)
-                    : "0.000"}
+                    $
+                    {Number(othersTotal)
+                      ? Number(othersTotal).toFixed(3)
+                      : "0.000"}
                 </span>
               </div>
 
