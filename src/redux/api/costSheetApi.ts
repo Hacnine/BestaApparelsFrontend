@@ -10,8 +10,9 @@ export const costSheetApi = createApi({
 
   tagTypes: ["CostSheet"],
   endpoints: (builder) => ({
-    getCostSheets: builder.query<any[], void>({
-      query: () => "/",
+    getCostSheets: builder.query<any, { page?: number; limit?: number; search?: string }>({
+      query: ({ page = 1, limit = 10, search = "" } = {}) => 
+        `/?page=${page}&limit=${limit}&search=${search}`,
       providesTags: ["CostSheet"],
     }),
     getCostSheet: builder.query<any, number>({
