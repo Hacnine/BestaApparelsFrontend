@@ -118,30 +118,17 @@ console.log("othersTotal:", othersTotal);
       
       onChange({
         summary: {
-          fabricCost,
-          accessoriesCost,
           factoryCM: nextFactoryCM,
-          totalCost: nextTotalCost,
           commercialPercent: nextCommercialPercent,
-          commercialCost: nextCommercialCost,
           profitPercent: nextProfitPercent,
-          profitCost: nextProfitCost,
-          fobPrice: nextFobPrice,
-          pricePerPiece: nextPricePerPiece,
+
         },
         json: {
           tableName: "Summary",
-          fabricCost,
-          accessoriesCost,
           factoryCM: nextFactoryCM,
-          othersTotal,
-          totalCost: nextTotalCost,
           commercialPercent: nextCommercialPercent,
-          commercialCost: nextCommercialCost,
           profitPercent: nextProfitPercent,
-          profitCost: nextProfitCost,
-          fobPrice: nextFobPrice,
-          pricePerPiece: nextPricePerPiece,
+ 
         }
       });
     }
@@ -196,12 +183,12 @@ console.log("othersTotal:", othersTotal);
     { label: "Fabric Cost / Dzn Garments", value: displayFabricCost },
     { label: "Accessories Cost / Dzn Garments", value: displayAccessoriesCost },
     { label: "Factory CM / Dzn Garments", value: displayFactoryCM },
-    { label: "Others Cost / Dzn Garments", value: othersTotal },
-    { label: "Total Cost", value: displayTotalCost },
+    { label: "Others Cost / Dzn Garments", value: displayOthersTotal },
     {
       label: `Commercial Cost (${commercialPercent}%)`,
       value: displayCommercialCost,
     },
+    { label: "Total Cost (with Commercial)", value: displayTotalCostWithCommercial },
     {
       label: `Profit (${profitPercent}%)`,
       value: displayProfitCost,
