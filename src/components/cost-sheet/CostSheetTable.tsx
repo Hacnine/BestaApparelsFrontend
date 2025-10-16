@@ -68,12 +68,15 @@ const FullScreenModal = ({
 };
 
 const CostSheetTable = () => {
-  const { data, isLoading, error } = useGetCostSheetsQuery();
+  // Pagination state
+  const [page, setPage] = useState(1);
+  const limit = 10;
+  // API call with pagination
+  const { data, isLoading, error } = useGetCostSheetsQuery({ page, limit });
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [editModalId, setEditModalId] = useState<number | null>(null);
-  const [updateCostSheet, { isLoading: isUpdating }] =
-    useUpdateCostSheetMutation();
-
+  const [updateCostSheet, { isLoading: isUpdating }] = useUpdateCostSheetMutation();
+  //console.log(data)
   // Add a form instance for edit mode
   const editForm = useForm({
     defaultValues: {
@@ -101,7 +104,7 @@ const CostSheetTable = () => {
   // Reset edited section state when opening a new modal
   React.useEffect(() => {
     if (expandedId !== null) {
-      const sheet = data.find((s: any) => s.id === expandedId);
+      const sheet = data?.sanitized.find((s: any) => s.id === expandedId);
       setEditedCadRows(sheet?.cadRows);
       setEditedFabricRows(sheet?.fabricRows);
       setEditedTrimsRows(sheet?.trimsRows);
@@ -268,7 +271,7 @@ const CostSheetTable = () => {
 
   // Find the sheet and edit mode before rendering
   const sheet =
-    expandedId !== null ? data?.find((s: any) => s.id === expandedId) : null;
+    expandedId !== null ? data?.sanitized.find((s: any) => s.id === expandedId) : null;
   const isEditMode = sheet && editModalId === sheet.id;
 
   // Set form values when entering edit mode
@@ -330,12 +333,10 @@ const CostSheetTable = () => {
                 <th className="text-left p-2">Created At</th>
                 <th className="text-left p-2">Details</th>
                 <th className="text-left p-2">Actions</th>
-
-                {/* <th className="text-left p-2">Download</th> */}
               </tr>
             </thead>
             <tbody>
-              {data.map((sheet: any) => (
+              {data.sanitized.map((sheet: any) => (
                 <React.Fragment key={sheet.id}>
                   <tr className="border-b hover:bg-muted/20">
                     <td className="p-2 uppercase text-xs">
@@ -392,22 +393,31 @@ const CostSheetTable = () => {
                         <Copy />
                       </Button>
                     </td>
-                    {/* <td className="p-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleExportRow(sheet)}
-                        title="Download all data as separate Excel sheets"
-                      >
-                        Download
-                      </Button>
-                    </td> */}
                   </tr>
-                  {/* Remove inline expanded row */}
                 </React.Fragment>
               ))}
             </tbody>
           </table>
+        </div>
+        {/* Pagination Controls */}
+        <div className="flex justify-center items-center gap-2 mt-4">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={page === 1}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+          >
+            Previous
+          </Button>
+          <span className="px-2">Page {page} of {data.totalPages || 1}</span>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={!data.hasNextPage}
+            onClick={() => setPage((p) => p + 1)}
+          >
+            Next
+          </Button>
         </div>
         {/* Fullscreen modal for expanded details */}
         <FullScreenModal

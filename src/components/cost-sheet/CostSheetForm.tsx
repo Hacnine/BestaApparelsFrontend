@@ -121,45 +121,30 @@ const CostSheetForm = ({ onClose }: CostSheetFormProps) => {
   const handleSave = async () => {
     const formData = form.getValues();
 
-    // Calculate summary if not set by user interaction
-    const calculatedSummary = calculateSummary();
-
-    const summaryJsonToSend =
-      Object.keys(summaryData.json).length > 0
-        ? summaryData.json
-        : {
-            tableName: "Summary",
-            fields: [
-              {
-                label: "Fabric Cost / Dzn Garments",
-                value: calculatedSummary.fabricCost,
-              },
-              {
-                label: "Accessories Cost / Dzn Garments",
-                value: calculatedSummary.accessoriesCost,
-              },
-              {
-                label: "Factory CM / Dzn Garments",
-                value: calculatedSummary.factoryCM,
-              },
-              {
-                label: "Others Cost / Dzn Garments",
-                value: calculatedSummary.othersCost,
-              },
-              { label: "Total Cost", value: calculatedSummary.totalCost },
-              {
-                label: `Commercial & Profit Cost (${
-                  calculatedSummary.profitPercentage * 100
-                }%)`,
-                value: calculatedSummary.commercialProfit,
-              },
-              { label: "FOB Price / Dzn", value: calculatedSummary.fobPrice },
-              {
-                label: "Price / Pc Garments",
-                value: calculatedSummary.pricePerPiece,
-              },
-            ],
-          };
+    // Use summary data from SummarySection if available, otherwise calculate
+    let summaryJsonToSend;
+    
+    if (summaryData.json && Object.keys(summaryData.json).length > 0) {
+      // Use data from SummarySection component
+      summaryJsonToSend = summaryData.json;
+    } else {
+      // Fallback to calculated summary
+      const calculatedSummary = calculateSummary();
+      summaryJsonToSend = {
+        tableName: "Summary",
+        fabricCost: calculatedSummary.fabricCost,
+        accessoriesCost: calculatedSummary.accessoriesCost,
+        factoryCM: calculatedSummary.factoryCM,
+        othersTotal: calculatedSummary.othersCost,
+        totalCost: calculatedSummary.totalCost,
+        commercialPercent: 15,
+        commercialCost: calculatedSummary.fabricCost + calculatedSummary.accessoriesCost + calculatedSummary.factoryCM + calculatedSummary.othersCost * 0.15,
+        profitPercent: 0,
+        profitCost: 0,
+        fobPrice: calculatedSummary.fobPrice,
+        pricePerPiece: calculatedSummary.pricePerPiece,
+      };
+    }
 
     // Ensure fallback for missing sections
     const costSheetData: CostSheetData = {

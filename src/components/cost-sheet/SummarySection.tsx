@@ -18,12 +18,13 @@ interface SummarySectionProps {
 }
 
 const SummarySection = ({
+  summary = {},
   fabricData,
   trimsData,
   othersData,
   onChange,
   mode = "create",
-}: SummarySectionProps) => {
+  }: SummarySectionProps) => {
   // Only use frontend-calculated values
   const [factoryCM, setFactoryCM] = useState(14.0);
   const [profitPercent, setProfitPercent] = useState(0);
@@ -32,6 +33,18 @@ const SummarySection = ({
     mode === "edit" || mode === "create"
   );
   console.log("othersData:", othersData);
+
+  // Initialize values from summary prop when available
+  useEffect(() => {
+    if (summary) {
+      // Handle both direct summary object and json-wrapped structure
+      const summaryData = summary.json || summary;
+      
+      if (summaryData.factoryCM !== undefined) setFactoryCM(Number(summaryData.factoryCM));
+      if (summaryData.profitPercent !== undefined) setProfitPercent(Number(summaryData.profitPercent));
+      if (summaryData.commercialPercent !== undefined) setCommercialPercent(Number(summaryData.commercialPercent));
+    }
+  }, [summary]);
 
   // Calculate fabric cost
   const getFabricCost = () => {
@@ -93,37 +106,34 @@ const SummarySection = ({
   const pricePerPiece = fobPrice / 12;
 
   // Helper to send summary data to parent
-  const notifyChange = (nextFactoryCM: number, nextProfitPercent: number) => {
+  const notifyChange = (nextFactoryCM: number, nextProfitPercent: number, nextCommercialPercent: number) => {
     if (onChange) {
-      // const nextTotalCost = fabricCost + accessoriesCost + nextFactoryCM + othersTotal;
-      // const nextCommercialProfit = nextTotalCost * (nextProfitPercent / 100);
-      // const nextFobPrice = nextTotalCost + nextCommercialProfit;
-      // const nextPricePerPiece = nextFobPrice / 12;
-      // onChange({
-      //   summary: {
-      //     fabricCost,
-      //     accessoriesCost,
-      //     factoryCM: nextFactoryCM,
-      //     totalCost: nextTotalCost,
-      //     commercialProfit: nextCommercialProfit,
-      //     fobPrice: nextFobPrice,
-      //     pricePerPiece: nextPricePerPiece,
-      //     profitPercent: nextProfitPercent,
-      //   },
-      //   json: {
-      //     tableName: "Summary",
-      //     fields: [
-      //       { label: "Fabric Cost / Dzn Garments", value: fabricCost },
-      //       { label: "Accessories Cost / Dzn Garments", value: accessoriesCost },
-      //       { label: "Factory CM / Dzn Garments", value: nextFactoryCM },
-      //       { label: "Others Cost / Dzn Garments", value: othersTotal },
-      //       { label: "Total Cost", value: nextTotalCost },
-      //       { label: `Commercial & Profit Cost (${nextProfitPercent}%)`, value: nextCommercialProfit },
-      //       { label: "FOB Price / Dzn", value: nextFobPrice },
-      //       { label: "Price / Pc Garments", value: nextPricePerPiece },
-      //     ],
-      //   }
-      // });
+      const nextTotalCost = fabricCost + accessoriesCost + nextFactoryCM + othersTotal;
+      const nextCommercialCost = nextTotalCost * (nextCommercialPercent / 100);
+      const nextProfitCost = nextTotalCost * (nextProfitPercent / 100);
+      const nextFobPrice = nextTotalCost + nextCommercialCost + nextProfitCost;
+      const nextPricePerPiece = nextFobPrice / 12;
+      
+      onChange({
+        summary: {
+          fabricCost,
+          factoryCM: nextFactoryCM,
+          commercialPercent: nextCommercialPercent,
+          commercialCost: nextCommercialCost,
+          profitPercent: nextProfitPercent,
+          profitCost: nextProfitCost,
+        },
+        json: {
+          tableName: "Summary",
+          fabricCost,
+          factoryCM: nextFactoryCM,
+          othersTotal,
+          commercialPercent: nextCommercialPercent,
+          commercialCost: nextCommercialCost,
+          profitPercent: nextProfitPercent,
+          profitCost: nextProfitCost,
+        }
+      });
     }
   };
 
@@ -131,7 +141,7 @@ const SummarySection = ({
   const handleFactoryCMChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Number(e.target.value) || 0;
     setFactoryCM(value);
-    notifyChange(value, profitPercent);
+    notifyChange(value, profitPercent, commercialPercent);
   };
 
   const handleProfitPercentChange = (
@@ -139,7 +149,7 @@ const SummarySection = ({
   ) => {
     const value = Number(e.target.value) || 0;
     setProfitPercent(value);
-    notifyChange(factoryCM, value);
+    notifyChange(factoryCM, value, commercialPercent);
   };
 
   const handleCommercialPercentChange = (
@@ -147,28 +157,47 @@ const SummarySection = ({
   ) => {
     const value = Number(e.target.value) || 0;
     setCommercialPercent(value);
-    notifyChange(factoryCM, profitPercent);
+    notifyChange(factoryCM, profitPercent, value);
   };
 
   const isEditable = editMode && (mode === "edit" || mode === "create");
 
+  // Get display values - use backend data if in show mode, otherwise use calculated
+  const getDisplayValue = (field: string, calculatedValue: number) => {
+    if (mode === "show" && summary) {
+      const summaryData = summary.json || summary;
+      return summaryData[field] !== undefined ? Number(summaryData[field]) : calculatedValue;
+    }
+    return calculatedValue;
+  };
+
+  const displayFabricCost = getDisplayValue('fabricCost', fabricCost);
+  const displayAccessoriesCost = getDisplayValue('accessoriesCost', accessoriesCost);
+  const displayFactoryCM = getDisplayValue('factoryCM', factoryCM);
+  const displayOthersTotal = getDisplayValue('othersTotal', othersTotal);
+  const displayTotalCost = getDisplayValue('totalCost', totalCost);
+  const displayCommercialCost = getDisplayValue('commercialCost', commercialCost);
+  const displayProfitCost = getDisplayValue('profitCost', profitCost);
+  const displayFobPrice = getDisplayValue('fobPrice', fobPrice);
+  const displayPricePerPiece = getDisplayValue('pricePerPiece', pricePerPiece);
+
   // Table rows for summary fields
   const summaryRows: { label: string; value: any }[] = [
-    { label: "Fabric Cost / Dzn Garments", value: fabricCost },
-    { label: "Accessories Cost / Dzn Garments", value: accessoriesCost },
-    { label: "Factory CM / Dzn Garments", value: factoryCM },
-    { label: "Others Cost / Dzn Garments", value: othersTotal },
-    { label: "Total Cost", value: totalCost },
+    { label: "Fabric Cost / Dzn Garments", value: displayFabricCost },
+    { label: "Accessories Cost / Dzn Garments", value: displayAccessoriesCost },
+    { label: "Factory CM / Dzn Garments", value: displayFactoryCM },
+    { label: "Others Cost / Dzn Garments", value: displayOthersTotal },
+    { label: "Total Cost", value: displayTotalCost },
     {
       label: `Commercial Cost (${commercialPercent}%)`,
-      value: commercialCost,
+      value: displayCommercialCost,
     },
     {
       label: `Profit (${profitPercent}%)`,
-      value: profitCost,
+      value: displayProfitCost,
     },
-    { label: "FOB Price / Dzn", value: fobPrice },
-    { label: "Price / Pc Garments", value: pricePerPiece },
+    { label: "FOB Price / Dzn", value: displayFobPrice },
+    { label: "Price / Pc Garments", value: displayPricePerPiece },
   ];
 
   return (
