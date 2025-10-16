@@ -228,7 +228,12 @@ const SummarySection = ({
                     className="font-semibold"
                     readOnly={!isEditable}
                   />
-                  <span className="text-sm text-muted-foreground">${commercialPercent}%</span>
+                   <span className="font-semibold">
+                  $
+                  {Number(commercialCost)
+                    ? Number(commercialCost).toFixed(3)
+                    : "0.000"}
+                </span>
                 </div>
               </div>
 
@@ -243,7 +248,12 @@ const SummarySection = ({
                     className="font-semibold"
                     readOnly={!isEditable}
                   />
-                  <span className="text-sm text-muted-foreground">${profitPercent}%</span>
+                   <span className="font-semibold">
+                  $
+                  {Number(profitCost)
+                    ? Number(profitCost).toFixed(3)
+                    : "0.000"}
+                </span>
                 </div>
               </div>
             </div>
