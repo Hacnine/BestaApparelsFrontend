@@ -117,21 +117,29 @@ const SummarySection = ({
       onChange({
         summary: {
           fabricCost,
+          accessoriesCost,
           factoryCM: nextFactoryCM,
+          totalCost: nextTotalCost,
           commercialPercent: nextCommercialPercent,
           commercialCost: nextCommercialCost,
           profitPercent: nextProfitPercent,
           profitCost: nextProfitCost,
+          fobPrice: nextFobPrice,
+          pricePerPiece: nextPricePerPiece,
         },
         json: {
           tableName: "Summary",
           fabricCost,
+          accessoriesCost,
           factoryCM: nextFactoryCM,
           othersTotal,
+          totalCost: nextTotalCost,
           commercialPercent: nextCommercialPercent,
           commercialCost: nextCommercialCost,
           profitPercent: nextProfitPercent,
           profitCost: nextProfitCost,
+          fobPrice: nextFobPrice,
+          pricePerPiece: nextPricePerPiece,
         }
       });
     }

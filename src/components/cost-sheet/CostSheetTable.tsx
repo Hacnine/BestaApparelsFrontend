@@ -104,12 +104,12 @@ const CostSheetTable = () => {
   // Reset edited section state when opening a new modal
   React.useEffect(() => {
     if (expandedId !== null) {
-      const sheet = data?.sanitized.find((s: any) => s.id === expandedId);
+      const sheet = data?.sanitized?.find((s: any) => s.id === expandedId);
       setEditedCadRows(sheet?.cadRows);
-      setEditedFabricRows(sheet?.fabricRows);
+      setEditedFabricRows(sheet?.fabricRows?.json || sheet?.fabricRows?.rows || sheet?.fabricRows);
       setEditedTrimsRows(sheet?.trimsRows);
       setEditedOthersRows(sheet?.othersRows);
-      setEditedSummaryRows(sheet?.summaryRows);
+      setEditedSummaryRows(sheet?.summaryRows?.json || sheet?.summaryRows?.summary || sheet?.summaryRows);
     }
   }, [expandedId, data]);
 
@@ -271,7 +271,7 @@ const CostSheetTable = () => {
 
   // Find the sheet and edit mode before rendering
   const sheet =
-    expandedId !== null ? data?.sanitized.find((s: any) => s.id === expandedId) : null;
+    expandedId !== null ? data?.sanitized?.find((s: any) => s.id === expandedId) : null;
   const isEditMode = sheet && editModalId === sheet.id;
 
   // Set form values when entering edit mode
@@ -306,7 +306,7 @@ const CostSheetTable = () => {
         </div>
       </Card>
     );
-  } else if (!data || data.length === 0) {
+  } else if (!data || !data.sanitized || data.sanitized.length === 0) {
     content = (
       <Card className="p-4 w-full ">
         <div className="text-center text-muted-foreground">
@@ -487,25 +487,27 @@ const CostSheetTable = () => {
               <div className="flex gap-6 ">
                 <div className="w-1/2 space-y-6 ">
                   <CadConsumptionSection
-                    data={editedCadRows?.rows || []}
+                    data={isEditMode 
+                      ? editedCadRows?.rows || [] 
+                      : sheet?.cadRows?.rows || sheet?.cadRows?.json?.rows || []}
                     mode={isEditMode ? "edit" : "show"}
                     onChange={
                       isEditMode ? (d) => setEditedCadRows(d) : undefined
                     }
                   />
                   <FabricCostSection
-                    data={
-                      isEditMode
-                        ? editedFabricRows
-                        : sheet.fabricRows?.json || sheet.fabricRows
-                    }
+                    data={isEditMode 
+                      ? editedFabricRows 
+                      : sheet?.fabricRows?.json || sheet?.fabricRows?.rows || sheet?.fabricRows}
                     mode={isEditMode ? "edit" : "show"}
                     onChange={
                       isEditMode ? (d) => setEditedFabricRows(d) : undefined
                     }
                   />
                   <OthersSection
-                    data={editedOthersRows}
+                    data={isEditMode 
+                      ? editedOthersRows
+                      : sheet?.othersRows}
                     mode={isEditMode ? "edit" : "show"}
                     onChange={
                       isEditMode ? (d) => setEditedOthersRows(d) : undefined
@@ -514,7 +516,9 @@ const CostSheetTable = () => {
                 </div>
                 <div className="w-1/2 space-y-5">
                   <TrimsAccessoriesSection
-                    data={editedTrimsRows}
+                    data={isEditMode 
+                      ? editedTrimsRows
+                      : sheet?.trimsRows}
                     mode={isEditMode ? "edit" : "show"}
                     onChange={
                       isEditMode ? (d) => setEditedTrimsRows(d) : undefined
@@ -522,10 +526,18 @@ const CostSheetTable = () => {
                   />
 
                   <SummarySection
-                    summary={editedSummaryRows}
-                    fabricData={editedFabricRows}
-                    trimsData={editedTrimsRows?.rows || []}
-                    othersData={editedOthersRows?.rows || []}
+                    summary={isEditMode 
+                      ? editedSummaryRows?.summary || editedSummaryRows
+                      : sheet?.summaryRows?.summary || sheet?.summaryRows?.json?.summary || sheet?.summaryRows}
+                    fabricData={isEditMode 
+                      ? editedFabricRows 
+                      : sheet?.fabricRows?.json || sheet?.fabricRows?.rows || sheet?.fabricRows}
+                    trimsData={isEditMode 
+                      ? editedTrimsRows?.rows || []
+                      : sheet?.trimsRows?.rows || []}
+                    othersData={isEditMode 
+                      ? editedOthersRows?.rows || editedOthersRows?.json || []
+                      : sheet?.othersRows?.rows || []}
                     mode={isEditMode ? "edit" : "show"}
                     onChange={
                       isEditMode ? (d) => setEditedSummaryRows(d) : undefined
