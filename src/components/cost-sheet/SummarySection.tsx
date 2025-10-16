@@ -101,8 +101,10 @@ const SummarySection = ({
 console.log("othersTotal:", othersTotal);
   const totalCost = fabricCost + accessoriesCost + factoryCM + othersTotal;
   const commercialCost = totalCost * (commercialPercent / 100);
-  const profitCost = totalCost * (profitPercent / 100);
-  const fobPrice = totalCost + commercialCost + profitCost;
+  // Add commercialCost to totalCost for display
+  const totalCostWithCommercial = totalCost + commercialCost;
+  const profitCost = totalCostWithCommercial * (profitPercent / 100);
+  const fobPrice = totalCostWithCommercial + profitCost;
   const pricePerPiece = fobPrice / 12;
 
   // Helper to send summary data to parent
@@ -184,6 +186,7 @@ console.log("othersTotal:", othersTotal);
   const displayFactoryCM = getDisplayValue('factoryCM', factoryCM);
   const displayOthersTotal = getDisplayValue('othersTotal', othersTotal);
   const displayTotalCost = getDisplayValue('totalCost', totalCost);
+  const displayTotalCostWithCommercial = getDisplayValue('totalCostWithCommercial', totalCostWithCommercial);
   const displayCommercialCost = getDisplayValue('commercialCost', commercialCost);
   const displayProfitCost = getDisplayValue('profitCost', profitCost);
   const displayFobPrice = getDisplayValue('fobPrice', fobPrice);
@@ -332,24 +335,24 @@ console.log("othersTotal:", othersTotal);
                 </span>
               </div>
 
-              <div className="flex justify-between items-center p-3 bg-primary/10 rounded border border-primary/20">
-                <span className="font-bold">Total Cost</span>
-                <span className="font-bold text-lg">
-                  ${Number(totalCost) ? Number(totalCost).toFixed(3) : "0.000"}
-                </span>
-              </div>
+                <div className="flex justify-between items-center p-3 bg-muted/30 rounded">
+                  <span className="font-medium">
+                    Commercial Cost ({commercialPercent}%)
+                  </span>
+                  <span className="font-semibold">
+                    $
+                    {Number(commercialCost)
+                      ? Number(commercialCost).toFixed(3)
+                      : "0.000"}
+                  </span>
+                </div>
 
-              <div className="flex justify-between items-center p-3 bg-muted/30 rounded">
-                <span className="font-medium">
-                  Commercial Cost ({commercialPercent}%)
-                </span>
-                <span className="font-semibold">
-                  $
-                  {Number(commercialCost)
-                    ? Number(commercialCost).toFixed(3)
-                    : "0.000"}
-                </span>
-              </div>
+                <div className="flex justify-between items-center p-3 bg-primary/10 rounded border border-primary/20">
+                  <span className="font-bold">Total Cost (with Commercial)</span>
+                  <span className="font-bold text-lg">
+                    ${Number(totalCostWithCommercial) ? Number(totalCostWithCommercial).toFixed(3) : "0.000"}
+                  </span>
+                </div>
 
               <div className="flex justify-between items-center p-3 bg-muted/30 rounded">
                 <span className="font-medium">
