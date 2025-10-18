@@ -187,6 +187,7 @@ const CostSheetForm = ({ onClose }: CostSheetFormProps) => {
     <div className="space-y-6">
       <StyleInfoForm
         form={form}
+        mode="create"
         onStyleCheck={() => {}}
         isCheckingStyle={isStyleChecking}
         styleExists={styleCheckData?.exists ?? null}
