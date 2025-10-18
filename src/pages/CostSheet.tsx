@@ -28,7 +28,7 @@ const CostSheet = () => {
               className="text-base "
             >
               <Plus className="h-4 w-4 mr-2" />
-              Create Cost Sheet
+             {openCostSheet  === true?"Close Cost Sheet"  :"Create Cost Sheet" } 
             </Button>
           </div>
 
